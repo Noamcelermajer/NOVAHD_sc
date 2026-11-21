@@ -158,7 +158,7 @@ static void unwrap_file(uint32_t g) {
 IMP(fopen) {
     const char *path = rt_host_path(S(0));
     FILE *f = fopen(path, S(1));
-    if (rt_verbose) rt_log("fopen %s (%s): %s", S(0), S(1), f ? "ok" : "missing");
+    if (rt_verbose) rt_log("fopen %s (%s): %s%s", S(0), S(1), f ? "ok" : "missing at ", f ? "" : path);
     if (!f) { set_errno(2); RET(0); return; }
     RET(wrap_file(f));
 }

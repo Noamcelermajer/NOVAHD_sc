@@ -131,6 +131,22 @@ const char *rt_host_path(const char *path) {
         snprintf(abs, sizeof abs, "%s/%s", rt_cwd[0] ? rt_cwd : rt_bundle_path, path);
         path = abs;
     }
+    if (strstr(path, "/.")) { /* collapse "." and ".." so "<bundle>/../Documents" reaches the home alias */
+        static __thread char norm[1024];
+        size_t n = 0;
+        for (const char *p = path; *p && n + 1 < sizeof norm;) {
+            if (p[0] == '/' && p[1] == '/') { p++; continue; } /* a cwd that ends in '/' */
+            if (p[0] == '/' && p[1] == '.' && (p[2] == '/' || !p[2])) { p += 2; continue; }
+            if (p[0] == '/' && p[1] == '.' && p[2] == '.' && (p[3] == '/' || !p[3])) {
+                while (n && norm[--n] != '/') {}
+                p += 3;
+                continue;
+            }
+            norm[n++] = *p++;
+        }
+        norm[n] = 0;
+        path = norm;
+    }
     for (int k = 0; k < nalias; k++)
         if (!strncmp(path, aliases[k].from, aliases[k].n)) {
             snprintf(buf, sizeof buf, "%s%s", aliases[k].to, path + aliases[k].n);

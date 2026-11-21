@@ -612,6 +612,8 @@ IMP(alSourcePlay) {
     alsource *s = source_get(A(0));
     if (!s) set_error(AL_INVALID_NAME);
     else source_play(s);
+    static int plays;
+    if (s && plays < 8) { plays++; rt_log("openal: alSourcePlay(%u), %d queued (first 8 are logged)", A(0), s->nqueue); }
     al_unlock();
 }
 
@@ -711,6 +713,7 @@ IMP(alcOpenDevice) {
     al_lock();
     if (!device_addr) {
         device_addr = rt_calloc(1, 16);
+        rt_log("openal: alcOpenDevice");
         if (!stream) {
             stream = rt_audio_open(OUT_RATE, 2, pull, NULL);
             if (stream) rt_audio_start(stream);
