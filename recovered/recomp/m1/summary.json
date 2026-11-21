@@ -1,0 +1,58 @@
+{
+ "executable": "NovaHD",
+ "entries": 25719,
+ "translated": 25689,
+ "untranslated": {
+  "instruction vrhadd in Thumb": 10,
+  "branch": 4,
+  "instruction ldrht": 4,
+  "undecodable word": 3,
+  "undecodable halfword": 3,
+  "instruction ldrsbt": 3,
+  "instruction ldrsht": 1,
+  "branch to -0x126539c, not an entry": 1,
+  "instruction vaddl in Thumb": 1
+ },
+ "tested": 1500,
+ "kind": "all",
+ "runs_per_function": 16,
+ "seed": 1,
+ "results": {
+  "leaf": {
+   "no-coverage": 115,
+   "pass": 205
+  },
+  "calls": {
+   "pass": 227,
+   "no-coverage": 953
+  }
+ },
+ "incomplete_runs_by_reason": {
+  "unicorn: Invalid memory read": 4325,
+  "import printf": 3496,
+  "unicorn: Invalid instruction": 2258,
+  "unicorn: Write to write-protected memory": 1612,
+  "unicorn: Invalid memory write": 1163,
+  "import memset": 870,
+  "unicorn stopped": 795,
+  "import _Unwind_SjLj_Register": 463,
+  "unicorn: Invalid memory fetch": 433,
+  "import objc_msgSend": 316,
+  "import memcpy": 149,
+  "import sprintf": 143,
+  "returned elsewhere": 96,
+  "unicorn: Unhandled CPU exception": 55,
+  "import __cxa_guard_acquire": 48,
+  "import _ZNSs6assignERKSs": 46,
+  "import _ZNSsC1EPKcRKSaIcE": 45,
+  "import fclose": 36,
+  "import memcmp": 32,
+  "import objc_msgSendSuper2": 32,
+  "import fread": 32,
+  "import _ZSt28_Rb_tree_rebalance_for_erasePSt18_Rb_tree_node_baseRS_": 32,
+  "import strcmp": 28,
+  "import glDeleteFramebuffersOES": 17,
+  "import wcslen": 16
+ },
+ "seconds": 298
+}

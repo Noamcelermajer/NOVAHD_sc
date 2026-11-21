@@ -1,0 +1,1501 @@
+address,size,kind,mode,status,runs,detail,name
+0x2c74,280,leaf,arm,no-coverage,3,"{""unicorn: Write to write-protected memory"": 7, ""unicorn: Invalid memory write"": 2, ""unicorn: Invalid memory read"": 4}",sub_2c1c+0x58
+0x30c0,8,leaf,arm,pass,16,,sub_30c0
+0x3330,112,calls,arm,pass,16,,sub_3330
+0x3844,56,calls,arm,pass,16,,sub_3844
+0x4578,116,calls,arm,no-coverage,0,"{""import _ZNSsC1EPKcRKSaIcE"": 13, ""unicorn: Invalid memory read"": 3}",sub_4578
+0x4ed8,12,leaf,arm,no-coverage,0,"{""import _ZNSsC1EPKcRKSaIcE"": 16}",sub_4ed8
+0x5074,212,calls,arm,no-coverage,0,"{""import _ZNSsC1EPKcRKSaIcE"": 16}",sub_5074
+0x5428,16,leaf,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 16}",sub_5410+0x18
+0x5668,212,calls,arm,no-coverage,0,"{""import objc_msgSend"": 16}",sub_5668
+0x5974,428,calls,arm,no-coverage,0,"{""import objc_msgSend"": 16}",sub_5974
+0x5b98,12,calls,arm,no-coverage,0,"{""import objc_msgSend"": 16}",sub_5b98
+0x5fb0,40,calls,arm,no-coverage,0,"{""import objc_msgSend_stret"": 2, ""import objc_enumerationMutation"": 14}",sub_5f8c+0x24
+0x6700,44,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 10, ""unicorn: Invalid memory fetch"": 3, ""unicorn: Invalid memory read"": 3}",sub_6700
+0x6db0,208,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_6d88+0x28
+0x6e90,132,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 12, ""unicorn: Invalid memory read"": 2, ""unicorn: Invalid memory fetch"": 1, ""import sprintf"": 1}",sub_6e90
+0x6f50,12,leaf,arm,no-coverage,0,"{""import printf"": 16}",sub_6f14+0x3c
+0x6f74,128,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_6f5c+0x18
+0x72cc,304,calls,arm,no-coverage,0,"{""unicorn: Invalid memory fetch"": 7, ""unicorn: Invalid instruction"": 4, ""unicorn: Invalid memory read"": 1, ""unicorn: Unhandled CPU exception"": 3, ""import _Unwind_SjLj_Register"": 1}",sub_7208+0x24+0x28+0x28+0x28+0x28
+0x75d4,176,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_7570+0x18+0x4c
+0x7740,244,calls,arm,no-coverage,0,"{""unicorn: Invalid memory fetch"": 2, ""unicorn: Invalid instruction"": 10, ""unicorn: Invalid memory read"": 4}",sub_7740
+0x7888,180,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_786c+0x1c
+0x7b54,108,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 2, ""unicorn: Invalid memory read"": 1, ""import printf"": 9, ""unicorn: Invalid memory write"": 2, ""import strcmp"": 2}",sub_7b54
+0x7c70,192,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_7bc0+0x38+0x78
+0x83b0,80,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 16}",sub_8370+0x4+0x3c
+0x8400,296,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 1, ""unicorn: Invalid instruction"": 6, ""unicorn: Invalid memory read"": 9}",sub_8400
+0x882c,32,calls,arm,no-coverage,2,"{""import printf"": 9, ""unicorn: Write to write-protected memory"": 5, ""returned elsewhere"": 2}",sub_8768+0xc4
+0x8ca4,4,leaf,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 16}",sub_8ca4
+0x8ce0,64,calls,arm,no-coverage,2,"{""returned elsewhere"": 2, ""unicorn: Invalid instruction"": 9, ""unicorn: Invalid memory read"": 5}",sub_8ce0
+0x8ce8,56,calls,arm,pass,9,,sub_8ce0+0x8
+0x9014,64,calls,arm,pass,7,,sub_9014
+0x90a4,68,calls,arm,no-coverage,0,"{""unicorn stopped"": 4, ""unicorn: Invalid memory read"": 9, ""unicorn: Invalid memory fetch"": 1, ""unicorn: Invalid instruction"": 1, ""import __CFConstantStringClassReference"": 1}",sub_9084+0x20
+0x99b0,1172,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_9854+0x64+0x14+0xc+0x14+0xc+0x64+0x10+0x14+0xc+0x14+0x10
+0x9b40,772,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_9854+0x64+0x14+0xc+0x14+0xc+0x64+0x10+0x14+0xc+0x14+0x10+0x14+0xc+0x40+0x10+0x14+0x10+0x14+0xc+0x14+0x10+0x14+0x10+0x14+0x10+0x70
+0xa0bc,160,calls,arm,pass,9,,sub_a03c+0x8+0x78
+0xa628,404,calls,arm,no-coverage,0,"{""unicorn stopped"": 16}",sub_a628
+0xa92c,32,calls,arm,no-coverage,0,"{""import remove"": 14, ""unicorn: Invalid memory read"": 1, ""unicorn stopped"": 1}",sub_a92c
+0xaa84,2436,calls,arm,no-coverage,0,"{""unicorn: Invalid memory write"": 4, ""unicorn stopped"": 6, ""unicorn: Write to write-protected memory"": 5, ""unicorn: Invalid memory read"": 1}",sub_a94c+0x138
+0xb4ac,328,calls,arm,no-coverage,0,"{""unicorn stopped"": 5, ""unicorn: Invalid memory write"": 4, ""unicorn: Invalid memory read"": 7}",sub_b408+0x8+0x84+0x18
+0xc6a0,64,calls,arm,no-coverage,0,"{""unicorn stopped"": 5, ""unicorn: Invalid memory read"": 10, ""unicorn: Invalid memory fetch"": 1}",sub_c4d0+0x1d0
+0xccc8,1596,calls,arm,no-coverage,0,"{""import memset"": 1, ""unicorn: Invalid memory write"": 11, ""unicorn: Write to write-protected memory"": 3, ""unicorn: Invalid memory read"": 1}",sub_cab0+0x218
+0xd25c,168,calls,arm,pass,5,,sub_cab0+0x2f0+0x438+0x84
+0xd304,5980,calls,arm,pass,4,,sub_d304
+0xd5b8,5288,calls,arm,no-coverage,3,"{""unicorn: Write to write-protected memory"": 7, ""returned elsewhere"": 3, ""unicorn: Invalid memory read"": 5, ""unicorn: Invalid memory write"": 1}",sub_d304+0x234+0x80
+0xdce8,3448,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 10, ""unicorn stopped"": 1, ""unicorn: Invalid memory write"": 3, ""import memset"": 1, ""unicorn: Invalid memory read"": 1}",sub_d304+0x988+0x5c
+0xe1ac,2228,calls,arm,no-coverage,2,"{""unicorn: Invalid memory read"": 6, ""unicorn: Write to write-protected memory"": 8, ""returned elsewhere"": 2}",sub_d304+0xe28+0x80
+0xe884,476,calls,arm,pass,5,,sub_d304+0x1500+0x80
+0xf478,2696,calls,arm,no-coverage,3,"{""returned elsewhere"": 3, ""unicorn: Invalid memory read"": 6, ""unicorn: Invalid memory write"": 2, ""unicorn: Write to write-protected memory"": 5}",sub_eb50+0x8a4+0x84
+0xf920,1504,calls,arm,no-coverage,0,"{""import memset"": 6, ""unicorn: Invalid memory write"": 9, ""unicorn: Invalid memory read"": 1}",sub_eb50+0xd5c+0x74
+0xff5c,100,calls,arm,no-coverage,0,"{""unicorn: Invalid memory write"": 9, ""import memset"": 5, ""unicorn: Invalid memory read"": 1, ""unicorn: Write to write-protected memory"": 1}",sub_ff5c
+0x10070,1220,calls,arm,no-coverage,0,"{""unicorn: Invalid memory write"": 10, ""unicorn: Write to write-protected memory"": 4, ""import memset"": 2}",sub_1002c+0x44
+0x10330,516,calls,arm,no-coverage,0,"{""unicorn: Invalid memory write"": 8, ""import memset"": 8}",sub_1002c+0x290+0x74
+0x10be8,344,calls,arm,no-coverage,0,"{""import memset"": 2, ""unicorn: Invalid memory write"": 13, ""unicorn: Write to write-protected memory"": 1}",sub_107c8+0x420
+0x11204,1032,calls,arm,no-coverage,0,"{""unicorn: Invalid memory write"": 14, ""unicorn: Invalid memory read"": 1, ""unicorn: Write to write-protected memory"": 1}",sub_111c4+0x40
+0x120b0,120,calls,arm,no-coverage,0,"{""import memset"": 2, ""unicorn: Write to write-protected memory"": 4, ""unicorn: Invalid memory write"": 10}",sub_1160c+0xaa4
+0x12458,3256,calls,arm,no-coverage,0,"{""unicorn: Invalid memory write"": 4, ""import memset"": 5, ""unicorn: Invalid memory read"": 7}",sub_12458
+0x12858,2232,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 6, ""unicorn: Invalid memory write"": 8, ""import memset"": 1, ""unicorn: Invalid memory read"": 1}",sub_12458+0x400
+0x12cec,1060,calls,arm,no-coverage,0,"{""unicorn: Invalid memory write"": 9, ""unicorn: Write to write-protected memory"": 4, ""unicorn: Invalid memory read"": 1, ""import memset"": 2}",sub_12458+0x894
+0x134a8,280,calls,arm,no-coverage,0,"{""import memset"": 2, ""unicorn: Write to write-protected memory"": 2, ""unicorn: Invalid memory write"": 3, ""unicorn: Invalid memory read"": 9}",sub_134a8
+0x134c4,252,calls,arm,no-coverage,0,"{""import memset"": 12, ""unicorn: Invalid memory read"": 4}",sub_134a8+0x1c
+0x139ec,208,calls,arm,no-coverage,0,"{""unicorn: Invalid memory write"": 9, ""import memset"": 4, ""unicorn: Write to write-protected memory"": 3}",sub_13738+0x68+0x1fc+0x50
+0x141cc,6968,calls,arm,no-coverage,0,"{""unicorn: Invalid memory write"": 10, ""import memset"": 2, ""unicorn: Write to write-protected memory"": 4}",sub_13b80+0x5fc+0x50
+0x14494,6256,calls,arm,no-coverage,0,"{""import memset"": 10, ""unicorn: Invalid memory write"": 6}",sub_13b80+0x914
+0x14558,6060,calls,arm,no-coverage,0,"{""import memset"": 9, ""unicorn: Invalid memory write"": 5, ""unicorn: Invalid memory read"": 2}",sub_13b80+0x9d8
+0x1461c,5864,calls,arm,no-coverage,0,"{""import memset"": 7, ""unicorn: Invalid memory write"": 8, ""unicorn: Invalid memory read"": 1}",sub_13b80+0xa9c
+0x14730,5588,calls,arm,no-coverage,0,"{""unicorn: Invalid memory write"": 10, ""unicorn: Write to write-protected memory"": 3, ""import memset"": 3}",sub_13b80+0xb60+0x50
+0x148b8,5196,calls,arm,no-coverage,0,"{""unicorn: Invalid memory write"": 8, ""unicorn: Write to write-protected memory"": 2, ""unicorn: Invalid memory read"": 3, ""import memset"": 3}",sub_13b80+0xce8+0x50
+0x154a8,2140,calls,arm,no-coverage,0,"{""unicorn: Invalid memory write"": 9, ""import memset"": 7}",sub_13b80+0x1928
+0x1985c,1316,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 8, ""unicorn: Write to write-protected memory"": 2, ""import memset"": 6}",sub_1985c
+0x1afa4,828,calls,arm,no-coverage,0,"{""unicorn: Invalid memory write"": 10, ""unicorn: Write to write-protected memory"": 2, ""import memset"": 4}",sub_19d80+0x10a4+0x180
+0x1b4a8,508,calls,arm,no-coverage,1,"{""unicorn: Invalid memory read"": 10, ""returned elsewhere"": 1, ""import memset"": 5}",sub_1b2e0+0x24+0x1a4
+0x1b608,156,calls,arm,no-coverage,0,"{""import memset"": 7, ""unicorn: Invalid memory read"": 9}",sub_1b2e0+0x24+0x2e4+0x20
+0x1b6ac,2540,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 7, ""import memset"": 9}",sub_1b6a4+0x8
+0x1b930,1896,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 7, ""import memset"": 8, ""unicorn: Invalid memory write"": 1}",sub_1b6a4+0x28c
+0x1b9d0,1736,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 9, ""import memset"": 7}",sub_1b6a4+0x32c
+0x1bcf8,928,calls,arm,no-coverage,0,"{""import memset"": 7, ""unicorn: Invalid memory read"": 9}",sub_1b6a4+0x654
+0x1c1c4,52,calls,arm,no-coverage,2,"{""unicorn: Invalid memory write"": 3, ""unicorn: Write to write-protected memory"": 7, ""unicorn: Invalid memory read"": 4, ""returned elsewhere"": 2}",sub_1c134+0x90
+0x1c3cc,360,calls,arm,pass,5,,sub_1c2a8+0x124
+0x1c94c,424,calls,arm,no-coverage,0,"{""import memset"": 16}",sub_1c534+0x398+0x80
+0x1ca78,124,calls,arm,no-coverage,0,"{""import memset"": 14, ""unicorn stopped"": 2}",sub_1c534+0x4d8+0x6c
+0x1cb2c,600,calls,arm,no-coverage,0,"{""import memset"": 13, ""unicorn: Invalid memory write"": 2, ""unicorn: Invalid memory read"": 1}",sub_1caf4+0x20+0x18
+0x1cb68,540,calls,arm,no-coverage,0,"{""import memset"": 8, ""unicorn stopped"": 7, ""unicorn: Write to write-protected memory"": 1}",sub_1caf4+0x20+0x54
+0x1cc28,348,calls,arm,no-coverage,0,"{""import memset"": 13, ""unicorn stopped"": 3}",sub_1caf4+0x20+0xfc+0x18
+0x1cd00,132,calls,arm,no-coverage,1,"{""returned elsewhere"": 1, ""import memset"": 12, ""unicorn stopped"": 2, ""unicorn: Write to write-protected memory"": 1}",sub_1caf4+0x20+0x1ec
+0x1cdd0,116,calls,arm,no-coverage,0,"{""import memset"": 14, ""unicorn: Invalid memory write"": 2}",sub_1cd88+0x8+0x40
+0x1d240,1756,calls,arm,no-coverage,0,"{""import memset"": 14, ""unicorn: Invalid memory write"": 2}",sub_1d1c4+0x4c+0x18+0x18
+0x1d43c,1248,calls,arm,no-coverage,0,"{""import memset"": 14, ""unicorn: Invalid memory write"": 2}",sub_1d1c4+0x4c+0x22c
+0x1d484,1176,calls,arm,no-coverage,0,"{""unicorn: Invalid memory write"": 7, ""import memset"": 9}",sub_1d1c4+0x4c+0x274
+0x1d874,168,calls,arm,no-coverage,0,"{""import memset"": 12, ""unicorn: Invalid memory write"": 4}",sub_1d1c4+0x6b0
+0x1d8a4,120,calls,arm,no-coverage,0,"{""import memset"": 11, ""unicorn: Invalid memory write"": 5}",sub_1d1c4+0x6e0
+0x1db14,204,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 8, ""unicorn: Unhandled CPU exception"": 1, ""unicorn: Invalid memory read"": 3, ""unicorn: Invalid memory fetch"": 4}",sub_1db14
+0x1dca4,4,leaf,arm,pass,9,,sub_1dbe0+0x68+0x5c
+0x1dea8,40,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_1dea8
+0x1e124,16,leaf,arm,pass,11,,sub_1e124
+0x1e2a4,64,calls,arm,no-coverage,1,"{""unicorn: Invalid memory write"": 6, ""unicorn stopped"": 4, ""unicorn: Write to write-protected memory"": 2, ""unicorn: Invalid memory read"": 3, ""returned elsewhere"": 1}",sub_1e2a4
+0x1e394,48,calls,arm,no-coverage,1,"{""unicorn: Invalid memory read"": 4, ""unicorn stopped"": 1, ""unicorn: Invalid memory write"": 3, ""unicorn: Write to write-protected memory"": 6, ""unicorn: Invalid instruction"": 1, ""returned elsewhere"": 1}",sub_1e37c+0x18
+0x1e590,48,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_1e590
+0x1e66c,44,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 10, ""unicorn: Invalid memory read"": 4, ""unicorn: Invalid memory fetch"": 2}",sub_1e66c
+0x1e750,36,leaf,arm,pass,9,,sub_1e750
+0x1ea7c,72,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_1ea7c
+0x1ebdc,12,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 10, ""unicorn: Invalid memory write"": 2, ""unicorn: Write to write-protected memory"": 3, ""import printf"": 1}",sub_1ebdc
+0x1ef90,100,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_1ef18+0x3c+0x14+0x28
+0x1f910,112,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 14, ""unicorn: Write to write-protected memory"": 2}",sub_1f910
+0x1fb98,160,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 9, ""unicorn: Invalid memory write"": 2, ""unicorn: Write to write-protected memory"": 4, ""unicorn: Invalid instruction"": 1}",sub_1fb6c+0x2c
+0x20ec8,16,leaf,arm,no-coverage,0,"{""import printf"": 16}",sub_20eb0+0x18
+0x212c0,124,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 5, ""unicorn: Invalid memory read"": 5, ""unicorn: Write to write-protected memory"": 5, ""unicorn: Invalid memory write"": 1}",sub_212c0
+0x2133c,4,leaf,arm,no-coverage,0,"{""import memset"": 16}",sub_2133c
+0x21a00,52,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 8, ""unicorn: Invalid memory read"": 4, ""unicorn: Write to write-protected memory"": 1, ""unicorn: Invalid memory fetch"": 3}",sub_21a00
+0x224a0,32,leaf,arm,no-coverage,0,"{""import printf"": 13, ""unicorn: Invalid memory read"": 2, ""unicorn: Invalid instruction"": 1}",sub_224a0
+0x23a64,60,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 16}",sub_23a44+0x20
+0x242d4,44,leaf,arm,pass,16,,sub_242d4
+0x24348,48,leaf,arm,pass,16,,sub_24348
+0x24d04,80,calls,arm,no-coverage,1,"{""import printf"": 2, ""unicorn: Invalid memory read"": 4, ""unicorn: Write to write-protected memory"": 6, ""unicorn: Invalid instruction"": 3}",sub_24d04
+0x25160,40,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 8, ""import printf"": 8}",sub_250cc+0x94
+0x25184,4,leaf,arm,no-coverage,0,"{""import printf"": 14, ""import sendto"": 2}",sub_250cc+0x94+0x24
+0x25ab0,148,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 14, ""unicorn: Invalid memory write"": 1, ""import printf"": 1}",sub_25ab0
+0x25c84,208,calls,arm,no-coverage,0,"{""import printf"": 10, ""unicorn: Invalid memory read"": 6}",sub_25c6c+0x18
+0x25cf4,96,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_25c6c+0x18+0x70
+0x260fc,1376,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_25e98+0x104+0x10+0x20+0x48+0x5c+0x68+0x24
+0x2623c,1056,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 5, ""unicorn: Invalid memory read"": 11}",sub_25e98+0x3a4
+0x26268,1012,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 16}",sub_25e98+0x3d0
+0x263e8,628,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 3, ""unicorn: Invalid memory write"": 5, ""import __cxa_guard_acquire"": 7, ""unicorn: Write to write-protected memory"": 1}",sub_25e98+0x404+0xf8+0x28+0x2c
+0x26690,20,leaf,arm,pass,16,,sub_26690
+0x282d8,8,leaf,arm,no-coverage,1,"{""import printf"": 11, ""unicorn: Write to write-protected memory"": 3, ""import strlen"": 1}",sub_282d8
+0x28310,8,calls,arm,pass,4,,sub_28310
+0x28d8c,16,leaf,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 16}",sub_28d08+0x84
+0x29258,44,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 11, ""unicorn: Write to write-protected memory"": 2, ""unicorn: Invalid instruction"": 3}",sub_29258
+0x29490,220,calls,arm,pass,8,,sub_29490
+0x29708,116,calls,arm,pass,6,,sub_2964c+0xbc
+0x29c98,52,calls,arm,pass,7,,sub_29bf0+0xa8
+0x2a388,320,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 6, ""unicorn stopped"": 8, ""unicorn: Invalid memory fetch"": 2}",sub_2a314+0x74
+0x2a670,428,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 2, ""unicorn stopped"": 5, ""unicorn: Invalid memory write"": 2, ""unicorn: Write to write-protected memory"": 6, ""unicorn: Invalid instruction"": 1}",sub_2a664+0xc
+0x2ac10,164,calls,arm,pass,5,,sub_2ac10
+0x2ad74,172,calls,arm,pass,6,,sub_2ad44+0x30
+0x2ae90,8,leaf,arm,pass,16,,sub_2ae90
+0x2af24,8,leaf,arm,pass,16,,sub_2af24
+0x2b3d0,96,leaf,arm,pass,10,,sub_2b3d0
+0x2b460,360,calls,arm,no-coverage,0,"{""import printf"": 8, ""unicorn: Invalid memory read"": 6, ""unicorn: Invalid memory fetch"": 1, ""import strcmp"": 1}",sub_2b430+0x30
+0x2b62c,736,calls,arm,no-coverage,0,"{""import printf"": 8, ""unicorn: Invalid memory read"": 5, ""unicorn: Invalid memory fetch"": 3}",sub_2b608+0x24
+0x2b820,236,calls,arm,no-coverage,1,"{""unicorn: Invalid memory fetch"": 2, ""returned elsewhere"": 1, ""import printf"": 10, ""unicorn: Invalid memory read"": 3}",sub_2b608+0x50+0x190+0x38
+0x2b910,264,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_2b910
+0x2bb40,36,leaf,arm,pass,6,,sub_2bb40
+0x2bd00,100,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 7, ""unicorn: Invalid memory read"": 2, ""unicorn: Invalid memory fetch"": 3, ""unicorn stopped"": 3, ""unicorn: Invalid memory write"": 1}",sub_2bd00
+0x2c6b8,4,leaf,arm,no-coverage,0,"{""import printf"": 16}",sub_2c6b8
+0x2c8f4,8,leaf,arm,pass,16,,sub_2c8f4
+0x2c918,16,leaf,arm,pass,8,,sub_2c918
+0x2d390,4,leaf,arm,pass,7,,sub_2d390
+0x2d394,52,leaf,arm,pass,5,,sub_2d394
+0x2d548,136,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_2d548
+0x2d93c,552,calls,arm,no-coverage,0,"{""unicorn: Invalid memory write"": 3, ""unicorn stopped"": 3, ""unicorn: Invalid memory read"": 1, ""unicorn: Write to write-protected memory"": 4, ""unicorn: Invalid memory fetch"": 2, ""unicorn: Invalid instruction"": 3}",sub_2d91c+0x20
+0x2f5d4,332,calls,arm,no-coverage,1,"{""unicorn: Write to write-protected memory"": 3, ""import memset"": 6, ""unicorn: Invalid memory write"": 4, ""returned elsewhere"": 1, ""unicorn: Invalid memory read"": 2}",sub_2f2a0+0x334
+0x2f814,512,calls,arm,no-coverage,0,"{""unicorn: Invalid memory write"": 5, ""import memset"": 6, ""unicorn: Invalid memory read"": 4, ""unicorn: Write to write-protected memory"": 1}",sub_2f720+0x58+0x1c+0x80
+0x2fba8,664,calls,arm,no-coverage,1,"{""unicorn: Write to write-protected memory"": 2, ""import memset"": 13, ""returned elsewhere"": 1}",sub_2fa14+0x94+0x18+0x1c+0x80+0x4c
+0x3000c,184,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 2, ""unicorn: Invalid instruction"": 7, ""unicorn: Write to write-protected memory"": 6, ""unicorn: Invalid memory fetch"": 1}",sub_3000c
+0x31c04,644,calls,arm,no-coverage,0,"{""unicorn: Invalid memory write"": 4, ""import memset"": 5, ""unicorn: Write to write-protected memory"": 7}",sub_31abc+0xf4+0x54
+0x32214,92,calls,arm,no-coverage,0,"{""import memset"": 15, ""unicorn: Invalid memory read"": 1}",sub_31e88+0xd0+0x54+0x268
+0x323e8,268,calls,arm,no-coverage,0,"{""import memset"": 12, ""unicorn: Invalid memory read"": 2, ""unicorn: Write to write-protected memory"": 2}",sub_323b0+0x38
+0x32cfc,72,calls,arm,pass,5,,sub_32cfc
+0x32e88,120,calls,arm,no-coverage,0,"{""import memset"": 16}",sub_32dc0+0xc8
+0x33934,112,calls,arm,pass,7,,sub_338e4+0x50
+0x33c80,88,calls,arm,pass,4,,sub_33c80
+0x3458c,44,leaf,arm,pass,4,,sub_3458c
+0x34d18,164,calls,arm,pass,16,,sub_34d18
+0x3537c,4,leaf,arm,pass,16,,sub_3537c
+0x36430,108,leaf,arm,pass,4,,sub_36238+0x60+0x30+0x164+0x4
+0x36538,36,calls,arm,no-coverage,1,"{""unicorn: Invalid memory read"": 3, ""unicorn: Invalid instruction"": 2, ""returned elsewhere"": 1, ""unicorn stopped"": 6, ""unicorn: Invalid memory write"": 3, ""unicorn: Write to write-protected memory"": 1}",sub_3649c+0x8c+0x10
+0x365fc,180,calls,arm,no-coverage,0,"{""import memset"": 12, ""unicorn: Invalid memory read"": 1, ""unicorn: Write to write-protected memory"": 3}",sub_365fc
+0x36938,40,calls,arm,no-coverage,3,"{""unicorn: Write to write-protected memory"": 3, ""unicorn: Invalid memory read"": 7, ""unicorn: Invalid memory write"": 3, ""returned elsewhere"": 3}",sub_36900+0xc+0x2c
+0x36b34,48,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 7, ""unicorn: Invalid memory read"": 9}",sub_36b34
+0x36b64,12,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 11, ""unicorn: Invalid memory read"": 3, ""unicorn: Invalid memory fetch"": 2}",sub_36b64
+0x36c60,28,leaf,arm,no-coverage,0,"{""unicorn: Invalid memory fetch"": 4, ""unicorn: Invalid instruction"": 11, ""unicorn: Invalid memory read"": 1}",sub_36c60
+0x36c7c,64,calls,arm,no-coverage,0,"{""unicorn: Invalid memory fetch"": 4, ""unicorn: Invalid memory read"": 5, ""unicorn: Invalid instruction"": 7}",sub_36c7c
+0x3735c,88,calls,arm,pass,5,,sub_3735c
+0x37450,48,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 15, ""unicorn: Write to write-protected memory"": 1}",sub_373f4+0x5c
+0x374a4,56,leaf,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 12, ""unicorn: Write to write-protected memory"": 4}",sub_37494+0x10
+0x37648,180,calls,arm,no-coverage,1,"{""unicorn: Invalid memory read"": 12, ""unicorn: Write to write-protected memory"": 3, ""returned elsewhere"": 1}",sub_37630+0x18
+0x376e0,28,leaf,arm,pass,11,,sub_37630+0xb0
+0x378e4,92,calls,arm,pass,4,,sub_378e4
+0x37fe4,180,calls,arm,no-coverage,0,"{""import printf"": 10, ""unicorn: Invalid memory write"": 3, ""unicorn: Invalid memory read"": 3}",sub_37fe4
+0x38358,40,calls,arm,no-coverage,0,"{""import printf"": 10, ""unicorn: Write to write-protected memory"": 2, ""unicorn: Invalid memory read"": 4}",sub_382d0+0x50+0x1c+0x1c
+0x383ec,144,calls,arm,no-coverage,0,"{""import printf"": 7, ""unicorn: Write to write-protected memory"": 6, ""unicorn: Invalid memory write"": 2, ""unicorn: Invalid memory read"": 1}",sub_383ec
+0x387b8,12,leaf,arm,no-coverage,0,"{""import printf"": 16}",sub_3875c+0x5c
+0x38b74,524,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 5, ""unicorn: Invalid memory write"": 1, ""import printf"": 8, ""unicorn: Write to write-protected memory"": 2}",sub_38b4c+0xc+0x1c
+0x38c00,384,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 5, ""unicorn: Write to write-protected memory"": 5, ""import printf"": 6}",sub_38b4c+0xc+0x8c+0x1c
+0x38f60,40,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_38ef4+0x6c
+0x3937c,88,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_39374+0x8
+0x394fc,24,calls,arm,no-coverage,0,"{""import printf"": 12, ""unicorn: Invalid memory read"": 4}",sub_394ec+0x10
+0x39514,28,calls,arm,no-coverage,0,"{""import printf"": 15, ""unicorn: Invalid memory read"": 1}",sub_39514
+0x39590,4,leaf,arm,no-coverage,0,"{""import printf"": 6, ""unicorn: Invalid memory write"": 5, ""unicorn: Invalid memory read"": 3, ""import strcmp"": 2}",sub_39590
+0x395d4,48,leaf,arm,no-coverage,0,"{""import strcmp"": 7, ""import printf"": 6, ""unicorn: Invalid memory write"": 3}",sub_395d4
+0x398f8,104,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 11, ""unicorn: Write to write-protected memory"": 5}",sub_398b4+0x44
+0x39910,80,leaf,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 15, ""unicorn: Write to write-protected memory"": 1}",sub_398b4+0x44+0x18
+0x399d8,8,leaf,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 7, ""unicorn: Invalid memory fetch"": 4, ""unicorn: Invalid instruction"": 5}",sub_399ac+0x2c
+0x39dd4,132,calls,arm,no-coverage,0,"{""import printf"": 11, ""unicorn: Invalid memory write"": 1, ""unicorn: Write to write-protected memory"": 4}",sub_39d94+0x34+0xc
+0x39f24,36,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_39e58+0xcc
+0x39fe8,56,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 10, ""unicorn: Invalid memory read"": 3, ""import printf"": 2, ""unicorn: Invalid memory fetch"": 1}",sub_39f48+0x68+0x38
+0x3a7a4,8,leaf,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 9, ""unicorn: Invalid instruction"": 7}",sub_3a650+0x58+0xf0+0xc
+0x3aa24,60,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_3aa00+0x24
+0x3aa3c,36,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_3aa00+0x24+0x18
+0x3ab04,40,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 5, ""unicorn: Invalid memory read"": 5, ""unicorn: Invalid memory write"": 3, ""unicorn: Invalid instruction"": 2, ""import printf"": 1}",sub_3ab04
+0x3ab2c,68,calls,arm,no-coverage,0,"{""import printf"": 15, ""unicorn: Invalid memory read"": 1}",sub_3ab2c
+0x3b010,48,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 8, ""unicorn: Invalid instruction"": 6, ""import printf"": 2}",sub_3aeb4+0xf8+0x64
+0x3b094,96,leaf,arm,no-coverage,0,"{""import printf"": 10, ""import strcmp"": 4, ""unicorn: Invalid memory write"": 2}",sub_3b094
+0x3b214,24,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_3b0f4+0xb8+0x34+0x34
+0x3b850,176,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_3b70c+0x144
+0x3ba9c,400,calls,arm,no-coverage,0,"{""unicorn: Invalid memory fetch"": 1, ""unicorn: Invalid instruction"": 10, ""unicorn: Unhandled CPU exception"": 2, ""unicorn: Write to write-protected memory"": 2, ""unicorn: Invalid memory read"": 1}",sub_3ba9c
+0x3bd38,140,calls,arm,no-coverage,0,"{""import printf"": 12, ""unicorn: Invalid memory read"": 2, ""unicorn: Invalid instruction"": 2}",sub_3bc7c+0x2c+0x90
+0x3bdb0,20,leaf,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 7, ""unicorn: Invalid instruction"": 9}",sub_3bc7c+0x11c+0x18
+0x3c1ec,128,calls,arm,no-coverage,0,"{""unicorn: Invalid memory write"": 2, ""unicorn: Invalid instruction"": 12, ""unicorn: Invalid memory fetch"": 1, ""unicorn: Invalid memory read"": 1}",sub_3c1ec
+0x3c274,52,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_3c26c+0x8
+0x3c308,136,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_3c308
+0x3c4a4,64,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_3c498+0xc
+0x3c718,52,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 6, ""import printf"": 9, ""unicorn: Invalid instruction"": 1}",sub_3c6bc+0x5c
+0x3cba0,104,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_3cb38+0x8+0x18+0x48
+0x3cc98,16,calls,arm,pass,9,,sub_3cc8c+0xc
+0x3d1b8,116,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_3d1b8
+0x3d2ec,40,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 3, ""unicorn: Invalid instruction"": 9, ""unicorn: Invalid memory fetch"": 2, ""import printf"": 2}",sub_3d2ec
+0x3d788,216,calls,arm,no-coverage,1,"{""unicorn: Write to write-protected memory"": 3, ""unicorn: Invalid memory read"": 6, ""unicorn: Invalid instruction"": 5, ""returned elsewhere"": 1, ""unicorn: Invalid memory fetch"": 1}",sub_3d788
+0x3d8bc,52,calls,arm,pass,8,,sub_3d8bc
+0x3d940,28,calls,arm,pass,4,,sub_3d910+0x30
+0x3da7c,216,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 16}",sub_3da4c+0x18+0x18
+0x3dea8,204,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 7, ""unicorn: Invalid memory read"": 7, ""unicorn: Invalid memory fetch"": 2}",sub_3dea8
+0x3e304,20,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 16}",sub_3e2c8+0x3c
+0x3e478,176,calls,arm,no-coverage,0,"{""import printf"": 15, ""unicorn: Invalid memory read"": 1}",sub_3e42c+0x4c
+0x3e6a4,64,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_3e614+0x60+0x18+0x18
+0x3ebf0,8,leaf,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 10, ""unicorn: Invalid memory write"": 4, ""unicorn: Write to write-protected memory"": 2}",sub_3ebf0
+0x3eff8,28,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 2, ""unicorn: Invalid memory write"": 2, ""import printf"": 9, ""unicorn: Invalid memory read"": 3}",sub_3eed0+0x10+0x1c+0xfc
+0x3f0f4,76,calls,arm,no-coverage,0,"{""import printf"": 5, ""unicorn: Write to write-protected memory"": 6, ""unicorn: Invalid instruction"": 1, ""unicorn: Invalid memory read"": 4}",sub_3f0bc+0x1c+0x1c
+0x3f24c,4,leaf,arm,no-coverage,0,"{""import printf"": 16}",sub_3f1c4+0x10+0x1c+0x5c
+0x3f2a0,320,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_3f2a0
+0x3f2ac,308,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_3f2a0+0xc
+0x3f444,180,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_3f3e0+0x64
+0x3f80c,156,calls,arm,no-coverage,3,"{""unicorn: Invalid instruction"": 3, ""unicorn: Invalid memory read"": 10, ""returned elsewhere"": 3}",sub_3f704+0xd8+0x30
+0x3fc68,216,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 13, ""unicorn: Invalid memory fetch"": 1, ""unicorn: Invalid memory read"": 1, ""unicorn: Unhandled CPU exception"": 1}",sub_3fc68
+0x3ffdc,48,leaf,arm,no-coverage,0,"{""import printf"": 16}",sub_3ff60+0x54+0x28
+0x4063c,188,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_4060c+0x30
+0x4069c,92,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 4, ""unicorn: Unhandled CPU exception"": 1, ""unicorn: Invalid memory write"": 4, ""unicorn: Invalid memory read"": 4, ""unicorn: Invalid instruction"": 3}",sub_4060c+0x30+0x60
+0x40fb4,52,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 5, ""unicorn: Invalid memory write"": 4, ""unicorn: Invalid instruction"": 6, ""unicorn: Invalid memory read"": 1}",sub_40eec+0x30+0x3c+0x2c+0x18+0x18
+0x41148,128,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_410ec+0x8+0x1c+0x38
+0x4119c,44,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_410ec+0xb0
+0x4165c,584,calls,arm,no-coverage,0,"{""import memcpy"": 16}",sub_41658+0x4
+0x41714,400,calls,arm,no-coverage,1,"{""import printf"": 6, ""unicorn: Invalid memory read"": 9, ""returned elsewhere"": 1}",sub_41658+0x18+0xa4
+0x41a28,8,calls,arm,no-coverage,0,"{""import printf"": 12, ""unicorn: Invalid memory read"": 2, ""unicorn: Invalid instruction"": 2}",sub_41a28
+0x41c94,36,calls,arm,no-coverage,0,"{""import memcpy"": 16}",sub_41c94
+0x41c98,32,calls,arm,no-coverage,0,"{""import memcpy"": 16}",sub_41c94+0x4
+0x41cb8,112,calls,arm,no-coverage,0,"{""import memcpy"": 16}",sub_41cb8
+0x41d78,200,calls,arm,no-coverage,0,"{""import memcpy"": 16}",sub_41d28+0x24+0x2c
+0x41f78,12,leaf,arm,no-coverage,0,"{""import printf"": 16}",sub_41f08+0x48+0x28
+0x425b4,52,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 6, ""import printf"": 10}",sub_425b4
+0x42b4c,128,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 6, ""unicorn: Invalid memory read"": 7, ""import printf"": 1, ""unicorn: Invalid memory write"": 2}",sub_42b4c
+0x42cec,192,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 14, ""import printf"": 2}",sub_42c7c+0x70
+0x42dec,48,calls,arm,no-coverage,0,"{""import printf"": 7, ""unicorn: Invalid instruction"": 6, ""unicorn: Invalid memory read"": 3}",sub_42dec
+0x42e90,88,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 8, ""unicorn: Write to write-protected memory"": 6, ""unicorn: Invalid instruction"": 2}",sub_42e38+0x40+0x18
+0x42f84,236,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 4, ""unicorn: Write to write-protected memory"": 5, ""unicorn: Invalid instruction"": 6, ""unicorn: Invalid memory fetch"": 1}",sub_42f00+0x84
+0x42f94,220,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 5, ""unicorn: Invalid memory read"": 10, ""unicorn: Invalid memory fetch"": 1}",sub_42f00+0x84+0x10
+0x430d4,16,leaf,arm,no-coverage,0,"{""import printf"": 16}",sub_430d0+0x4
+0x430ec,140,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_430e4+0x8
+0x434a8,96,calls,arm,no-coverage,0,"{""unicorn stopped"": 2, ""unicorn: Invalid memory read"": 9, ""unicorn: Invalid instruction"": 4, ""unicorn: Invalid memory fetch"": 1}",sub_433f0+0xb8
+0x4437c,1900,calls,arm,no-coverage,1,"{""unicorn: Unhandled CPU exception"": 2, ""unicorn: Invalid memory read"": 7, ""unicorn: Invalid instruction"": 4, ""unicorn: Write to write-protected memory"": 1, ""returned elsewhere"": 1, ""unicorn: Invalid memory fetch"": 1}",sub_44318+0x64
+0x448d4,532,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 4, ""unicorn: Invalid instruction"": 9, ""unicorn: Unhandled CPU exception"": 2, ""unicorn: Invalid memory fetch"": 1}",sub_44318+0x378+0xa4+0x1a0
+0x45138,168,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 5, ""unicorn: Invalid instruction"": 4, ""unicorn: Invalid memory read"": 7}",sub_45138
+0x45358,84,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 5, ""import printf"": 4, ""unicorn: Invalid memory fetch"": 5, ""unicorn: Invalid instruction"": 2}",sub_45358
+0x45840,272,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 7, ""unicorn: Invalid memory write"": 2, ""unicorn: Invalid memory fetch"": 1, ""unicorn: Invalid instruction"": 3, ""unicorn: Invalid memory read"": 3}",sub_45840
+0x459a0,52,calls,arm,no-coverage,0,"{""unicorn: Invalid memory fetch"": 2, ""unicorn: Invalid memory read"": 7, ""unicorn: Invalid instruction"": 6, ""import printf"": 1}",sub_459a0
+0x4600c,180,calls,arm,no-coverage,0,"{""import printf"": 10, ""unicorn: Invalid memory read"": 6}",sub_45fec+0x20
+0x46768,8,leaf,arm,pass,16,,sub_46768
+0x467cc,16,leaf,arm,pass,5,,sub_467cc
+0x46acc,8,leaf,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 12, ""unicorn: Invalid memory read"": 1, ""unicorn: Invalid memory write"": 3}",sub_46acc
+0x46adc,120,calls,arm,no-coverage,0,"{""unicorn: Invalid memory write"": 6, ""unicorn: Write to write-protected memory"": 6, ""unicorn: Invalid memory read"": 4}",sub_46adc
+0x46d60,32,calls,arm,pass,16,,sub_46d38+0x14+0x14
+0x47294,8,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 7, ""unicorn: Invalid memory fetch"": 2, ""unicorn: Invalid instruction"": 6, ""unicorn: Unhandled CPU exception"": 1}",sub_47294
+0x47884,40,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 9, ""unicorn: Invalid memory read"": 3, ""unicorn: Unhandled CPU exception"": 1, ""unicorn: Invalid memory fetch"": 3}",sub_47884
+0x47930,16,calls,arm,no-coverage,0,"{""unicorn: Invalid memory fetch"": 6, ""unicorn: Invalid instruction"": 9, ""unicorn: Unhandled CPU exception"": 1}",sub_478e8+0x48
+0x48dc8,76,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 9, ""import memset"": 7}",sub_48dc8
+0x490e0,56,calls,arm,pass,16,,sub_490e0
+0x495b4,12,calls,arm,no-coverage,0,"{""unicorn stopped"": 11, ""unicorn: Write to write-protected memory"": 3, ""unicorn: Invalid memory write"": 2}",sub_495b4
+0x49c50,20,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 2, ""import memset"": 13, ""unicorn stopped"": 1}",sub_49ba0+0x94+0x10+0xc
+0x4a104,424,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_4a104
+0x4a30c,72,calls,arm,pass,16,,sub_4a304+0x8
+0x4a3a8,4,leaf,arm,pass,16,,sub_4a354+0x54
+0x4a3b0,44,calls,arm,pass,6,,sub_4a3ac+0x4
+0x4a4d4,24,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 5, ""unicorn: Invalid memory read"": 7, ""unicorn: Invalid instruction"": 3, ""unicorn: Invalid memory write"": 1}",sub_4a4ac+0x28
+0x4a958,328,calls,arm,no-coverage,2,"{""unicorn: Invalid memory read"": 5, ""unicorn: Invalid memory write"": 7, ""unicorn: Write to write-protected memory"": 2, ""returned elsewhere"": 2}",sub_4a958
+0x4acb4,148,calls,arm,no-coverage,1,"{""returned elsewhere"": 1, ""unicorn: Invalid memory write"": 6, ""unicorn: Invalid memory read"": 2, ""unicorn: Write to write-protected memory"": 1, ""import memset"": 6}",sub_4ac8c+0x4+0x24
+0x4ad48,252,calls,arm,no-coverage,0,"{""import memset"": 8, ""unicorn: Invalid memory read"": 5, ""unicorn: Invalid memory write"": 2, ""unicorn: Write to write-protected memory"": 1}",sub_4ad48
+0x4b34c,36,calls,arm,no-coverage,0,"{""unicorn: Invalid memory write"": 3, ""unicorn: Invalid memory read"": 7, ""unicorn: Write to write-protected memory"": 6}",sub_4b34c
+0x4b9e0,40,calls,arm,no-coverage,0,"{""unicorn stopped"": 4, ""import printf"": 7, ""unicorn: Invalid memory read"": 4, ""unicorn: Invalid instruction"": 1}",sub_4b96c+0x2c+0x34+0x14
+0x4ba8c,96,calls,arm,no-coverage,0,"{""import printf"": 13, ""unicorn stopped"": 3}",sub_4ba54+0x38
+0x4c5b8,148,calls,arm,no-coverage,0,"{""unicorn stopped"": 16}",sub_4c490+0x60+0x84+0x44
+0x4d12c,8,leaf,arm,no-coverage,0,"{""unicorn stopped"": 4, ""unicorn: Invalid memory read"": 6, ""import printf"": 6}",sub_4d12c
+0x4d15c,16,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 9, ""unicorn: Invalid memory fetch"": 5, ""unicorn stopped"": 2}",sub_4d134+0x28
+0x4d258,20,calls,arm,no-coverage,0,"{""import printf"": 8, ""unicorn: Write to write-protected memory"": 1, ""unicorn: Invalid memory read"": 6, ""unicorn: Invalid instruction"": 1}",sub_4d238+0x20
+0x4d8c0,172,calls,arm,no-coverage,0,"{""import printf"": 13, ""unicorn stopped"": 2, ""unicorn: Invalid memory read"": 1}",sub_4d8c0
+0x4d96c,188,calls,arm,no-coverage,0,"{""import memcpy"": 13, ""import printf"": 2, ""unicorn stopped"": 1}",sub_4d96c
+0x4de40,32,calls,arm,no-coverage,1,"{""unicorn: Invalid memory read"": 7, ""unicorn stopped"": 6, ""returned elsewhere"": 1, ""unicorn: Invalid instruction"": 1, ""unicorn: Invalid memory fetch"": 1}",sub_4dd5c+0xd0+0x14
+0x4df70,44,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_4def4+0x7c
+0x4e2fc,164,calls,arm,pass,14,,sub_4e14c+0x17c+0x34
+0x4e654,52,calls,arm,pass,12,,sub_4e5a4+0x30+0x74+0xc
+0x4e720,208,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 6, ""unicorn stopped"": 1, ""import printf"": 6, ""unicorn: Invalid memory write"": 2, ""unicorn: Invalid memory read"": 1}",sub_4e720
+0x4eccc,24,leaf,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 6, ""unicorn: Invalid memory write"": 2, ""unicorn: Invalid memory read"": 4, ""unicorn stopped"": 4}",sub_4ec4c+0x80
+0x4ed60,196,calls,arm,pass,11,,sub_4ed44+0x1c
+0x4f630,180,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 13, ""unicorn stopped"": 3}",sub_4f630
+0x4fbf0,64,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 16}",sub_4fbf0
+0x50068,84,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 13, ""unicorn: Invalid memory read"": 2, ""unicorn stopped"": 1}",sub_50008+0x50+0x10
+0x5041c,84,calls,arm,no-coverage,0,"{""import printf"": 13, ""unicorn: Invalid memory read"": 2, ""unicorn stopped"": 1}",sub_50250+0x1cc
+0x50790,28,calls,arm,no-coverage,0,"{""unicorn stopped"": 13, ""unicorn: Invalid memory read"": 3}",sub_50790
+0x508c4,108,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_50830+0x94
+0x50b0c,28,leaf,arm,no-coverage,0,"{""unicorn: Invalid memory write"": 5, ""import printf"": 11}",sub_50b0c
+0x50b5c,104,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_50b28+0x34
+0x50e78,32,leaf,arm,no-coverage,0,"{""import printf"": 13, ""unicorn: Invalid memory write"": 3}",sub_50e78
+0x51240,72,calls,arm,no-coverage,0,"{""import printf"": 8, ""unicorn: Invalid memory read"": 8}",sub_5122c+0x14
+0x5196c,12,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 13, ""unicorn: Invalid memory write"": 3}",sub_5196c
+0x51ce0,52,calls,arm,no-coverage,0,"{""unicorn: Invalid memory write"": 6, ""unicorn: Write to write-protected memory"": 6, ""unicorn: Invalid memory read"": 4}",sub_51cb4+0x2c
+0x51f90,268,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 14, ""unicorn: Invalid memory write"": 1, ""import memset"": 1}",sub_51f90
+0x5209c,24,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 10, ""unicorn: Invalid memory read"": 6}",sub_5209c
+0x521fc,40,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 4, ""unicorn: Invalid memory write"": 2, ""unicorn: Write to write-protected memory"": 10}",sub_521f0+0xc
+0x522ac,68,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 12, ""unicorn: Write to write-protected memory"": 2, ""unicorn stopped"": 1, ""unicorn: Invalid memory write"": 1}",sub_522ac
+0x522fc,160,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 13, ""unicorn: Invalid memory write"": 3}",sub_522fc
+0x525a4,32,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 3, ""unicorn: Write to write-protected memory"": 13}",sub_525a0+0x4
+0x525ac,24,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 10, ""unicorn: Invalid memory read"": 6}",sub_525a0+0x4+0x8
+0x527d0,16,leaf,arm,no-coverage,0,"{""import printf"": 16}",sub_52634+0xd8+0x4c+0x60+0x18
+0x52808,32,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_527e0+0x28
+0x52acc,16,leaf,arm,no-coverage,0,"{""import printf"": 16}",sub_52a88+0x44
+0x52ae8,12,leaf,arm,no-coverage,0,"{""import printf"": 16}",sub_52adc+0xc
+0x53554,120,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 8, ""unicorn: Invalid memory write"": 3, ""unicorn: Invalid memory read"": 5}",sub_53554
+0x539a0,48,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 16}",sub_53990+0x10
+0x539fc,60,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 3, ""unicorn: Invalid memory write"": 2, ""unicorn stopped"": 4, ""unicorn: Write to write-protected memory"": 7}",sub_539fc
+0x53a8c,180,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 9, ""unicorn: Invalid memory fetch"": 2, ""unicorn stopped"": 4, ""unicorn: Unhandled CPU exception"": 1}",sub_53a84+0x8
+0x53cb0,96,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 5, ""import printf"": 10, ""import strcmp"": 1}",sub_53ca4+0xc
+0x53d70,112,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 2, ""unicorn stopped"": 9, ""unicorn: Invalid memory fetch"": 2, ""unicorn: Invalid instruction"": 3}",sub_53d70
+0x53e98,4,leaf,arm,no-coverage,0,"{""unicorn: Invalid memory fetch"": 4, ""import printf"": 5, ""unicorn: Invalid memory read"": 3, ""unicorn stopped"": 4}",sub_53e98
+0x53f7c,88,calls,arm,no-coverage,0,"{""unicorn: Invalid memory write"": 7, ""import printf"": 7, ""unicorn: Write to write-protected memory"": 2}",sub_53f7c
+0x53fec,16,calls,arm,no-coverage,0,"{""import printf"": 5, ""unicorn: Invalid memory write"": 3, ""unicorn: Write to write-protected memory"": 8}",sub_53fec
+0x54bd0,324,calls,arm,no-coverage,0,"{""import memset"": 13, ""unicorn: Invalid instruction"": 1, ""import printf"": 2}",sub_54ae0+0xf0
+0x55194,136,calls,arm,no-coverage,0,"{""import printf"": 10, ""unicorn: Invalid memory read"": 3, ""unicorn: Write to write-protected memory"": 3}",sub_55124+0x70
+0x55560,888,calls,arm,no-coverage,0,"{""import printf"": 8, ""unicorn: Invalid memory read"": 6, ""unicorn: Invalid memory write"": 2}",sub_553ec+0x128+0x4c
+0x55ce4,20,calls,arm,no-coverage,0,"{""import memset"": 13, ""unicorn: Invalid memory read"": 2, ""unicorn: Write to write-protected memory"": 1}",sub_55c58+0x54+0x38
+0x55fb4,132,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_55fb4
+0x5658c,180,calls,arm,no-coverage,0,"{""import printf"": 2, ""import memset"": 12, ""unicorn: Invalid memory write"": 1, ""unicorn: Write to write-protected memory"": 1}",sub_56548+0x44
+0x56968,184,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 5, ""import memset"": 1, ""unicorn: Invalid memory read"": 1, ""import printf"": 9}",sub_56964+0x4
+0x57074,168,calls,arm,no-coverage,0,"{""import printf"": 7, ""unicorn: Invalid memory write"": 1, ""unicorn: Invalid memory read"": 5, ""import memset"": 1, ""unicorn: Write to write-protected memory"": 2}",sub_57058+0x4+0xc+0xc
+0x57b94,60,calls,arm,no-coverage,1,"{""unicorn: Invalid memory write"": 4, ""import printf"": 1, ""returned elsewhere"": 1, ""unicorn: Invalid memory read"": 9, ""unicorn: Write to write-protected memory"": 1}",sub_57b6c+0x28
+0x58a9c,324,calls,arm,no-coverage,0,"{""unicorn stopped"": 10, ""unicorn: Invalid memory read"": 4, ""unicorn: Invalid memory fetch"": 1, ""unicorn: Invalid instruction"": 1}",sub_58a9c
+0x58be0,4,leaf,arm,pass,16,,sub_58be0
+0x599fc,120,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_599fc
+0x59e94,28,calls,arm,pass,9,,sub_59e94
+0x59f18,12,leaf,arm,pass,16,,sub_59eb0+0x68
+0x5a3a4,8,calls,arm,pass,10,,sub_5a338+0x5c+0x10
+0x5a670,28,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 15, ""unicorn: Write to write-protected memory"": 1}",sub_5a5e8+0x88
+0x5a6bc,48,leaf,arm,no-coverage,1,"{""unicorn: Invalid memory read"": 13, ""unicorn: Invalid memory write"": 1, ""returned elsewhere"": 1, ""unicorn: Write to write-protected memory"": 1}",sub_5a6bc
+0x5add0,84,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 1, ""import __assert_rtn"": 14, ""unicorn: Invalid memory read"": 1}",sub_5add0
+0x5b2cc,64,calls,arm,pass,16,,sub_5b280+0x34+0x18
+0x5b30c,32,leaf,arm,pass,8,,sub_5b30c
+0x5b354,184,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 13, ""unicorn: Write to write-protected memory"": 3}",sub_5b32c+0x28
+0x5b444,372,calls,arm,pass,4,,sub_5b40c+0x2c+0xc
+0x5c3bc,40,calls,arm,no-coverage,0,"{""unicorn: Invalid memory write"": 6, ""unicorn: Write to write-protected memory"": 5, ""unicorn: Invalid memory read"": 3, ""import memset"": 2}",sub_5c2c0+0xa0+0x44+0x18
+0x5cfec,36,calls,arm,no-coverage,0,"{""import memset"": 3, ""unicorn: Invalid memory read"": 5, ""unicorn: Invalid memory write"": 7, ""unicorn: Write to write-protected memory"": 1}",sub_5cfec
+0x5df1c,48,leaf,arm,no-coverage,0,"{""import memset"": 10, ""unicorn: Invalid memory read"": 6}",sub_5df1c
+0x5e698,180,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 5, ""unicorn: Invalid memory write"": 5, ""unicorn: Invalid memory read"": 4, ""import memset"": 2}",sub_5e5e0+0xb8
+0x5f36c,784,calls,arm,no-coverage,0,"{""unicorn: Invalid memory write"": 9, ""import memset"": 4, ""unicorn: Invalid memory read"": 2, ""unicorn: Write to write-protected memory"": 1}",sub_5f358+0x14
+0x5f6fc,60,leaf,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 16}",sub_5f67c+0x80
+0x5f848,84,calls,arm,no-coverage,0,"{""unicorn: Invalid memory write"": 13, ""unicorn: Invalid memory read"": 2, ""unicorn: Write to write-protected memory"": 1}",sub_5f81c+0x2c
+0x5f920,112,calls,arm,no-coverage,2,"{""unicorn: Invalid memory write"": 1, ""returned elsewhere"": 2, ""unicorn: Invalid memory read"": 8, ""unicorn: Write to write-protected memory"": 4, ""import memset"": 1}",sub_5f89c+0x48+0x3c
+0x5fbb4,20,leaf,arm,no-coverage,1,"{""unicorn: Invalid memory read"": 9, ""unicorn: Write to write-protected memory"": 6, ""returned elsewhere"": 1}",sub_5fba0+0x14
+0x5fc48,68,calls,arm,no-coverage,1,"{""unicorn: Invalid memory read"": 11, ""unicorn: Write to write-protected memory"": 4, ""returned elsewhere"": 1}",sub_5fc48
+0x5ff94,12,calls,arm,no-coverage,0,"{""import memset"": 1, ""unicorn: Invalid memory read"": 13, ""unicorn: Write to write-protected memory"": 1, ""unicorn: Invalid memory write"": 1}",sub_5ff94
+0x5ffdc,40,leaf,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 13, ""import memset"": 1, ""unicorn: Invalid instruction"": 1, ""unicorn stopped"": 1}",sub_5ffa0+0x3c
+0x602f4,660,calls,arm,no-coverage,1,"{""unicorn: Invalid memory read"": 13, ""unicorn stopped"": 1, ""returned elsewhere"": 1, ""unicorn: Invalid instruction"": 1}",sub_602f4
+0x6066c,44,leaf,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 9, ""unicorn stopped"": 1, ""unicorn: Invalid instruction"": 1, ""unicorn: Invalid memory read"": 4, ""unicorn: Invalid memory write"": 1}",sub_6066c
+0x6082c,132,calls,arm,no-coverage,2,"{""unicorn: Invalid instruction"": 2, ""unicorn stopped"": 1, ""unicorn: Invalid memory write"": 3, ""returned elsewhere"": 2, ""unicorn: Write to write-protected memory"": 4, ""unicorn: Invalid memory read"": 4}",sub_60698+0x14+0x14+0x16c
+0x61afc,84,calls,arm,no-coverage,0,"{""unicorn: Invalid memory write"": 11, ""unicorn: Invalid memory read"": 4, ""unicorn: Write to write-protected memory"": 1}",sub_61844+0x1c+0x40+0x25c
+0x61e3c,48,calls,arm,no-coverage,0,"{""import memset"": 12, ""unicorn: Invalid memory read"": 3, ""unicorn: Write to write-protected memory"": 1}",sub_61e10+0x2c
+0x61e88,68,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 9, ""unicorn: Invalid memory write"": 6, ""unicorn: Write to write-protected memory"": 1}",sub_61e6c+0x1c
+0x622c0,284,calls,arm,no-coverage,0,"{""import memset"": 10, ""unicorn: Invalid memory read"": 5, ""unicorn: Write to write-protected memory"": 1}",sub_622a4+0x1c
+0x6266c,60,calls,arm,no-coverage,1,"{""unicorn: Write to write-protected memory"": 2, ""unicorn: Invalid memory read"": 3, ""import memset"": 10, ""returned elsewhere"": 1}",sub_62630+0x4+0x38
+0x629e4,420,calls,arm,pass,4,,sub_629e4
+0x62b88,172,leaf,arm,pass,5,,sub_62b88
+0x62bcc,104,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 6, ""unicorn: Write to write-protected memory"": 6, ""unicorn: Invalid memory write"": 4}",sub_62b88+0x44
+0x632c4,108,calls,arm,pass,5,,sub_63174+0x150
+0x63490,328,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 7, ""unicorn: Invalid memory read"": 6, ""unicorn: Invalid memory write"": 1, ""unicorn: Invalid instruction"": 2}",sub_63490
+0x63638,236,calls,arm,pass,5,,sub_635d8+0x60
+0x63908,164,calls,arm,pass,4,,sub_638e8+0x20
+0x63a00,268,calls,arm,no-coverage,3,"{""returned elsewhere"": 3, ""unicorn: Invalid memory read"": 9, ""unicorn stopped"": 4}",sub_639d8+0x28
+0x64248,12,leaf,arm,pass,16,,sub_6422c+0x1c
+0x64264,112,calls,arm,no-coverage,2,"{""unicorn: Invalid memory read"": 14, ""returned elsewhere"": 2}",sub_64254+0x10
+0x64300,168,calls,arm,no-coverage,3,"{""unicorn: Invalid memory read"": 13, ""returned elsewhere"": 3}",sub_642d4+0x24+0x8
+0x64f28,304,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 13, ""unicorn: Invalid instruction"": 3}",sub_64f28
+0x64f68,240,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 5, ""unicorn: Invalid instruction"": 11}",sub_64f28+0x40
+0x6518c,280,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 16}",sub_650cc+0xc0
+0x658fc,148,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 7, ""unicorn: Write to write-protected memory"": 3, ""unicorn: Invalid instruction"": 4, ""import __cxa_pure_virtual"": 1, ""unicorn: Invalid memory write"": 1}",sub_658fc
+0x664b0,72,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 12, ""unicorn: Write to write-protected memory"": 3, ""unicorn: Invalid memory write"": 1}",sub_6649c+0x14
+0x664dc,28,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 4, ""unicorn: Invalid memory write"": 3, ""unicorn: Invalid memory read"": 6, ""unicorn: Invalid memory fetch"": 1, ""unicorn: Write to write-protected memory"": 2}",sub_6649c+0x38+0x8
+0x665ec,4,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 2, ""unicorn: Invalid memory read"": 14}",sub_665ec
+0x66ba0,4,leaf,arm,no-coverage,0,"{""import memset"": 13, ""unicorn: Invalid memory read"": 2, ""unicorn: Write to write-protected memory"": 1}",sub_66ba0
+0x66bc4,284,calls,arm,pass,13,,sub_66ba4+0x20
+0x677b4,88,calls,arm,no-coverage,0,"{""unicorn stopped"": 2, ""unicorn: Invalid memory read"": 9, ""unicorn: Write to write-protected memory"": 4, ""unicorn: Invalid memory write"": 1}",sub_6779c+0x18
+0x679b0,376,calls,arm,no-coverage,0,"{""import memset"": 3, ""unicorn: Invalid memory write"": 13}",sub_67998+0x18
+0x67b28,100,calls,arm,no-coverage,0,"{""unicorn: Invalid memory write"": 12, ""unicorn: Invalid memory read"": 2, ""unicorn: Write to write-protected memory"": 2}",sub_67b28
+0x68230,8,leaf,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 8, ""unicorn: Invalid memory write"": 4, ""unicorn: Invalid memory read"": 4}",sub_681f4+0x3c
+0x68338,8,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 2, ""unicorn: Invalid memory write"": 10, ""unicorn: Invalid memory read"": 2, ""import memset"": 2}",sub_68328+0x10
+0x688a0,52,calls,arm,no-coverage,0,"{""unicorn: Invalid memory write"": 5, ""import memset"": 10, ""unicorn: Invalid memory read"": 1}",sub_686e0+0x2c+0x17c+0x18
+0x688b8,28,calls,arm,no-coverage,0,"{""unicorn: Invalid memory write"": 3, ""import memset"": 10, ""unicorn: Invalid memory read"": 3}",sub_686e0+0x2c+0x1ac
+0x68c2c,4,leaf,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 7, ""unicorn stopped"": 3, ""import printf"": 1, ""unicorn: Invalid memory write"": 4, ""unicorn: Invalid memory read"": 1}",sub_68bd0+0x5c
+0x68cb0,28,calls,arm,no-coverage,0,"{""unicorn: Invalid memory fetch"": 1, ""unicorn stopped"": 6, ""unicorn: Invalid memory read"": 9}",sub_68cb0
+0x6904c,52,calls,arm,no-coverage,0,"{""unicorn stopped"": 8, ""unicorn: Invalid memory read"": 8}",sub_68eb0+0x19c
+0x6925c,16,leaf,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 9, ""import memset"": 6, ""unicorn: Invalid memory write"": 1}",sub_6925c
+0x69588,32,calls,arm,no-coverage,2,"{""returned elsewhere"": 2, ""unicorn: Invalid memory write"": 7, ""unicorn: Write to write-protected memory"": 4, ""unicorn: Invalid memory read"": 3}",sub_69588
+0x69668,16,calls,arm,no-coverage,0,"{""unicorn stopped"": 11, ""unicorn: Invalid instruction"": 1, ""unicorn: Invalid memory read"": 3, ""unicorn: Invalid memory fetch"": 1}",sub_69668
+0x696d0,28,calls,arm,no-coverage,2,"{""unicorn: Write to write-protected memory"": 7, ""unicorn: Invalid memory read"": 6, ""returned elsewhere"": 2, ""unicorn stopped"": 1}",sub_696d0
+0x69818,92,calls,arm,no-coverage,0,"{""unicorn stopped"": 2, ""unicorn: Invalid memory read"": 6, ""unicorn: Write to write-protected memory"": 3, ""unicorn: Invalid memory fetch"": 3, ""unicorn: Invalid instruction"": 1, ""unicorn: Invalid memory write"": 1}",sub_69818
+0x69cbc,20,calls,arm,no-coverage,1,"{""unicorn: Invalid memory read"": 15, ""returned elsewhere"": 1}",sub_69cbc
+0x69f58,52,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_69f58
+0x6a09c,228,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 16}",sub_69f8c+0x78+0x28+0x38+0x38
+0x6a3a0,180,calls,arm,pass,8,,sub_6a3a0
+0x6a804,76,calls,arm,pass,15,,sub_6a798+0x6c
+0x6a9dc,56,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_6a9d8+0x4
+0x6b1f8,108,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 16}",sub_6b1ec+0xc
+0x6b3c4,188,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 16}",sub_6b350+0x54+0x20
+0x6b604,164,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 10, ""unicorn: Invalid memory read"": 3, ""unicorn: Invalid memory fetch"": 1, ""unicorn: Unhandled CPU exception"": 1, ""import __cxa_pure_virtual"": 1}",sub_6b5f4+0x10
+0x6bfac,40,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 2, ""unicorn: Invalid memory read"": 14}",sub_6bd74+0xe0+0x158
+0x6c088,28,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 2, ""unicorn: Invalid memory fetch"": 2, ""unicorn: Invalid instruction"": 12}",sub_6c04c+0x3c
+0x6c160,60,calls,arm,pass,8,,sub_6c14c+0x14
+0x6c6a8,20,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 12, ""unicorn stopped"": 4}",sub_6c690+0x18
+0x6c6fc,24,leaf,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 13, ""unicorn stopped"": 3}",sub_6c6fc
+0x6c86c,12,leaf,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 15, ""unicorn stopped"": 1}",sub_6c854+0x8+0x10
+0x6ca20,392,calls,arm,no-coverage,0,"{""import printf"": 14, ""unicorn: Invalid memory read"": 2}",sub_6ca20
+0x6d2f0,20,leaf,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 10, ""unicorn stopped"": 6}",sub_6d2f0
+0x6db78,36,leaf,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 10, ""unicorn: Write to write-protected memory"": 6}",sub_6db78
+0x6df94,60,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 10, ""unicorn: Invalid memory fetch"": 2, ""unicorn: Invalid memory read"": 1, ""unicorn: Unhandled CPU exception"": 1, ""import memcpy"": 1, ""import __cxa_pure_virtual"": 1}",sub_6df94
+0x6dfd0,356,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 3, ""unicorn: Invalid instruction"": 10, ""unicorn: Invalid memory fetch"": 3}",sub_6dfd0
+0x6e518,24,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_6e518
+0x6e560,268,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_6e554+0xc
+0x6e738,108,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 10, ""unicorn: Invalid memory read"": 2, ""unicorn: Invalid memory fetch"": 2, ""unicorn: Write to write-protected memory"": 2}",sub_6e6bc+0x7c
+0x6ec90,44,calls,arm,no-coverage,2,"{""unicorn: Invalid memory read"": 11, ""import printf"": 3, ""returned elsewhere"": 2}",sub_6ec90
+0x6eea8,52,leaf,arm,no-coverage,0,"{""import printf"": 16}",sub_6eea8
+0x6eedc,304,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_6eedc
+0x6f24c,388,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 6, ""unicorn: Invalid memory read"": 9, ""unicorn: Invalid instruction"": 1}",sub_6f24c
+0x6fbe4,68,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 12, ""unicorn: Invalid memory read"": 2, ""unicorn: Invalid memory fetch"": 2}",sub_6fb78+0x6c
+0x7023c,324,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_7020c+0x18+0x18
+0x70754,76,leaf,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 4, ""unicorn: Invalid memory read"": 12}",sub_70754
+0x70e4c,576,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 5, ""unicorn: Invalid instruction"": 7, ""unicorn: Write to write-protected memory"": 4}",sub_70e4c
+0x711d8,128,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 15, ""unicorn: Invalid instruction"": 1}",sub_711a8+0x30
+0x71504,440,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 4, ""unicorn: Invalid memory read"": 3, ""unicorn: Write to write-protected memory"": 7, ""import printf"": 2}",sub_714c4+0x40
+0x719a8,376,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 12, ""unicorn: Invalid instruction"": 4}",sub_71860+0x9c+0x34+0x38+0x40
+0x71d14,360,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_71b8c+0x3c+0x20+0x110+0x1c
+0x71f24,12,leaf,arm,no-coverage,0,"{""import printf"": 16}",sub_71eb0+0x58+0x1c
+0x7227c,56,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 10, ""unicorn: Invalid memory read"": 3, ""unicorn: Invalid memory write"": 1, ""unicorn: Invalid instruction"": 2}",sub_72174+0x14+0xf4
+0x724c0,16,leaf,arm,pass,10,,sub_724c0
+0x72aa0,312,calls,arm,pass,9,,sub_72aa0
+0x72d98,44,calls,arm,no-coverage,0,"{""import printf"": 9, ""unicorn: Invalid memory read"": 4, ""import strcmp"": 3}",sub_72d6c+0x2c
+0x72de4,84,calls,arm,pass,11,,sub_72dc4+0x20
+0x73058,76,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_73058
+0x734e8,112,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_734e8
+0x73bc4,148,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_73bc4
+0x73d8c,20,leaf,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 10, ""unicorn: Invalid memory read"": 3, ""unicorn: Invalid memory fetch"": 2, ""unicorn: Unhandled CPU exception"": 1}",sub_73d8c
+0x74028,436,calls,arm,no-coverage,1,"{""unicorn: Invalid instruction"": 9, ""unicorn: Invalid memory read"": 6, ""returned elsewhere"": 1}",sub_74028
+0x741e4,4,leaf,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 9, ""unicorn: Invalid memory read"": 3, ""unicorn: Invalid memory write"": 1, ""unicorn: Invalid memory fetch"": 3}",sub_741e4
+0x74b98,44,leaf,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 10, ""unicorn: Invalid memory fetch"": 2, ""unicorn: Invalid memory read"": 4}",sub_74b98
+0x74fe4,8,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_74fe4
+0x7502c,72,calls,arm,no-coverage,0,"{""import printf"": 7, ""unicorn: Write to write-protected memory"": 6, ""unicorn: Invalid memory read"": 2, ""unicorn: Invalid memory write"": 1}",sub_74fec+0x40
+0x75074,204,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 7, ""unicorn: Invalid instruction"": 2, ""unicorn: Invalid memory read"": 6, ""unicorn: Invalid memory write"": 1}",sub_75074
+0x75110,48,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_75074+0x8+0x94
+0x754e0,96,leaf,arm,no-coverage,2,"{""unicorn: Invalid instruction"": 1, ""unicorn: Invalid memory write"": 2, ""unicorn: Write to write-protected memory"": 8, ""unicorn: Invalid memory read"": 3, ""returned elsewhere"": 2}",sub_754e0
+0x756ac,52,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 12, ""unicorn: Invalid memory read"": 4}",sub_75618+0x50+0x44
+0x75a58,68,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_759c0+0x98
+0x75c14,196,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 12, ""unicorn: Invalid memory read"": 3, ""unicorn: Invalid memory fetch"": 1}",sub_75c14
+0x75ec0,288,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 3, ""unicorn: Write to write-protected memory"": 12, ""unicorn: Invalid memory read"": 1}",sub_75e60+0x60
+0x76034,152,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 10, ""unicorn: Invalid memory fetch"": 5, ""unicorn: Unhandled CPU exception"": 1}",sub_76034
+0x76164,80,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 9, ""unicorn: Unhandled CPU exception"": 4, ""unicorn: Invalid memory fetch"": 3}",sub_7613c+0x28
+0x76350,24,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 10, ""unicorn: Invalid memory fetch"": 5, ""unicorn: Write to write-protected memory"": 1}",sub_76328+0x4+0x24
+0x76454,72,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 5, ""unicorn: Invalid instruction"": 6, ""unicorn: Invalid memory read"": 5}",sub_76408+0x4c
+0x7649c,40,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_7649c
+0x7688c,24,leaf,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 9, ""unicorn: Invalid memory fetch"": 5, ""unicorn: Unhandled CPU exception"": 2}",sub_7688c
+0x77118,24,calls,arm,pass,4,,sub_77118
+0x771ec,44,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 7, ""unicorn: Invalid memory fetch"": 6, ""unicorn: Unhandled CPU exception"": 1, ""unicorn: Invalid memory read"": 2}",sub_771ec
+0x77218,28,leaf,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 8, ""unicorn: Invalid memory read"": 3, ""unicorn: Invalid instruction"": 1, ""unicorn: Invalid memory write"": 4}",sub_77218
+0x77278,84,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 9, ""unicorn: Invalid memory read"": 7}",sub_77278
+0x77b2c,84,calls,arm,pass,7,,sub_77b2c
+0x77f7c,180,calls,arm,no-coverage,0,"{""unicorn: Invalid memory fetch"": 2, ""unicorn: Invalid instruction"": 12, ""unicorn: Invalid memory read"": 1, ""unicorn: Unhandled CPU exception"": 1}",sub_77f7c
+0x781d4,76,leaf,arm,no-coverage,0,"{""unicorn: Invalid memory write"": 4, ""unicorn: Write to write-protected memory"": 8, ""unicorn: Invalid memory read"": 2, ""unicorn stopped"": 2}",sub_781d4
+0x78220,12,leaf,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 11, ""unicorn: Invalid memory read"": 2, ""unicorn: Invalid memory write"": 2, ""unicorn stopped"": 1}",sub_78220
+0x78238,24,leaf,arm,no-coverage,1,"{""unicorn: Write to write-protected memory"": 9, ""unicorn: Invalid memory read"": 3, ""unicorn stopped"": 3, ""returned elsewhere"": 1}",sub_7822c+0xc
+0x78570,12,leaf,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 9, ""unicorn: Invalid memory write"": 3, ""unicorn: Invalid memory read"": 4}",sub_78570
+0x7890c,60,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 4, ""unicorn: Invalid memory read"": 6, ""import printf"": 6}",sub_787e8+0xb8+0x6c
+0x78aec,256,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 1, ""unicorn: Invalid memory write"": 3, ""unicorn: Write to write-protected memory"": 3, ""unicorn: Invalid instruction"": 8, ""unicorn: Invalid memory fetch"": 1}",sub_78aec
+0x78b38,180,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 4, ""import memset"": 1, ""unicorn: Invalid instruction"": 11}",sub_78aec+0x4c
+0x78ee4,124,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 16}",sub_78c7c+0xb4+0x104+0xc+0xa4
+0x79304,96,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_78f60+0x3a4
+0x7955c,44,leaf,arm,no-coverage,0,"{""unicorn: Invalid memory fetch"": 2, ""unicorn: Invalid instruction"": 11, ""unicorn: Unhandled CPU exception"": 2, ""unicorn: Invalid memory write"": 1}",sub_7955c
+0x79894,8,leaf,arm,no-coverage,2,"{""unicorn: Invalid memory read"": 11, ""unicorn: Invalid instruction"": 2, ""unicorn: Invalid memory fetch"": 1, ""returned elsewhere"": 2}",sub_797c4+0x20+0xb0
+0x7990c,140,calls,arm,no-coverage,1,"{""unicorn: Invalid memory read"": 14, ""unicorn: Invalid memory fetch"": 1, ""returned elsewhere"": 1}",sub_7989c+0x70
+0x79a38,64,calls,arm,no-coverage,0,"{""unicorn: Invalid memory fetch"": 3, ""unicorn: Invalid instruction"": 13}",sub_79a2c+0xc
+0x79f3c,164,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 11, ""unicorn: Invalid memory read"": 5}",sub_79d88+0x144+0x70
+0x7a6ac,340,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 12, ""unicorn: Write to write-protected memory"": 4}",sub_7a554+0x104+0x54
+0x7ab40,672,calls,arm,pass,4,,sub_7ab40
+0x7cd58,40,calls,arm,no-coverage,0,"{""import printf"": 4, ""unicorn: Write to write-protected memory"": 3, ""unicorn: Invalid memory read"": 5, ""unicorn: Invalid memory write"": 1, ""unicorn: Invalid instruction"": 3}",sub_7cd58
+0x7d454,912,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 9, ""unicorn: Invalid memory read"": 6, ""unicorn: Invalid memory fetch"": 1}",sub_7d348+0x10c
+0x7d7cc,24,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_7d348+0x390+0x8c+0x68
+0x7dee0,148,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 9, ""unicorn: Invalid memory fetch"": 1, ""unicorn: Invalid memory read"": 6}",sub_7de58+0x88
+0x7dfa0,12,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 2, ""unicorn: Invalid memory read"": 13, ""unicorn: Invalid memory fetch"": 1}",sub_7df9c+0x4
+0x7e064,212,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 2, ""unicorn: Invalid memory read"": 2, ""import memset"": 5, ""unicorn: Invalid instruction"": 1, ""unicorn: Invalid memory write"": 6}",sub_7e064
+0x7e26c,8,leaf,arm,no-coverage,0,"{""import memset"": 15, ""unicorn: Invalid memory fetch"": 1}",sub_7e260+0xc
+0x7e51c,180,calls,arm,no-coverage,0,"{""import memset"": 11, ""unicorn: Invalid instruction"": 3, ""unicorn: Write to write-protected memory"": 1, ""unicorn: Invalid memory read"": 1}",sub_7e518+0x4
+0x7e67c,28,calls,arm,no-coverage,0,"{""unicorn: Unhandled CPU exception"": 2, ""unicorn: Invalid instruction"": 13, ""unicorn: Invalid memory fetch"": 1}",sub_7e668+0x14
+0x7e6c0,36,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 12, ""unicorn: Invalid instruction"": 3, ""unicorn: Invalid memory fetch"": 1}",sub_7e6c0
+0x7e6d8,12,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 3, ""unicorn: Invalid memory read"": 12, ""unicorn: Invalid memory fetch"": 1}",sub_7e6c0+0x18
+0x7ed60,180,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 7, ""unicorn: Write to write-protected memory"": 4, ""unicorn: Invalid memory write"": 4, ""unicorn: Unhandled CPU exception"": 1}",sub_7ed04+0x5c
+0x7ee14,12,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 4, ""import memset"": 10, ""unicorn: Invalid instruction"": 2}",sub_7ee14
+0x7ee6c,32,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 10, ""unicorn: Invalid memory read"": 5, ""unicorn: Unhandled CPU exception"": 1}",sub_7ee2c+0x4+0x20+0x1c
+0x7ee8c,20,leaf,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 8, ""unicorn: Invalid instruction"": 4, ""import __cxa_pure_virtual"": 1, ""unicorn: Write to write-protected memory"": 3}",sub_7ee8c
+0x7ef00,8,leaf,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 5, ""unicorn: Invalid memory read"": 7, ""unicorn: Invalid memory write"": 2, ""unicorn: Invalid instruction"": 2}",sub_7eeec+0x14
+0x7f0a8,316,calls,arm,no-coverage,0,"{""unicorn: Invalid memory write"": 5, ""unicorn: Invalid memory read"": 2, ""unicorn stopped"": 2, ""unicorn: Write to write-protected memory"": 6, ""unicorn: Invalid instruction"": 1}",sub_7f008+0xa0
+0x7f2c0,40,calls,arm,no-coverage,0,"{""import memset"": 15, ""unicorn: Write to write-protected memory"": 1}",sub_7f1e4+0x88+0x54
+0x7f60c,164,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 3, ""unicorn: Invalid memory write"": 9, ""import memset"": 3, ""unicorn: Invalid memory fetch"": 1}",sub_7f60c
+0x7f6b0,144,calls,arm,no-coverage,0,"{""unicorn: Invalid memory fetch"": 2, ""unicorn: Invalid instruction"": 11, ""import _ZTVN10__cxxabiv121__vmi_class_type_infoE"": 1, ""unicorn: Invalid memory read"": 2}",sub_7f6b0
+0x7f94c,188,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_7f940+0xc
+0x80128,192,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 2, ""import memset"": 13, ""unicorn: Write to write-protected memory"": 1}",sub_8009c+0x68+0x18+0xc
+0x80548,4,leaf,arm,no-coverage,1,"{""unicorn: Invalid instruction"": 6, ""unicorn: Write to write-protected memory"": 3, ""import memcpy"": 1, ""unicorn: Invalid memory read"": 2, ""unicorn: Invalid memory write"": 2, ""unicorn: Invalid memory fetch"": 1, ""returned elsewhere"": 1}",sub_80548
+0x805fc,80,leaf,arm,no-coverage,2,"{""unicorn: Invalid memory read"": 14}",sub_805fc
+0x80860,12,leaf,arm,no-coverage,2,"{""unicorn: Invalid instruction"": 5, ""unicorn: Invalid memory read"": 9}",sub_80860
+0x80a44,8,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 5, ""unicorn: Write to write-protected memory"": 5, ""import memset"": 4, ""unicorn: Invalid memory write"": 2}",sub_80a44
+0x80aa4,536,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 6, ""import memset"": 10}",sub_80aa4
+0x812a8,564,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 9, ""unicorn: Invalid instruction"": 7}",sub_811b8+0x6c+0x84
+0x812d4,520,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 15, ""unicorn: Invalid instruction"": 1}",sub_811b8+0x6c+0x84+0x2c
+0x818b8,8,calls,arm,no-coverage,2,"{""unicorn: Invalid memory write"": 5, ""unicorn: Write to write-protected memory"": 5, ""unicorn: Invalid memory read"": 4}",sub_818b8
+0x81fcc,472,calls,arm,no-coverage,0,"{""import memmove"": 3, ""unicorn: Invalid memory read"": 10, ""import memcpy"": 3}",sub_81fcc
+0x82ab0,172,calls,arm,no-coverage,0,"{""unicorn: Invalid memory fetch"": 1, ""unicorn: Invalid memory read"": 6, ""unicorn: Invalid instruction"": 8, ""import _objc_empty_vtable"": 1}",sub_829f4+0xbc
+0x82c64,332,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 12, ""unicorn: Invalid memory read"": 2, ""unicorn: Unhandled CPU exception"": 1, ""unicorn: Invalid memory fetch"": 1}",sub_82b5c+0x50+0xb8
+0x82fb0,364,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_82e1c+0x12c+0x68
+0x83064,184,calls,arm,no-coverage,3,"{""unicorn: Write to write-protected memory"": 5, ""unicorn: Invalid memory read"": 8}",sub_82e1c+0x248
+0x839dc,284,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 16}",sub_839dc
+0x83f20,8,leaf,arm,pass,16,,sub_83f20
+0x83fd8,8,leaf,arm,pass,16,,sub_83fd8
+0x846f8,4,leaf,arm,no-coverage,0,"{""import memcpy"": 11, ""unicorn: Write to write-protected memory"": 5}",sub_846f8
+0x84a5c,28,leaf,arm,pass,9,,sub_84a5c
+0x84b50,100,calls,arm,pass,8,,sub_84ad4+0x7c
+0x84c30,96,calls,arm,no-coverage,1,"{""unicorn: Write to write-protected memory"": 7, ""unicorn: Invalid instruction"": 1, ""unicorn: Invalid memory read"": 1, ""unicorn: Invalid memory write"": 6, ""returned elsewhere"": 1}",sub_84bec+0x44
+0x85514,4,leaf,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 5, ""unicorn: Invalid memory write"": 6, ""unicorn: Invalid instruction"": 2, ""unicorn: Write to write-protected memory"": 3}",sub_853f8+0x11c
+0x85d74,68,calls,arm,no-coverage,3,"{""returned elsewhere"": 3, ""unicorn: Invalid memory read"": 11, ""unicorn: Invalid instruction"": 2}",sub_85d74
+0x85d94,36,calls,arm,pass,7,,sub_85d74+0x20
+0x85fb8,336,calls,arm,pass,8,,sub_85fb8
+0x86108,8,calls,arm,pass,11,,sub_86108
+0x86878,136,calls,arm,pass,7,,sub_86878
+0x877bc,12,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 7, ""unicorn: Invalid instruction"": 3, ""import memset"": 5, ""unicorn: Invalid memory write"": 1}",sub_877bc
+0x877cc,64,calls,arm,no-coverage,0,"{""unicorn: Invalid memory fetch"": 1, ""unicorn: Invalid memory read"": 8, ""import memset"": 5, ""unicorn: Invalid instruction"": 1, ""unicorn: Write to write-protected memory"": 1}",sub_877cc
+0x8780c,60,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 6, ""unicorn: Invalid memory read"": 7, ""unicorn: Invalid memory fetch"": 3}",sub_8780c
+0x8806c,92,calls,arm,no-coverage,0,"{""unicorn: Invalid memory fetch"": 3, ""unicorn: Write to write-protected memory"": 3, ""unicorn: Invalid memory write"": 3, ""unicorn: Invalid instruction"": 6, ""unicorn: Invalid memory read"": 1}",sub_8801c+0x44+0xc
+0x889e4,392,calls,arm,pass,6,,sub_889e4
+0x88c14,12,calls,arm,pass,4,,sub_88c0c+0x8
+0x88dec,68,calls,arm,pass,4,,sub_88dec
+0x88e40,80,calls,arm,no-coverage,1,"{""import printf"": 8, ""unicorn: Invalid memory read"": 3, ""unicorn: Write to write-protected memory"": 3, ""returned elsewhere"": 1, ""unicorn: Invalid memory write"": 1}",sub_88e40
+0x89044,28,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_89044
+0x891bc,576,calls,arm,pass,8,,sub_890c4+0x48+0xb0
+0x8a514,92,calls,arm,no-coverage,0,"{""import printf"": 8, ""unicorn: Invalid memory write"": 2, ""unicorn: Write to write-protected memory"": 3, ""unicorn stopped"": 3}",sub_8a18c+0x388
+0x8a910,216,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 11, ""unicorn stopped"": 1, ""unicorn: Write to write-protected memory"": 4}",sub_8a8e8+0x28
+0x8ae8c,208,calls,arm,no-coverage,0,"{""import printf"": 10, ""import memset"": 1, ""unicorn stopped"": 2, ""unicorn: Invalid memory read"": 2, ""unicorn: Write to write-protected memory"": 1}",sub_8ae8c
+0x8b068,164,calls,arm,no-coverage,0,"{""unicorn: Invalid memory write"": 6, ""unicorn: Write to write-protected memory"": 2, ""unicorn stopped"": 5, ""unicorn: Invalid memory read"": 3}",sub_8af5c+0x10c
+0x8b964,52,calls,arm,no-coverage,0,"{""import memset"": 12, ""unicorn: Invalid memory read"": 2, ""unicorn: Write to write-protected memory"": 2}",sub_8b8fc+0x3c+0x2c
+0x8b9b0,420,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 5, ""unicorn: Invalid memory write"": 5, ""unicorn: Write to write-protected memory"": 4, ""unicorn stopped"": 2}",sub_8b998+0x18
+0x8bbf0,48,leaf,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 3, ""unicorn: Write to write-protected memory"": 7, ""unicorn stopped"": 4, ""unicorn: Invalid memory fetch"": 2}",sub_8bb54+0x9c
+0x8bfcc,168,calls,arm,no-coverage,0,"{""unicorn stopped"": 9, ""unicorn: Invalid memory read"": 5, ""unicorn: Invalid memory fetch"": 1, ""import objc_msgSend"": 1}",sub_8bfcc
+0x8c3d0,336,calls,arm,no-coverage,0,"{""unicorn: Invalid memory write"": 4, ""import memset"": 12}",sub_8c36c+0x64
+0x8c544,96,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_8c520+0x24
+0x8ca04,12,calls,arm,pass,6,,sub_8ca00+0x4
+0x8cef0,148,calls,arm,no-coverage,0,"{""unicorn stopped"": 4, ""unicorn: Invalid memory read"": 10, ""unicorn: Invalid memory fetch"": 2}",sub_8cea4+0x8+0x44
+0x8d3c8,88,calls,arm,pass,8,,sub_8d3c8
+0x8d520,112,calls,arm,no-coverage,0,"{""unicorn stopped"": 9, ""unicorn: Invalid memory fetch"": 1, ""unicorn: Invalid memory read"": 4, ""unicorn: Invalid instruction"": 2}",sub_8d520
+0x8d8a0,328,calls,arm,no-coverage,0,"{""unicorn stopped"": 8, ""unicorn: Invalid memory read"": 6, ""import _Unwind_SjLj_Register"": 2}",sub_8d874+0x2c
+0x8dc20,432,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 16}",sub_8db54+0xcc
+0x8ddb8,24,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 10, ""unicorn stopped"": 3, ""unicorn: Write to write-protected memory"": 1, ""unicorn: Invalid memory write"": 1, ""unicorn: Invalid memory fetch"": 1}",sub_8db54+0x190+0xd4
+0x8df38,268,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 8, ""unicorn stopped"": 6, ""unicorn: Write to write-protected memory"": 2}",sub_8debc+0x7c
+0x8e438,224,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 16}",sub_8e0b0+0x124+0x4+0x138+0x34+0xf4
+0x8ec58,48,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 12, ""unicorn: Invalid instruction"": 3, ""unicorn: Write to write-protected memory"": 1}",sub_8eb70+0xe4+0x4
+0x8ec88,16,leaf,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 16}",sub_8ec88
+0x8f0bc,268,calls,arm,no-coverage,1,"{""unicorn: Invalid instruction"": 2, ""unicorn: Invalid memory read"": 11, ""unicorn: Invalid memory write"": 1, ""returned elsewhere"": 1, ""unicorn: Write to write-protected memory"": 1}",sub_8ee3c+0x278+0x8
+0x8f0e4,228,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 5, ""unicorn: Invalid memory read"": 8, ""unicorn: Write to write-protected memory"": 2, ""unicorn: Invalid memory write"": 1}",sub_8ee3c+0x278+0x8+0x20+0x8
+0x8f174,84,calls,arm,no-coverage,1,"{""unicorn: Invalid memory read"": 9, ""unicorn: Invalid instruction"": 3, ""unicorn: Write to write-protected memory"": 2, ""returned elsewhere"": 1, ""unicorn: Invalid memory write"": 1}",sub_8ee3c+0x278+0x8+0x38+0x8+0x50+0x8+0x20
+0x8f17c,76,calls,arm,no-coverage,1,"{""unicorn: Invalid memory fetch"": 1, ""unicorn: Invalid memory read"": 9, ""unicorn: Invalid instruction"": 3, ""unicorn: Write to write-protected memory"": 2, ""returned elsewhere"": 1}",sub_8ee3c+0x278+0x8+0x38+0x8+0x50+0x8+0x28
+0x8f1dc,80,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 8, ""unicorn: Invalid memory fetch"": 1, ""unicorn: Invalid instruction"": 4, ""unicorn: Write to write-protected memory"": 2, ""unicorn: Invalid memory write"": 1}",sub_8f1c8+0xc+0x8
+0x8f1f4,56,calls,arm,no-coverage,1,"{""unicorn: Invalid memory read"": 7, ""unicorn: Invalid memory write"": 2, ""unicorn: Invalid instruction"": 4, ""returned elsewhere"": 1, ""unicorn: Write to write-protected memory"": 2}",sub_8f1c8+0x1c+0x10
+0x8f5a0,144,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 4, ""unicorn: Write to write-protected memory"": 8, ""unicorn: Invalid memory write"": 3, ""unicorn: Invalid instruction"": 1}",sub_8f5a0
+0x8f71c,4,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 11, ""unicorn: Write to write-protected memory"": 5}",sub_8f71c
+0x8fb10,856,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 2, ""unicorn: Invalid memory read"": 11, ""import memset"": 2, ""unicorn: Invalid memory write"": 1}",sub_8f9d0+0x140
+0x8fe68,420,calls,arm,no-coverage,0,"{""import memset"": 13, ""unicorn: Write to write-protected memory"": 1, ""unicorn: Invalid memory read"": 1, ""unicorn: Invalid memory write"": 1}",sub_8fe68
+0x8ff80,140,calls,arm,no-coverage,0,"{""unicorn: Invalid memory write"": 9, ""unicorn: Invalid memory read"": 4, ""unicorn: Write to write-protected memory"": 3}",sub_8fe68+0x24+0xac+0x48
+0x90558,380,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 6, ""unicorn: Invalid memory read"": 4, ""unicorn: Invalid instruction"": 6}",sub_902f4+0x1c+0x14+0xac+0x154+0x10+0x24
+0x906f8,20,calls,arm,no-coverage,2,"{""returned elsewhere"": 2, ""unicorn: Invalid memory read"": 11, ""unicorn: Invalid memory fetch"": 1, ""unicorn: Invalid instruction"": 2}",sub_906f4+0x4
+0x90a30,212,calls,arm,pass,4,,sub_9099c+0x4+0x90
+0x90aa8,92,calls,arm,pass,8,,sub_9099c+0xd0+0x3c
+0x90c28,452,calls,arm,pass,12,,sub_90c00+0x28
+0x9106c,352,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 14, ""unicorn: Invalid instruction"": 1, ""unicorn: Invalid memory fetch"": 1}",sub_9106c
+0x91578,72,calls,arm,pass,4,,sub_911cc+0x3ac
+0x91b7c,328,calls,arm,no-coverage,0,"{""unicorn stopped"": 16}",sub_91b7c
+0x925e8,136,calls,arm,no-coverage,0,"{""import printf"": 12, ""unicorn: Unhandled CPU exception"": 1, ""unicorn: Invalid memory read"": 2, ""unicorn stopped"": 1}",sub_925c0+0x28
+0x926c4,60,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 4, ""import printf"": 10, ""import strcmp"": 2}",sub_92670+0x38+0x1c
+0x92c48,192,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 16}",sub_92c34+0x14
+0x92d08,12,leaf,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 7, ""unicorn: Invalid memory write"": 6, ""import printf"": 2, ""unicorn: Invalid memory read"": 1}",sub_92d08
+0x9307c,632,calls,arm,no-coverage,0,"{""import sprintf"": 16}",sub_92f94+0x28+0xc0
+0x932f4,116,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_932f4
+0x93498,36,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_93368+0x100+0x30
+0x934bc,12,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_934bc
+0x935fc,672,calls,arm,no-coverage,0,"{""import __cxa_guard_acquire"": 6, ""import printf"": 8, ""unicorn: Invalid memory read"": 2}",sub_935fc
+0x93d54,48,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_93d08+0x34+0x18
+0x94280,40,leaf,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 1, ""import printf"": 14, ""unicorn: Invalid memory write"": 1}",sub_94280
+0x945b8,92,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_94424+0x110+0x84
+0x94744,116,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_94744
+0x94814,20,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_94808+0xc
+0x94a50,440,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 11, ""unicorn: Invalid memory read"": 4, ""unicorn: Unhandled CPU exception"": 1}",sub_94a08+0x2c+0x1c
+0x94b60,168,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 6, ""unicorn: Invalid memory read"": 6, ""import printf"": 4}",sub_94a08+0xf8+0x60
+0x94ca4,364,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 12, ""unicorn: Invalid instruction"": 4}",sub_94c08+0x28+0x74
+0x94e10,336,calls,arm,no-coverage,0,"{""import printf"": 12, ""unicorn: Invalid memory read"": 2, ""unicorn: Invalid instruction"": 1, ""unicorn: Invalid memory fetch"": 1}",sub_94e10
+0x95830,16,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 1, ""import printf"": 15}",sub_95830
+0x95f80,24,leaf,arm,no-coverage,0,"{""import printf"": 12, ""unicorn: Invalid memory read"": 4}",sub_95f80
+0x9610c,104,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_9610c
+0x963c4,16,leaf,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 11, ""unicorn: Invalid memory read"": 4, ""unicorn: Invalid memory fetch"": 1}",sub_963c4
+0x966d0,320,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 16}",sub_966c0+0x10
+0x96b20,20,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 11, ""unicorn: Invalid memory fetch"": 2, ""unicorn: Invalid instruction"": 2, ""unicorn: Write to write-protected memory"": 1}",sub_969c4+0xec+0x70
+0x96bc0,76,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 4, ""unicorn: Invalid instruction"": 12}",sub_96b34+0x10+0x7c
+0x96f40,104,calls,arm,no-coverage,2,"{""unicorn: Invalid memory read"": 14, ""returned elsewhere"": 2}",sub_96f14+0x2c
+0x98398,132,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 13, ""import memset"": 2, ""unicorn: Write to write-protected memory"": 1}",sub_98318+0x28+0x58
+0x98660,20,leaf,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 8, ""unicorn: Invalid instruction"": 6, ""unicorn: Invalid memory read"": 2}",sub_98660
+0x98bb8,228,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 7, ""import memset"": 2, ""unicorn: Invalid memory read"": 6, ""import memcmp"": 1}",sub_98a60+0xc+0xe0+0x6c
+0x98be0,188,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 6, ""unicorn: Invalid memory write"": 2, ""import memset"": 2, ""unicorn: Invalid memory read"": 6}",sub_98a60+0xc+0x174
+0x98c9c,52,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 2, ""import memcmp"": 1, ""unicorn: Invalid memory read"": 12, ""unicorn: Write to write-protected memory"": 1}",sub_98c9c
+0x98cd0,336,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 12, ""unicorn: Write to write-protected memory"": 2, ""import memcmp"": 2}",sub_98cd0
+0x98d48,216,calls,arm,no-coverage,0,"{""import memcmp"": 4, ""unicorn: Invalid memory read"": 11, ""import memset"": 1}",sub_98cd0+0x6c+0xc
+0x99f38,44,calls,arm,no-coverage,1,"{""unicorn: Write to write-protected memory"": 5, ""unicorn: Invalid memory read"": 4, ""unicorn: Invalid memory write"": 6, ""returned elsewhere"": 1}",sub_99f20+0x18
+0x9a07c,264,calls,arm,pass,12,,sub_9a040+0x3c
+0x9a1a4,28,calls,arm,no-coverage,1,"{""unicorn: Invalid memory write"": 6, ""unicorn: Invalid memory read"": 2, ""unicorn: Write to write-protected memory"": 7, ""returned elsewhere"": 1}",sub_9a1a4
+0x9a49c,184,calls,arm,no-coverage,1,"{""unicorn: Invalid memory write"": 7, ""unicorn: Invalid memory read"": 2, ""unicorn: Write to write-protected memory"": 6, ""returned elsewhere"": 1}",sub_9a22c+0x24c+0x24
+0x9ad28,8,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 3, ""unicorn: Invalid instruction"": 5, ""unicorn: Write to write-protected memory"": 3, ""unicorn: Invalid memory write"": 5}",sub_9ad28
+0x9aeb4,364,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 15, ""import memcmp"": 1}",sub_9aeb4
+0x9b260,184,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 4, ""import memcmp"": 12}",sub_9b250+0x10
+0x9b270,168,calls,arm,no-coverage,0,"{""import memcmp"": 11, ""unicorn: Invalid memory read"": 5}",sub_9b250+0x20
+0x9c094,696,calls,arm,pass,9,,sub_9bfb0+0xdc+0x8
+0x9c94c,104,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_9c934+0x18
+0x9cbf0,16,calls,arm,pass,9,,sub_9cbf0
+0x9d010,48,calls,arm,no-coverage,0,"{""unicorn: Invalid memory fetch"": 3, ""unicorn: Invalid instruction"": 10, ""unicorn: Invalid memory read"": 2, ""import printf"": 1}",sub_9d010
+0x9d1f8,20,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_9d1f8
+0x9d740,68,calls,arm,pass,6,,sub_9d740
+0x9d7a4,44,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 9, ""unicorn: Invalid memory fetch"": 4, ""unicorn: Invalid memory read"": 2, ""unicorn: Unhandled CPU exception"": 1}",sub_9d7a4
+0x9de50,396,calls,arm,no-coverage,0,"{""unicorn: Invalid memory fetch"": 2, ""unicorn: Invalid instruction"": 7, ""unicorn: Invalid memory read"": 6, ""unicorn: Invalid memory write"": 1}",sub_9dda4+0xac
+0x9e4d0,320,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 16}",sub_9e498+0x38
+0x9e610,72,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 10, ""unicorn: Invalid memory fetch"": 3, ""unicorn: Invalid memory read"": 2, ""unicorn: Write to write-protected memory"": 1}",sub_9e610
+0x9f85c,76,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 15, ""unicorn: Invalid instruction"": 1}",sub_9f688+0x1d4
+0x9f8a8,124,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 3, ""unicorn: Invalid instruction"": 11, ""unicorn: Invalid memory fetch"": 2}",sub_9f8a8
+0x9f9a4,568,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 4, ""unicorn: Invalid instruction"": 10, ""unicorn: Invalid memory fetch"": 2}",sub_9f9a0+0x4
+0x9fa50,396,calls,arm,no-coverage,2,"{""unicorn: Invalid memory write"": 4, ""unicorn: Invalid instruction"": 3, ""unicorn: Invalid memory read"": 3, ""unicorn: Write to write-protected memory"": 4, ""returned elsewhere"": 2}",sub_9f9a0+0xb0
+0x9fdec,120,calls,arm,pass,6,,sub_9fdc0+0x2c
+0x9ff80,120,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 2, ""unicorn: Invalid memory write"": 2, ""unicorn: Write to write-protected memory"": 8, ""unicorn stopped"": 3, ""unicorn: Invalid instruction"": 1}",sub_9ff80
+0xa0644,64,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_a04f8+0x14c
+0xa06c0,120,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_a0694+0x10+0x1c
+0xa082c,148,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_a07f4+0x38
+0xa168c,208,calls,arm,pass,13,,sub_a168c
+0xa1c14,8,leaf,arm,pass,16,,sub_a1c14
+0xa1f2c,96,calls,arm,pass,6,,sub_a1f2c
+0xa1f8c,8,calls,arm,pass,4,,sub_a1f8c
+0xa2264,112,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_a2264
+0xa2c08,16,leaf,arm,pass,16,,sub_a2c08
+0xa2e10,168,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_a2e10
+0xa3234,128,calls,arm,no-coverage,1,"{""import printf"": 13, ""unicorn: Invalid memory read"": 2}",sub_a3234
+0xa3804,536,calls,arm,no-coverage,0,"{""import printf"": 13, ""unicorn: Invalid memory write"": 3}",sub_a3804
+0xa3a4c,8,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 3, ""unicorn: Invalid instruction"": 9, ""unicorn: Invalid memory fetch"": 4}",sub_a3a4c
+0xa3aa0,8,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 9, ""unicorn: Invalid memory fetch"": 3, ""unicorn: Invalid instruction"": 4}",sub_a3aa0
+0xa456c,96,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 12, ""unicorn: Invalid memory write"": 4}",sub_a448c+0xe0
+0xa5118,128,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 12, ""unicorn: Invalid memory read"": 3, ""unicorn: Invalid memory fetch"": 1}",sub_a5118
+0xa5298,8,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 7, ""unicorn: Invalid memory read"": 8, ""unicorn: Invalid memory fetch"": 1}",sub_a5298
+0xa5658,160,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 4, ""import memcpy"": 6, ""unicorn: Invalid instruction"": 5, ""unicorn: Write to write-protected memory"": 1}",sub_a5658
+0xa6484,108,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 12, ""unicorn: Invalid instruction"": 4}",sub_a6408+0x1c+0x60
+0xa6d30,488,calls,arm,no-coverage,0,"{""import printf"": 3, ""unicorn: Invalid instruction"": 1, ""unicorn: Invalid memory read"": 9, ""unicorn: Invalid memory fetch"": 1, ""unicorn: Write to write-protected memory"": 2}",sub_a6d30
+0xa73e4,52,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 7, ""unicorn: Invalid memory read"": 4, ""unicorn: Write to write-protected memory"": 1, ""unicorn: Invalid memory fetch"": 3, ""unicorn: Invalid memory write"": 1}",sub_a73e4
+0xa740c,12,leaf,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 12, ""unicorn: Invalid memory read"": 2, ""unicorn: Invalid memory fetch"": 2}",sub_a73e4+0x1c+0xc
+0xa7c6c,8,leaf,arm,no-coverage,0,"{""unicorn: Invalid memory fetch"": 2, ""unicorn: Invalid instruction"": 10, ""unicorn: Invalid memory read"": 4}",sub_a7c30+0x3c
+0xa7e5c,52,calls,arm,no-coverage,0,"{""unicorn: Invalid memory write"": 9, ""unicorn: Write to write-protected memory"": 4, ""unicorn: Invalid instruction"": 1, ""unicorn: Invalid memory read"": 2}",sub_a7e5c
+0xa7fcc,112,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 8, ""unicorn: Invalid memory read"": 5, ""unicorn: Invalid instruction"": 2, ""unicorn: Invalid memory write"": 1}",sub_a7f48+0x84
+0xa829c,20,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 6, ""unicorn: Invalid instruction"": 3, ""unicorn: Invalid memory read"": 4, ""unicorn: Invalid memory fetch"": 1, ""unicorn: Unhandled CPU exception"": 1, ""import _objc_empty_cache"": 1}",sub_a81f8+0x68+0x3c
+0xa82ac,4,leaf,arm,no-coverage,0,"{""import printf"": 16}",sub_a81f8+0x68+0x3c+0x10
+0xa86c0,48,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 8, ""unicorn: Invalid memory fetch"": 1, ""unicorn: Invalid memory read"": 5, ""unicorn: Write to write-protected memory"": 2}",sub_a86c0
+0xa86f0,44,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 5, ""unicorn: Invalid memory read"": 7, ""unicorn: Invalid memory fetch"": 3, ""unicorn: Invalid instruction"": 1}",sub_a86f0
+0xa8720,276,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 8, ""unicorn: Invalid instruction"": 7, ""unicorn: Invalid memory fetch"": 1}",sub_a871c+0x4
+0xa8f60,8,leaf,arm,pass,16,,sub_a8f60
+0xa925c,56,calls,arm,pass,10,,sub_a925c
+0xa9d14,56,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 5, ""unicorn: Invalid memory read"": 5, ""unicorn: Invalid instruction"": 5, ""unicorn: Invalid memory fetch"": 1}",sub_a9d14
+0xa9fcc,76,calls,arm,pass,6,,sub_a9f8c+0x40
+0xaa330,28,leaf,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 4, ""unicorn: Invalid memory read"": 3, ""unicorn: Invalid memory write"": 3, ""unicorn: Invalid instruction"": 6}",sub_aa330
+0xab2d4,40,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_ab2d4
+0xab844,508,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 7, ""unicorn: Invalid instruction"": 6, ""unicorn: Invalid memory write"": 2, ""unicorn: Invalid memory read"": 1}",sub_ab844
+0xaba70,336,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 9, ""unicorn: Invalid memory fetch"": 4, ""unicorn: Invalid memory read"": 3}",sub_aba70
+0xac7c8,24,calls,arm,no-coverage,0,"{""unicorn: Invalid memory write"": 7, ""unicorn: Write to write-protected memory"": 6, ""unicorn: Invalid memory read"": 3}",sub_ac78c+0x3c
+0xac7f0,84,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_ac7f0
+0xacc2c,52,calls,arm,no-coverage,0,"{""import printf"": 4, ""unicorn: Invalid memory write"": 6, ""unicorn: Invalid memory read"": 4, ""unicorn: Write to write-protected memory"": 2}",sub_acbd4+0x58
+0xace08,72,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 10, ""unicorn: Invalid memory read"": 5, ""unicorn: Invalid memory fetch"": 1}",sub_acda0+0x68
+0xace88,4,leaf,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 9, ""unicorn: Invalid memory fetch"": 2, ""unicorn: Invalid memory read"": 5}",sub_ace88
+0xad00c,156,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 7, ""unicorn: Invalid memory read"": 8, ""unicorn: Invalid memory fetch"": 1}",sub_ad00c
+0xad4c4,648,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 16}",sub_ad4c4
+0xae030,132,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 2, ""unicorn: Invalid instruction"": 11, ""unicorn: Invalid memory fetch"": 3}",sub_adf74+0xbc
+0xae0f0,96,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 4, ""unicorn: Invalid instruction"": 11, ""unicorn: Write to write-protected memory"": 1}",sub_ae0b4+0x30+0xc
+0xae178,20,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 6, ""unicorn: Invalid instruction"": 5, ""unicorn: Invalid memory fetch"": 1, ""unicorn: Write to write-protected memory"": 4}",sub_ae178
+0xae380,20,calls,arm,no-coverage,1,"{""unicorn: Invalid memory read"": 7, ""returned elsewhere"": 1, ""unicorn: Invalid instruction"": 8}",sub_ae380
+0xaec88,8,leaf,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 12, ""unicorn: Invalid memory read"": 3, ""unicorn: Invalid memory fetch"": 1}",sub_aec4c+0x10+0x2c
+0xaf36c,32,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 10, ""unicorn: Write to write-protected memory"": 4, ""unicorn: Invalid memory write"": 2}",sub_af36c
+0xafc84,136,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 16}",sub_afc84
+0xb0c90,356,calls,arm,no-coverage,1,"{""import printf"": 15}",sub_b0c90
+0xb1a64,76,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_b19d8+0xc+0x48+0x38
+0xb1cec,372,calls,arm,no-coverage,0,"{""unicorn: Invalid memory fetch"": 4, ""unicorn: Invalid instruction"": 7, ""unicorn: Write to write-protected memory"": 1, ""unicorn: Invalid memory write"": 1, ""import __cxa_pure_virtual"": 1, ""unicorn: Invalid memory read"": 2}",sub_b1cec
+0xb20cc,12,leaf,arm,no-coverage,0,"{""unicorn: Invalid memory fetch"": 1, ""unicorn: Invalid memory read"": 5, ""unicorn: Invalid instruction"": 10}",sub_b1f48+0x150+0x34
+0xb21cc,1224,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_b20d8+0x84+0x70
+0xb21f0,1188,calls,arm,no-coverage,0,"{""unicorn: Invalid memory fetch"": 3, ""unicorn: Invalid instruction"": 4, ""unicorn: Write to write-protected memory"": 3, ""unicorn: Invalid memory read"": 6}",sub_b20d8+0x100+0x18
+0xb28d4,88,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 8, ""unicorn: Invalid memory read"": 6, ""unicorn: Invalid memory fetch"": 1, ""import __cxa_pure_virtual"": 1}",sub_b28d4
+0xb3268,64,calls,arm,pass,15,,sub_b3224+0x44
+0xb3574,48,calls,arm,pass,6,,sub_b3574
+0xb3b1c,72,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_b3b14+0x8
+0xb3f88,764,calls,arm,pass,16,,sub_b3f88
+0xb4580,128,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_b4508+0x78
+0xb4604,8,calls,arm,no-coverage,1,"{""unicorn: Invalid memory read"": 6, ""unicorn: Invalid memory write"": 9}",sub_b4604
+0xb4938,960,calls,arm,pass,8,,sub_b46fc+0x23c
+0xb4e50,1000,calls,arm,no-coverage,0,"{""import printf"": 7, ""unicorn: Invalid memory read"": 4, ""unicorn stopped"": 4, ""unicorn: Write to write-protected memory"": 1}",sub_b4cf8+0x118+0x40
+0xb54b4,360,calls,arm,no-coverage,0,"{""unicorn stopped"": 1, ""unicorn: Invalid memory read"": 9, ""unicorn: Write to write-protected memory"": 6}",sub_b5378+0x13c
+0xb61a4,172,calls,arm,pass,4,,sub_b60fc+0xa8
+0xb62bc,32,calls,arm,pass,10,,sub_b6250+0x6c
+0xb676c,72,calls,arm,no-coverage,0,"{""import memset"": 12, ""unicorn stopped"": 2, ""unicorn: Invalid memory read"": 2}",sub_b676c
+0xb69c0,8,leaf,arm,no-coverage,0,"{""unicorn stopped"": 9, ""unicorn: Invalid memory read"": 4, ""unicorn: Invalid instruction"": 1, ""unicorn: Invalid memory fetch"": 2}",sub_b69c0
+0xb6a10,8,leaf,arm,no-coverage,0,"{""unicorn: Invalid memory fetch"": 2, ""unicorn stopped"": 9, ""unicorn: Invalid memory read"": 5}",sub_b6a04+0xc
+0xb6b88,24,leaf,arm,no-coverage,0,"{""unicorn stopped"": 11, ""unicorn: Invalid memory read"": 5}",sub_b6b88
+0xb6cb0,104,calls,arm,pass,16,,sub_b6cb0
+0xb6d8c,12,calls,arm,no-coverage,0,"{""unicorn stopped"": 8, ""unicorn: Invalid memory read"": 7, ""unicorn: Invalid memory write"": 1}",sub_b6d8c
+0xb74a8,364,calls,arm,no-coverage,0,"{""unicorn stopped"": 10, ""unicorn: Invalid memory read"": 5, ""unicorn: Invalid instruction"": 1}",sub_b7494+0x14
+0xb7614,32,calls,arm,pass,6,,sub_b7614
+0xb77bc,20,calls,arm,pass,7,,sub_b77bc
+0xb86d8,88,calls,arm,no-coverage,0,"{""unicorn: Invalid memory write"": 5, ""unicorn: Write to write-protected memory"": 2, ""unicorn: Invalid memory read"": 4, ""import memset"": 4, ""unicorn: Invalid instruction"": 1}",sub_b8680+0x1c+0x3c
+0xb8c84,24,leaf,arm,pass,10,,sub_b8c60+0x24
+0xb8ca0,136,calls,arm,pass,7,,sub_b8c9c+0x4
+0xb8ec8,8,leaf,arm,pass,16,,sub_b8ec8
+0xb8ef0,76,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_b8ed0+0x20
+0xb8f10,44,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_b8ed0+0x20+0x20
+0xb8f94,8,leaf,arm,no-coverage,1,"{""import memset"": 11, ""unicorn: Invalid memory read"": 2, ""unicorn: Invalid memory write"": 1, ""unicorn: Write to write-protected memory"": 1, ""returned elsewhere"": 1}",sub_b8f3c+0x1c+0x3c
+0xb908c,96,calls,arm,pass,15,,sub_b9080+0xc
+0xb9134,4,leaf,arm,pass,16,,sub_b9134
+0xb9384,196,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 6, ""import printf"": 7, ""unicorn: Write to write-protected memory"": 3}",sub_b9384
+0xb94d4,196,calls,arm,pass,6,,sub_b94d4
+0xb99e8,4,leaf,arm,pass,16,,sub_b99e8
+0xb9c5c,64,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 2, ""unicorn: Invalid memory fetch"": 3, ""unicorn: Invalid instruction"": 10, ""import __cxa_pure_virtual"": 1}",sub_b9c38+0x24
+0xb9d08,28,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_b9d08
+0xb9d50,8,leaf,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 8, ""unicorn: Invalid memory write"": 1, ""import printf"": 3, ""unicorn: Invalid memory read"": 4}",sub_b9d50
+0xb9de0,12,leaf,arm,no-coverage,2,"{""unicorn: Invalid instruction"": 1, ""unicorn: Write to write-protected memory"": 2, ""import printf"": 9, ""returned elsewhere"": 2, ""unicorn: Invalid memory read"": 2}",sub_b9de0
+0xba348,56,leaf,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 5, ""unicorn: Invalid memory read"": 5, ""unicorn: Invalid instruction"": 5, ""unicorn: Invalid memory fetch"": 1}",sub_ba328+0x20
+0xba494,40,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 1, ""unicorn: Invalid instruction"": 8, ""unicorn: Invalid memory read"": 7}",sub_ba48c+0x8
+0xba6f4,4,leaf,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 9, ""unicorn: Invalid memory read"": 7}",sub_ba6d4+0x20
+0xbb148,64,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_bb0cc+0x7c
+0xbb258,8,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 2, ""unicorn: Invalid instruction"": 12, ""unicorn: Invalid memory fetch"": 2}",sub_bb258
+0xbb2ec,288,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 3, ""unicorn: Write to write-protected memory"": 7, ""unicorn: Invalid memory write"": 4, ""unicorn: Invalid memory read"": 1, ""unicorn: Invalid memory fetch"": 1}",sub_bb2ec
+0xbbdb4,4,leaf,arm,no-coverage,0,"{""import printf"": 16}",sub_bb838+0x204+0x378
+0xbc120,236,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_bc120
+0xbc498,4,leaf,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 5, ""unicorn: Invalid instruction"": 4, ""unicorn: Write to write-protected memory"": 7}",sub_bc46c+0x10+0x1c
+0xbc5ac,144,calls,arm,no-coverage,3,"{""unicorn: Write to write-protected memory"": 6, ""unicorn: Invalid memory fetch"": 1, ""unicorn: Invalid memory read"": 2, ""unicorn: Invalid instruction"": 1, ""returned elsewhere"": 3, ""unicorn: Invalid memory write"": 3}",sub_bc504+0xa8
+0xbc7f0,36,leaf,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 8, ""unicorn: Invalid memory read"": 3, ""unicorn stopped"": 2, ""unicorn: Unhandled CPU exception"": 1, ""unicorn: Invalid memory fetch"": 1, ""unicorn: Write to write-protected memory"": 1}",sub_bc7f0
+0xbc880,228,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 8, ""unicorn: Invalid memory fetch"": 1, ""unicorn stopped"": 6, ""unicorn: Unhandled CPU exception"": 1}",sub_bc82c+0x30+0x24
+0xbcce8,68,calls,arm,no-coverage,0,"{""unicorn stopped"": 8, ""unicorn: Invalid memory read"": 6, ""unicorn: Invalid memory fetch"": 1, ""unicorn: Invalid instruction"": 1}",sub_bcce8
+0xbce20,12,calls,arm,no-coverage,0,"{""import memset"": 13, ""unicorn: Invalid memory fetch"": 1, ""unicorn: Invalid memory write"": 1, ""unicorn: Invalid memory read"": 1}",sub_bce08+0x18
+0xbd150,20,leaf,arm,no-coverage,0,"{""unicorn stopped"": 9, ""unicorn: Invalid instruction"": 2, ""unicorn: Invalid memory read"": 3, ""unicorn: Invalid memory fetch"": 2}",sub_bd150
+0xbd1f8,60,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 15, ""unicorn: Write to write-protected memory"": 1}",sub_bd19c+0x5c
+0xbd234,28,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 11, ""unicorn: Write to write-protected memory"": 5}",sub_bd234
+0xbd2a4,64,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 14, ""unicorn stopped"": 2}",sub_bd288+0x1c
+0xbd35c,20,leaf,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 14, ""unicorn: Write to write-protected memory"": 1, ""unicorn stopped"": 1}",sub_bd328+0x34
+0xbd450,8,leaf,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 5, ""unicorn: Invalid instruction"": 2, ""unicorn stopped"": 8, ""unicorn: Invalid memory fetch"": 1}",sub_bd450
+0xbd458,48,calls,arm,no-coverage,0,"{""unicorn stopped"": 7, ""unicorn: Invalid memory fetch"": 2, ""unicorn: Invalid memory read"": 5, ""unicorn: Invalid instruction"": 2}",sub_bd458
+0xbd900,12,calls,arm,no-coverage,0,"{""unicorn: Invalid memory fetch"": 3, ""unicorn: Invalid memory read"": 4, ""unicorn stopped"": 5, ""import memset"": 1, ""unicorn: Invalid instruction"": 1, ""unicorn: Unhandled CPU exception"": 1, ""unicorn: Write to write-protected memory"": 1}",sub_bd900
+0xbda8c,48,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 3, ""unicorn: Invalid instruction"": 5, ""unicorn: Invalid memory fetch"": 2, ""unicorn stopped"": 4, ""import _Unwind_SjLj_Register"": 1, ""unicorn: Unhandled CPU exception"": 1}",sub_bda8c
+0xbdb1c,56,leaf,arm,pass,8,,sub_bdb1c
+0xbdd60,20,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 1, ""import printf"": 14, ""unicorn: Invalid memory write"": 1}",sub_bdd60
+0xbe6c0,24,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 12, ""unicorn stopped"": 3, ""unicorn: Invalid instruction"": 1}",sub_be6c0
+0xbe79c,100,calls,arm,no-coverage,0,"{""unicorn stopped"": 8, ""unicorn: Invalid memory read"": 5, ""unicorn: Invalid memory fetch"": 2, ""unicorn: Invalid instruction"": 1}",sub_be79c
+0xbe9c4,32,leaf,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 9, ""unicorn: Invalid memory fetch"": 2, ""unicorn: Invalid memory read"": 4, ""unicorn stopped"": 1}",sub_be9c4
+0xbee74,20,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_bed24+0x114+0x24+0x18
+0xbeeb0,20,leaf,arm,pass,11,,sub_bee88+0x28
+0xbf720,20,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_bf718+0x8
+0xbf86c,112,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 8, ""unicorn: Invalid memory fetch"": 1, ""unicorn: Invalid instruction"": 3, ""unicorn: Write to write-protected memory"": 4}",sub_bf86c
+0xc0620,40,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 1, ""import memset"": 13, ""unicorn: Invalid memory read"": 1, ""unicorn: Invalid memory write"": 1}",sub_c0620
+0xc0648,44,calls,arm,no-coverage,0,"{""unicorn: Invalid memory write"": 2, ""unicorn stopped"": 6, ""unicorn: Invalid memory read"": 4, ""unicorn: Invalid instruction"": 1, ""unicorn: Write to write-protected memory"": 3}",sub_c0648
+0xc07ec,56,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 14, ""unicorn: Invalid memory read"": 1, ""unicorn: Write to write-protected memory"": 1}",sub_c07ec
+0xc0d4c,1084,calls,arm,no-coverage,0,"{""import memset"": 4, ""unicorn: Invalid instruction"": 8, ""unicorn: Write to write-protected memory"": 2, ""unicorn: Invalid memory write"": 2}",sub_c0c68+0x9c+0x48
+0xc124c,228,calls,arm,no-coverage,0,"{""import printf"": 9, ""unicorn: Invalid memory fetch"": 2, ""unicorn: Invalid memory read"": 2, ""unicorn: Invalid instruction"": 3}",sub_c124c
+0xc134c,40,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_c1330+0x1c
+0xc1788,1004,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_c13ec+0x170+0x13c+0xc8+0x28
+0xc1968,524,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 1, ""unicorn: Invalid memory write"": 3, ""import memset"": 3, ""import strlen"": 1, ""unicorn stopped"": 6, ""unicorn: Invalid memory read"": 2}",sub_c13ec+0x4c0+0xbc
+0xc233c,264,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_c233c
+0xc244c,4,leaf,arm,pass,16,,sub_c244c
+0xc32b4,80,calls,arm,no-coverage,0,"{""unicorn: Invalid memory fetch"": 5, ""unicorn: Invalid instruction"": 8, ""unicorn: Invalid memory read"": 3}",sub_c32b4
+0xc472c,64,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 10, ""unicorn: Invalid memory read"": 6}",sub_c4524+0x208
+0xc49ec,108,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 2, ""unicorn: Write to write-protected memory"": 8, ""unicorn: Invalid memory read"": 4, ""unicorn: Invalid memory write"": 1, ""unicorn: Invalid memory fetch"": 1}",sub_c49ec
+0xc4dd0,8,calls,arm,no-coverage,0,"{""unicorn: Invalid memory write"": 8, ""unicorn: Invalid instruction"": 3, ""unicorn: Invalid memory read"": 2, ""unicorn: Invalid memory fetch"": 3}",sub_c4dd0
+0xc5734,8,leaf,arm,pass,9,,sub_c5734
+0xc6894,332,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 9, ""unicorn: Invalid memory read"": 7}",sub_c6850+0x44
+0xc6b44,8,calls,arm,pass,16,,sub_c6b44
+0xc74b8,200,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 10, ""unicorn: Invalid memory read"": 5, ""unicorn: Invalid memory fetch"": 1}",sub_c74b8
+0xc7690,124,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 16}",sub_c7690
+0xc770c,84,calls,arm,pass,9,,sub_c770c
+0xc77cc,84,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 16}",sub_c7760+0x6c
+0xc7ce8,224,calls,arm,pass,7,,sub_c7cb0+0x38
+0xc7f7c,184,calls,arm,pass,5,,sub_c7f7c
+0xc82c8,44,calls,arm,no-coverage,0,"{""unicorn: Invalid memory fetch"": 3, ""unicorn: Invalid instruction"": 9, ""unicorn: Invalid memory read"": 4}",sub_c82b4+0x14
+0xc9cb8,8,leaf,arm,pass,16,,sub_c9cb8
+0xc9cd8,68,leaf,arm,pass,10,,sub_c9cd8
+0xcb2ac,40,leaf,arm,pass,4,,sub_cb2ac
+0xcba04,420,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 6, ""unicorn: Invalid memory read"": 7, ""unicorn: Invalid memory fetch"": 3}",sub_cba04
+0xcc2dc,1112,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 6, ""unicorn: Invalid memory read"": 7, ""unicorn: Invalid memory write"": 3}",sub_cc2dc
+0xcc740,8,calls,arm,no-coverage,0,"{""unicorn stopped"": 4, ""unicorn: Invalid memory read"": 6, ""unicorn: Invalid memory write"": 5, ""unicorn: Write to write-protected memory"": 1}",sub_cc740
+0xcca24,8,calls,arm,no-coverage,3,"{""unicorn: Invalid memory fetch"": 3, ""unicorn: Invalid instruction"": 9, ""unicorn: Invalid memory read"": 1}",sub_cca24
+0xcd09c,60,calls,arm,pass,4,,sub_cd09c
+0xcd8dc,8,calls,arm,no-coverage,0,"{""unicorn: Invalid memory write"": 6, ""unicorn: Invalid memory read"": 10}",sub_cd8dc
+0xcf3bc,276,calls,arm,pass,8,,sub_cf3bc
+0xcf850,168,calls,arm,no-coverage,3,"{""import printf"": 12, ""unicorn: Invalid memory read"": 1}",sub_cf850
+0xd0ea8,2732,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 5, ""unicorn: Write to write-protected memory"": 8, ""unicorn: Invalid memory fetch"": 1, ""unicorn: Invalid memory read"": 2}",sub_d09d0+0x394+0x144
+0xd1930,36,calls,arm,pass,4,,sub_d09d0+0x394+0xbcc
+0xd1bb0,384,calls,arm,no-coverage,0,"{""import __cxa_guard_acquire"": 16}",sub_d1bb0
+0xd2984,100,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_d1d30+0x9c0+0x294
+0xd2db8,1192,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_d2b74+0x1c4+0x58+0x20+0x8
+0xd3974,708,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 7, ""unicorn stopped"": 7, ""unicorn: Invalid instruction"": 2}",sub_d35ac+0x3bc+0xc
+0xd3c38,284,calls,arm,no-coverage,0,"{""import printf"": 10, ""unicorn: Write to write-protected memory"": 3, ""unicorn: Invalid memory read"": 3}",sub_d3c38
+0xd3d1c,56,calls,arm,pass,8,,sub_d3c38+0xe4
+0xd3e6c,68,calls,arm,no-coverage,0,"{""unicorn stopped"": 10, ""unicorn: Invalid memory read"": 6}",sub_d3df8+0x74
+0xd3fdc,180,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_d3eb0+0x12c
+0xd4058,56,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_d3eb0+0x15c+0x4c
+0xd4574,28,leaf,arm,pass,4,,sub_d4574
+0xd49f0,2888,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 8, ""unicorn: Invalid memory fetch"": 2, ""unicorn: Write to write-protected memory"": 4, ""unicorn: Invalid instruction"": 1, ""unicorn stopped"": 1}",sub_d49a0+0x50
+0xd4a00,2872,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 7, ""unicorn stopped"": 4, ""unicorn: Invalid memory fetch"": 3, ""unicorn: Invalid instruction"": 2}",sub_d49a0+0x60
+0xd5530,8,leaf,arm,no-coverage,0,"{""unicorn: Invalid memory fetch"": 2, ""unicorn stopped"": 5, ""unicorn: Invalid instruction"": 1, ""unicorn: Invalid memory read"": 6, ""import printf"": 2}",sub_d49a0+0x688+0x390+0x178
+0xd5c90,76,calls,arm,pass,16,,sub_d5c90
+0xd6ba0,552,calls,arm,no-coverage,0,"{""unicorn stopped"": 16}",sub_d69b8+0xb4+0x38+0x94+0x68
+0xd70bc,80,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 1, ""import memset"": 2, ""unicorn: Invalid memory read"": 8, ""unicorn: Invalid memory write"": 2, ""unicorn stopped"": 2, ""import printf"": 1}",sub_d708c+0x30
+0xd723c,368,calls,arm,no-coverage,0,"{""unicorn: Invalid memory write"": 3, ""unicorn: Invalid memory read"": 8, ""unicorn: Write to write-protected memory"": 5}",sub_d721c+0x20
+0xd73cc,332,calls,arm,no-coverage,0,"{""unicorn: Invalid memory write"": 13, ""import memset"": 2, ""import printf"": 1}",sub_d73ac+0x20
+0xd789c,76,calls,arm,no-coverage,0,"{""unicorn stopped"": 9, ""unicorn: Invalid memory read"": 3, ""unicorn: Invalid memory fetch"": 4}",sub_d789c
+0xd79d8,4,leaf,arm,no-coverage,1,"{""unicorn stopped"": 7, ""unicorn: Invalid memory read"": 8, ""returned elsewhere"": 1}",sub_d79d8
+0xd7d00,200,calls,arm,no-coverage,0,"{""unicorn: Invalid memory write"": 4, ""import printf"": 12}",sub_d7d00
+0xd81d0,56,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_d81d0
+0xd9728,36,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 10, ""unicorn: Invalid memory fetch"": 4, ""unicorn stopped"": 1, ""unicorn: Unhandled CPU exception"": 1}",sub_d9728
+0xdb3cc,8,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_db3cc
+0xdb3d4,36,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_db3d4
+0xdb5a8,676,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_db5a8
+0xdc100,552,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 5, ""import strlen"": 1, ""unicorn stopped"": 6, ""import __cxa_guard_acquire"": 3, ""unicorn: Invalid memory fetch"": 1}",sub_dc084+0x14+0x68
+0xdc208,288,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_dc084+0x184
+0xdd33c,8,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_dd33c
+0xde44c,576,calls,arm,no-coverage,0,"{""unicorn stopped"": 7, ""unicorn: Invalid instruction"": 2, ""unicorn: Invalid memory read"": 7}",sub_de44c
+0xde8c0,104,calls,arm,no-coverage,0,"{""unicorn stopped"": 8, ""unicorn: Invalid memory read"": 4, ""unicorn: Invalid instruction"": 2, ""unicorn: Invalid memory fetch"": 1, ""unicorn: Unhandled CPU exception"": 1}",sub_de8c0
+0xdf03c,192,calls,arm,no-coverage,0,"{""unicorn stopped"": 9, ""unicorn: Invalid memory read"": 5, ""unicorn: Invalid memory fetch"": 2}",sub_def20+0x6c+0xb0
+0xdf340,380,calls,arm,pass,5,,sub_df340
+0xe076c,172,calls,arm,no-coverage,0,"{""import printf"": 15, ""unicorn: Invalid memory read"": 1}",sub_e076c
+0xe09d0,260,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_e0954+0x18+0x64
+0xe1a50,8,leaf,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 4, ""unicorn stopped"": 6, ""unicorn: Invalid memory write"": 2, ""unicorn: Invalid memory fetch"": 1, ""unicorn: Write to write-protected memory"": 3}",sub_e13c8+0x390+0x1c+0x2dc
+0xe1f20,8,leaf,arm,pass,16,,sub_e1f20
+0xe22c4,704,calls,arm,no-coverage,0,"{""unicorn stopped"": 16}",sub_e22c4
+0xe3b10,56,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_e3938+0x120+0xb8
+0xe55d8,120,calls,arm,no-coverage,0,"{""import printf"": 15, ""unicorn: Invalid memory write"": 1}",sub_e55d8
+0xe5740,84,calls,arm,no-coverage,0,"{""import printf"": 14, ""unicorn: Invalid memory read"": 2}",sub_e5710+0x30
+0xe5794,356,calls,arm,no-coverage,0,"{""import sendto"": 2, ""import printf"": 12, ""import strcpy"": 2}",sub_e5794
+0xe5cfc,68,calls,arm,no-coverage,0,"{""unicorn stopped"": 1, ""unicorn: Invalid memory write"": 3, ""unicorn: Write to write-protected memory"": 4, ""unicorn: Invalid instruction"": 2, ""unicorn: Invalid memory read"": 6}",sub_e5cfc
+0xe5d40,128,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_e5d40
+0xe64ac,300,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_e6480+0x2c
+0xe64dc,252,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_e6480+0x2c+0x30
+0xe6a68,316,calls,arm,no-coverage,1,"{""unicorn stopped"": 10, ""unicorn: Invalid memory read"": 2, ""unicorn: Invalid instruction"": 1, ""unicorn: Invalid memory fetch"": 1, ""unicorn: Unhandled CPU exception"": 1, ""returned elsewhere"": 1}",sub_e6a00+0x68
+0xe6af8,172,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 7, ""unicorn stopped"": 9}",sub_e6a00+0x68+0x90
+0xe6d68,4,leaf,arm,pass,16,,sub_e6d68
+0xe7054,148,calls,arm,no-coverage,0,"{""unicorn stopped"": 11, ""unicorn: Invalid instruction"": 2, ""unicorn: Invalid memory fetch"": 3}",sub_e7054
+0xe7448,64,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 11, ""unicorn: Write to write-protected memory"": 3, ""unicorn: Invalid memory write"": 2}",sub_e7448
+0xe83ec,132,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_e83ec
+0xe9e74,4,leaf,arm,pass,16,,sub_e9e74
+0xea448,8,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 10, ""unicorn: Invalid memory write"": 6}",sub_ea448
+0xec29c,148,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_ec29c
+0xec3e4,236,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 11, ""unicorn stopped"": 5}",sub_ec330+0x20+0x94
+0xeef90,128,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_eef90
+0xeff20,20,leaf,arm,pass,16,,sub_eff20
+0xf01dc,48,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_f01dc
+0xf1d64,200,calls,arm,pass,14,,sub_f1bac+0x188+0x30
+0xf2034,56,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_f2034
+0xf26dc,516,calls,arm,no-coverage,0,"{""import printf"": 15, ""unicorn: Invalid memory write"": 1}",sub_f26dc
+0xf6180,76,calls,arm,no-coverage,0,"{""unicorn: Invalid memory write"": 5, ""unicorn: Write to write-protected memory"": 6, ""unicorn: Invalid memory read"": 3, ""unicorn stopped"": 1, ""unicorn: Invalid memory fetch"": 1}",sub_f6180
+0xf7058,160,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 3, ""unicorn stopped"": 12, ""unicorn: Invalid memory fetch"": 1}",sub_f7058
+0xf7ad4,376,calls,arm,no-coverage,0,"{""import printf"": 14, ""unicorn stopped"": 2}",sub_f7ad4
+0xf824c,40,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 7, ""unicorn: Invalid memory read"": 9}",sub_f824c
+0xf8548,1068,calls,arm,pass,10,,sub_f837c+0x5c+0x168+0x8
+0xf9e5c,204,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_f9c38+0xf8+0x74+0xb8
+0xf9f7c,340,calls,arm,no-coverage,0,"{""unicorn: Invalid memory fetch"": 2, ""unicorn: Invalid memory read"": 11, ""unicorn stopped"": 2, ""unicorn: Invalid instruction"": 1}",sub_f9f28+0x54
+0xfa044,140,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 8, ""unicorn stopped"": 2, ""unicorn: Invalid memory read"": 5, ""unicorn: Invalid instruction"": 1}",sub_f9f28+0x54+0x60+0x3c+0x2c
+0xfbe40,92,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 2, ""unicorn: Invalid memory read"": 7, ""unicorn stopped"": 7}",sub_fbe40
+0xfc9a0,24,calls,arm,no-coverage,0,"{""import memcpy"": 2, ""unicorn: Write to write-protected memory"": 8, ""unicorn: Invalid memory read"": 4, ""unicorn stopped"": 2}",sub_fc924+0x70+0xc
+0xfd84c,88,calls,arm,pass,16,,sub_fd84c
+0xfd980,152,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 10, ""unicorn: Invalid memory read"": 3, ""unicorn: Invalid memory write"": 1, ""import __cxa_pure_virtual"": 1, ""unicorn: Unhandled CPU exception"": 1}",sub_fd980
+0xfddc8,220,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 9, ""unicorn: Invalid memory read"": 6, ""unicorn: Invalid memory write"": 1}",sub_fddc8
+0xfe1c4,160,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 4, ""unicorn: Invalid instruction"": 10, ""unicorn: Invalid memory fetch"": 2}",sub_fe1c4
+0x100fe4,340,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 5, ""unicorn: Invalid instruction"": 8, ""unicorn: Invalid memory fetch"": 3}",sub_100fe4
+0x103b50,240,calls,arm,pass,4,,sub_103b50
+0x109680,8,calls,arm,no-coverage,1,"{""unicorn: Invalid memory read"": 11, ""unicorn: Invalid memory write"": 4}",sub_109680
+0x10c3d8,40,calls,arm,no-coverage,2,"{""unicorn: Invalid memory write"": 3, ""import fclose"": 6, ""unicorn: Write to write-protected memory"": 5}",sub_10c3d8
+0x10d164,412,calls,arm,no-coverage,3,"{""import fopen"": 10, ""unicorn: Invalid memory read"": 3}",sub_10d164
+0x10d850,460,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_10d850
+0x10d8b4,360,calls,arm,no-coverage,0,"{""unicorn: Invalid memory write"": 5, ""unicorn: Invalid memory read"": 2, ""unicorn: Write to write-protected memory"": 7, ""unicorn: Invalid instruction"": 2}",sub_10d850+0x64
+0x10da24,80,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 7, ""unicorn: Invalid memory fetch"": 2, ""unicorn: Invalid instruction"": 7}",sub_10da24
+0x10e2e0,128,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 7, ""unicorn: Invalid memory write"": 4, ""unicorn: Invalid memory read"": 1, ""unicorn: Invalid memory fetch"": 1, ""unicorn: Invalid instruction"": 3}",sub_10e2e0
+0x10e840,12,leaf,arm,pass,16,,sub_10e840
+0x110718,224,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 4, ""unicorn: Invalid memory fetch"": 5, ""unicorn: Invalid memory write"": 4, ""unicorn: Write to write-protected memory"": 3}",sub_110718
+0x110800,8,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 6, ""unicorn: Invalid memory write"": 10}",sub_110800
+0x1108bc,8,calls,arm,pass,16,,sub_1108bc
+0x11137c,8,leaf,arm,pass,16,,sub_11137c
+0x112344,120,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 11, ""unicorn: Invalid memory fetch"": 3, ""unicorn: Invalid memory read"": 1, ""unicorn: Unhandled CPU exception"": 1}",sub_112344
+0x1125a8,180,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 3, ""unicorn: Write to write-protected memory"": 6, ""import printf"": 6, ""unicorn: Invalid memory write"": 1}",sub_1123bc+0x1ec
+0x112a38,4,leaf,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 6, ""import printf"": 10}",sub_112a1c+0x4+0x18
+0x112a3c,284,calls,arm,no-coverage,0,"{""import printf"": 7, ""unicorn: Write to write-protected memory"": 1, ""unicorn: Invalid memory read"": 6, ""unicorn stopped"": 2}",sub_112a3c
+0x112d60,336,calls,arm,no-coverage,0,"{""unicorn: Invalid memory write"": 2, ""unicorn: Invalid instruction"": 3, ""unicorn: Write to write-protected memory"": 4, ""unicorn: Invalid memory read"": 7}",sub_112cd8+0x88
+0x1131a0,108,calls,arm,no-coverage,0,"{""unicorn: Invalid memory fetch"": 2, ""unicorn: Invalid instruction"": 11, ""unicorn: Invalid memory read"": 3}",sub_113148+0x1c+0x3c
+0x1132f8,108,calls,arm,no-coverage,0,"{""import printf"": 11, ""unicorn: Invalid memory read"": 1, ""unicorn: Invalid instruction"": 2, ""unicorn: Invalid memory fetch"": 2}",sub_1132f8
+0x1132fc,104,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 10, ""unicorn: Unhandled CPU exception"": 1, ""unicorn: Invalid memory fetch"": 3, ""unicorn: Invalid memory read"": 2}",sub_1132f8+0x4
+0x11350c,200,calls,arm,no-coverage,0,"{""unicorn: Unhandled CPU exception"": 1, ""unicorn: Invalid instruction"": 3, ""unicorn: Invalid memory write"": 7, ""unicorn: Invalid memory read"": 1, ""unicorn: Write to write-protected memory"": 4}",sub_11350c
+0x1136a0,240,calls,arm,pass,5,,sub_1136a0
+0x113bfc,84,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 16}",sub_113bfc
+0x113d5c,168,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_113d5c
+0x11889c,40,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_11889c
+0x119a90,28,calls,arm,no-coverage,3,"{""unicorn: Invalid memory read"": 12, ""unicorn: Invalid memory write"": 1}",sub_119a90
+0x11a664,8,leaf,arm,pass,7,,sub_11a664
+0x11a758,28,calls,arm,no-coverage,1,"{""unicorn: Invalid memory read"": 11, ""unicorn: Invalid memory write"": 4}",sub_11a758
+0x11bbf0,8,leaf,arm,pass,13,,sub_11bbf0
+0x11bc1c,20,leaf,arm,pass,15,,sub_11bc1c
+0x11bc38,8,leaf,arm,pass,16,,sub_11bc38
+0x11bc58,8,leaf,arm,pass,14,,sub_11bc58
+0x11bc94,28,leaf,arm,pass,6,,sub_11bc94
+0x11c5b4,8,leaf,arm,pass,8,,sub_11c5b4
+0x11c798,28,calls,arm,no-coverage,1,"{""unicorn: Invalid memory read"": 13, ""unicorn: Invalid memory write"": 2}",sub_11c798
+0x11d390,28,leaf,arm,pass,9,,sub_11d390
+0x11db68,8,leaf,arm,pass,12,,sub_11db68
+0x11db70,8,leaf,arm,pass,9,,sub_11db70
+0x11db78,8,leaf,arm,pass,13,,sub_11db78
+0x11dd78,88,leaf,arm,pass,7,,sub_11dd78
+0x11e2ac,8,leaf,arm,pass,12,,sub_11e2ac
+0x11e530,12,leaf,arm,pass,9,,sub_11e530
+0x11ea5c,68,calls,arm,pass,8,,sub_11ea5c
+0x1244b8,8,calls,arm,no-coverage,0,"{""unicorn: Invalid memory write"": 10, ""unicorn: Invalid memory read"": 6}",sub_1244b8
+0x127d54,260,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 8, ""unicorn: Invalid instruction"": 3, ""unicorn: Invalid memory read"": 1, ""unicorn: Invalid memory write"": 3, ""unicorn: Invalid memory fetch"": 1}",sub_127c6c+0xe8
+0x127eb0,20,calls,arm,no-coverage,1,"{""import objc_msgSend"": 15}",sub_127eb0
+0x127f9c,40,calls,arm,no-coverage,0,"{""import objc_msgSend"": 16}",sub_127f9c
+0x1284c8,160,calls,arm,no-coverage,0,"{""import objc_msgSend"": 16}",sub_1284c8
+0x12925c,268,calls,arm,pass,14,,sub_12925c
+0x129520,40,calls,arm,pass,16,,sub_129520
+0x129b60,8,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_129b60
+0x129b98,8,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_129b98
+0x12abd4,48,leaf,arm,pass,14,,sub_12abd4
+0x12cfcc,324,calls,arm,pass,5,,sub_12cfcc
+0x12ee98,160,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 4, ""import _Unwind_SjLj_Register"": 8, ""unicorn: Invalid instruction"": 2, ""unicorn: Unhandled CPU exception"": 1, ""unicorn: Invalid memory fetch"": 1}",sub_12ee98
+0x12f224,56,leaf,arm,pass,16,,sub_12f224
+0x132a98,328,calls,arm,no-coverage,0,"{""import printf"": 6, ""unicorn: Invalid memory read"": 3, ""unicorn: Invalid instruction"": 7}",sub_132a98
+0x133014,8,leaf,arm,pass,16,,sub_133014
+0x134070,40,leaf,arm,pass,15,,sub_134070
+0x134df8,4,leaf,arm,pass,16,,sub_134df8
+0x13538c,8,leaf,arm,pass,16,,sub_13538c
+0x135394,8,leaf,arm,pass,16,,sub_135394
+0x135750,8,leaf,arm,pass,16,,sub_135750
+0x13594c,1028,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 8, ""unicorn: Invalid memory read"": 6, ""unicorn: Invalid memory write"": 2}",sub_13594c
+0x136850,4,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 13, ""unicorn: Invalid memory write"": 3}",sub_136850
+0x1368a8,8,calls,arm,no-coverage,1,"{""unicorn: Invalid memory read"": 8, ""unicorn: Invalid memory write"": 7}",sub_1368a8
+0x136afc,80,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 6, ""unicorn: Invalid instruction"": 10}",sub_136afc
+0x1373a0,80,calls,arm,pass,13,,sub_1373a0
+0x137a20,96,calls,arm,no-coverage,1,"{""unicorn: Invalid instruction"": 5, ""unicorn: Invalid memory read"": 2, ""unicorn: Invalid memory fetch"": 1, ""unicorn: Write to write-protected memory"": 5, ""unicorn: Invalid memory write"": 2}",sub_137a20
+0x138a4c,8,calls,arm,no-coverage,1,"{""unicorn: Invalid memory read"": 11, ""unicorn: Invalid memory write"": 4}",sub_138a4c
+0x138a98,8,leaf,arm,pass,16,,sub_138a98
+0x13a308,4,calls,arm,no-coverage,0,"{""import printf"": 13, ""unicorn: Invalid memory write"": 3}",sub_13a308
+0x13a400,128,calls,arm,pass,5,,sub_13a400
+0x13a9ec,8,calls,arm,pass,16,,sub_13a9ec
+0x13a9f8,176,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 3, ""unicorn: Write to write-protected memory"": 7, ""unicorn: Invalid memory read"": 6}",sub_13a9f8
+0x13ba68,200,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 13, ""unicorn: Invalid memory write"": 3}",sub_13b5b8+0x4b0
+0x13bc48,4,leaf,arm,pass,16,,sub_13bc48
+0x13bc4c,648,calls,arm,no-coverage,2,"{""import printf"": 11, ""unicorn: Invalid memory read"": 3}",sub_13bc4c
+0x13bfa8,60,calls,arm,pass,6,,sub_13bfa8
+0x13bfec,52,calls,arm,no-coverage,3,"{""unicorn: Invalid memory write"": 3, ""unicorn: Invalid memory read"": 8, ""unicorn: Write to write-protected memory"": 2}",sub_13bfec
+0x13d7a8,340,calls,arm,no-coverage,0,"{""unicorn: Invalid memory fetch"": 1, ""unicorn: Invalid instruction"": 10, ""unicorn: Unhandled CPU exception"": 1, ""unicorn: Invalid memory read"": 4}",sub_13d7a8
+0x13e1c4,72,calls,arm,pass,10,,sub_13e1c4
+0x140528,320,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 2, ""unicorn: Invalid instruction"": 4, ""import printf"": 10}",sub_140528
+0x140920,52,calls,arm,no-coverage,3,"{""unicorn: Invalid instruction"": 7, ""unicorn: Invalid memory read"": 6}",sub_140920
+0x1415c4,84,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 16}",sub_1415c4
+0x141664,728,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 10, ""unicorn: Invalid memory read"": 6}",sub_141664
+0x1432f8,304,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 15, ""unicorn: Invalid memory write"": 1}",sub_1432f8
+0x146a34,80,calls,arm,no-coverage,1,"{""unicorn: Write to write-protected memory"": 6, ""unicorn: Invalid memory read"": 1, ""unicorn: Invalid instruction"": 7, ""unicorn: Invalid memory fetch"": 1}",sub_146a34
+0x14702c,76,calls,arm,pass,7,,sub_14702c
+0x14aa14,1100,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_14a970+0xa4
+0x14d4f4,8,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 1, ""unicorn: Invalid memory write"": 7, ""unicorn: Invalid memory read"": 1, ""unicorn: Invalid instruction"": 7}",sub_14d4f4
+0x14eafc,212,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 9, ""import memcpy"": 5, ""unicorn: Invalid memory fetch"": 1, ""unicorn: Invalid memory read"": 1}",sub_14eafc
+0x14ebd0,40,calls,arm,pass,8,,sub_14ebd0
+0x14fe08,1396,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 14, ""unicorn: Invalid memory write"": 2}",sub_14fd80+0x88
+0x150db0,1524,calls,arm,pass,5,,sub_150db0
+0x15181c,356,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_15181c
+0x1556b0,1148,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_1556b0
+0x15953c,404,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_15953c
+0x15a5fc,48,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_15a5fc
+0x15a634,36,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_15a634
+0x15aa24,1496,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 16}",sub_15aa24
+0x15b448,48,calls,arm,no-coverage,0,"{""import printf"": 14, ""unicorn: Invalid memory write"": 2}",sub_15b448
+0x15c5bc,52,leaf,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 16}",sub_15c5bc
+0x15c978,80,leaf,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 1, ""unicorn: Invalid memory read"": 15}",sub_15c978
+0x15f4d0,28,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 9, ""unicorn: Invalid memory write"": 6, ""unicorn: Write to write-protected memory"": 1}",sub_15f4d0
+0x15f9a8,52,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_15f9a8
+0x15fa08,128,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_15fa08
+0x15fb58,80,calls,arm,pass,9,,sub_15fb58
+0x16066c,104,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_16066c
+0x161a4c,860,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 7, ""unicorn: Invalid instruction"": 4, ""unicorn: Invalid memory fetch"": 4, ""unicorn: Write to write-protected memory"": 1}",sub_161a4c
+0x162160,4,leaf,arm,pass,16,,sub_162160
+0x1627d8,92,calls,arm,pass,9,,sub_1627d8
+0x162c64,4,leaf,arm,pass,16,,sub_162c64
+0x162c68,68,calls,arm,no-coverage,0,"{""import objc_msgSend"": 16}",sub_162c68
+0x162f24,172,calls,arm,pass,16,,sub_162f24
+0x1631f0,68,leaf,arm,pass,8,,sub_1631f0
+0x16bc24,80,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 3, ""import printf"": 8, ""unicorn: Invalid instruction"": 4, ""unicorn: Invalid memory fetch"": 1}",sub_16bc24
+0x16bf58,216,calls,arm,pass,16,,sub_16bf58
+0x16c420,100,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_16c420
+0x16c5a8,8,calls,arm,no-coverage,0,"{""unicorn: Invalid memory write"": 8, ""unicorn: Invalid memory read"": 7, ""unicorn: Invalid memory fetch"": 1}",sub_16c5a8
+0x16e188,12,leaf,arm,pass,16,,sub_16e188
+0x16ee44,96,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 13, ""unicorn: Invalid memory read"": 1, ""unicorn: Invalid memory fetch"": 2}",sub_16ee44
+0x16f0b4,52,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 7, ""unicorn: Write to write-protected memory"": 9}",sub_16f0b4
+0x16f48c,8,leaf,arm,pass,16,,sub_16f48c
+0x16f494,16,leaf,arm,pass,12,,sub_16f494
+0x16f634,300,calls,arm,no-coverage,0,"{""import printf"": 13, ""unicorn: Invalid memory write"": 3}",sub_16f618+0x1c
+0x1711c0,4,calls,arm,no-coverage,0,"{""import printf"": 12, ""unicorn: Invalid memory write"": 4}",sub_1711c0
+0x172d0c,4,leaf,arm,pass,16,,sub_172d0c
+0x1734a0,204,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 5, ""unicorn: Invalid memory fetch"": 3, ""unicorn: Invalid instruction"": 8}",sub_1732c8+0x1d8
+0x1738e4,8,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 6, ""unicorn: Invalid memory read"": 10}",sub_1738e4
+0x174368,8,calls,arm,no-coverage,0,"{""unicorn: Invalid memory write"": 8, ""unicorn: Invalid memory read"": 8}",sub_174368
+0x176bac,196,calls,arm,pass,8,,sub_176bac
+0x176c70,124,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_176c70
+0x1770e8,780,calls,arm,no-coverage,2,"{""unicorn: Invalid instruction"": 10, ""unicorn: Invalid memory read"": 4}",sub_1770e8
+0x178a6c,4908,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 3, ""import printf"": 9, ""unicorn: Invalid memory read"": 4}",sub_178a6c
+0x17bcb0,12,leaf,arm,pass,16,,sub_17bcb0
+0x17c120,176,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 12, ""unicorn: Write to write-protected memory"": 3, ""unicorn: Invalid memory write"": 1}",sub_17c120
+0x17d550,16,calls,arm,pass,16,,sub_17d550
+0x17df0c,416,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 13, ""unicorn: Invalid memory read"": 3}",sub_17df0c
+0x17e484,8,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_17e484
+0x17edcc,16,calls,arm,pass,16,,sub_17edcc
+0x17ee90,8,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_17ee90
+0x17f65c,1116,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_17f65c
+0x1809b0,912,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 9, ""unicorn: Invalid memory fetch"": 1, ""unicorn: Invalid instruction"": 6}",sub_1809b0
+0x181260,36,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_181260
+0x181944,72,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 3, ""unicorn: Invalid instruction"": 7, ""unicorn: Invalid memory write"": 2, ""unicorn: Write to write-protected memory"": 4}",sub_181944
+0x182a00,392,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_182a00
+0x1831d0,4,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 11, ""unicorn: Invalid memory write"": 4, ""import __cxa_pure_virtual"": 1}",sub_1831d0
+0x1868d0,676,calls,arm,pass,16,,sub_1868d0
+0x1874d4,660,calls,arm,pass,4,,sub_1874d4
+0x187c58,8,calls,arm,no-coverage,1,"{""unicorn: Invalid memory read"": 11, ""unicorn: Invalid memory write"": 4}",sub_187c58
+0x187d3c,12,leaf,arm,pass,16,,sub_187d3c
+0x1891c4,352,calls,arm,no-coverage,2,"{""unicorn: Invalid memory write"": 12, ""unicorn: Write to write-protected memory"": 2}",sub_1891c4
+0x189588,4,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_189588
+0x18a7e0,8,leaf,arm,pass,16,,sub_18a7e0
+0x18b178,28,calls,arm,no-coverage,1,"{""unicorn: Invalid memory read"": 13, ""unicorn: Invalid memory write"": 2}",sub_18b178
+0x18d86c,804,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_18d86c
+0x18e2d0,968,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 7, ""unicorn: Invalid memory read"": 9}",sub_18e2d0
+0x193b28,60,calls,arm,no-coverage,1,"{""unicorn: Invalid instruction"": 13, ""unicorn: Invalid memory fetch"": 1, ""unicorn: Invalid memory read"": 1}",sub_193b28
+0x193f5c,44,calls,arm,pass,5,,sub_193f5c
+0x194218,52,calls,arm,no-coverage,0,"{""unicorn: Invalid memory write"": 4, ""import printf"": 12}",sub_194218
+0x19845c,16,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 13, ""unicorn: Invalid memory read"": 3}",sub_19845c
+0x198954,28,calls,arm,no-coverage,2,"{""unicorn: Invalid memory read"": 14}",sub_198954
+0x198dcc,8,leaf,arm,pass,16,,sub_198dcc
+0x198fbc,28,calls,arm,no-coverage,2,"{""unicorn: Invalid memory write"": 4, ""unicorn: Invalid memory read"": 10}",sub_198fbc
+0x19926c,872,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 7, ""unicorn: Invalid memory read"": 9}",sub_19926c
+0x19983c,1396,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 16}",sub_19983c
+0x19c284,8,calls,arm,no-coverage,0,"{""unicorn: Invalid memory write"": 8, ""unicorn: Write to write-protected memory"": 1, ""unicorn: Invalid instruction"": 3, ""unicorn: Invalid memory fetch"": 2, ""unicorn: Invalid memory read"": 1, ""unicorn: Unhandled CPU exception"": 1}",sub_19c284
+0x19c604,36,calls,arm,no-coverage,0,"{""import printf"": 16}",sub_19c604
+0x19d150,1428,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 4, ""unicorn: Invalid instruction"": 9, ""unicorn: Invalid memory fetch"": 3}",sub_19d150
+0x19d6e4,16,leaf,arm,pass,16,,sub_19d6e4
+0x19d724,16,leaf,arm,pass,16,,sub_19d724
+0x1a1acc,128,calls,arm,no-coverage,0,"{""import objc_msgSend"": 16}",sub_1a1acc
+0x1a2358,548,calls,arm,no-coverage,0,"{""import objc_msgSend"": 16}",sub_1a2358
+0x1a257c,348,calls,arm,no-coverage,0,"{""import objc_msgSend"": 16}",sub_1a257c
+0x1a280c,36,calls,arm,no-coverage,0,"{""import sprintf"": 16}",sub_1a280c
+0x1aa7f4,4,calls,arm,no-coverage,0,"{""import objc_msgSend"": 16}",sub_1aa7f4
+0x1afbd4,344,calls,arm,no-coverage,0,"{""import objc_msgSend"": 12, ""unicorn: Invalid memory read"": 4}",sub_1afbd4
+0x1b0120,212,calls,arm,no-coverage,0,"{""import objc_msgSend"": 16}",sub_1b0120
+0x1b07f4,1396,calls,arm,no-coverage,0,"{""import _Unwind_SjLj_Register"": 16}",sub_1b07f4
+0x1b1450,488,leaf,arm,pass,7,,sub_1b1450
+0x1b29cc,604,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 3, ""import fprintf"": 13}",sub_1b29cc
+0x1b4464,20,leaf,arm,pass,14,,sub_1b4464
+0x1b51b8,68,calls,arm,no-coverage,0,"{""import objc_msgSend"": 16}",sub_1b51b8
+0x1b8968,288,calls,arm,no-coverage,0,"{""import objc_msgSend"": 16}",sub_1b8968
+0x1b8e54,88,calls,arm,no-coverage,0,"{""import objc_msgSend"": 16}",sub_1b8e54
+0x1b9260,172,calls,arm,pass,14,,sub_1b9260
+0x1b9c0c,876,calls,arm,pass,5,,sub_1b9c0c
+0x1bad0c,5744,calls,arm,no-coverage,0,"{""import objc_msgSendSuper2"": 16}",sub_1bad0c
+0x1bd7f0,16,leaf,arm,pass,16,,sub_1bd7f0
+0x1be1f4,308,calls,arm,no-coverage,0,"{""import objc_msgSend"": 16}",sub_1be1f4
+0x1bf914,24,leaf,arm,pass,13,,sub_1bf914
+0x1bfe54,1020,calls,arm,no-coverage,0,"{""import wcslen"": 16}",sub_1bfe54
+0x1c13ec,4,leaf,arm,pass,16,,sub_1c13ec
+0x1c1494,8,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 10, ""unicorn: Invalid memory fetch"": 3, ""unicorn: Invalid instruction"": 3}",sub_1c1494
+0x1c56a8,1180,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 8, ""unicorn: Invalid memory read"": 7, ""unicorn: Write to write-protected memory"": 1}",sub_1c56a8
+0x1c6538,12,leaf,arm,pass,16,,sub_1c6538
+0x1cd238,72,calls,arm,no-coverage,2,"{""unicorn: Invalid memory read"": 3, ""unicorn: Write to write-protected memory"": 10, ""unicorn: Invalid memory write"": 1}",sub_1cd238
+0x1cd408,296,calls,arm,no-coverage,2,"{""unicorn: Invalid memory read"": 2, ""unicorn: Write to write-protected memory"": 12}",sub_1cd408
+0x1ced3c,20,calls,arm,pass,16,,sub_1ced3c
+0x1cfa8c,16,leaf,arm,pass,8,,sub_1cfa8c
+0x1cfb34,8,leaf,arm,pass,14,,sub_1cfb34
+0x1cfbb4,32,leaf,arm,no-coverage,3,"{""unicorn: Invalid memory write"": 8, ""unicorn: Write to write-protected memory"": 4, ""unicorn: Invalid memory read"": 1}",sub_1cfbb4
+0x1cfbdc,8,leaf,arm,pass,12,,sub_1cfbdc
+0x1cfc3c,28,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 15, ""unicorn: Invalid instruction"": 1}",sub_1cfc3c
+0x1d01d4,68,calls,arm,pass,16,,sub_1d01d4
+0x1d0218,88,calls,arm,pass,6,,sub_1d0218
+0x1d0390,104,calls,arm,pass,5,,sub_1d0390
+0x1d1b3c,3736,calls,arm,pass,15,,sub_1d1b3c
+0x1d8f28,1588,calls,arm,no-coverage,1,"{""unicorn: Invalid instruction"": 10, ""unicorn: Invalid memory read"": 5}",sub_1d8f28
+0x1db054,508,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 8, ""unicorn: Invalid instruction"": 7, ""unicorn: Invalid memory fetch"": 1}",sub_1db054
+0x1db9d0,740,calls,arm,no-coverage,1,"{""unicorn: Invalid instruction"": 10, ""unicorn: Invalid memory fetch"": 3, ""unicorn: Invalid memory read"": 2}",sub_1db9d0
+0x1dce58,92,calls,arm,pass,9,,sub_1dce58
+0x1de064,4,leaf,arm,pass,16,,sub_1de064
+0x1de0f4,16,calls,arm,no-coverage,0,"{""unicorn: Invalid memory fetch"": 2, ""unicorn: Invalid instruction"": 11, ""unicorn: Invalid memory read"": 3}",sub_1de0f4
+0x1de284,4,leaf,arm,pass,16,,sub_1de284
+0x1de474,64,calls,arm,pass,4,,sub_1de474
+0x1dfa5c,348,calls,arm,no-coverage,2,"{""unicorn: Invalid memory read"": 6, ""unicorn: Invalid memory fetch"": 1, ""unicorn: Invalid instruction"": 6, ""import __cxa_pure_virtual"": 1}",sub_1dfa5c
+0x1e1098,12,leaf,arm,pass,5,,sub_1e1098
+0x1e279c,1700,calls,arm,no-coverage,2,"{""unicorn: Invalid memory read"": 14}",sub_1e279c
+0x1e5514,8,leaf,arm,pass,14,,sub_1e5514
+0x1e551c,8,leaf,arm,pass,13,,sub_1e551c
+0x1e5534,8,leaf,arm,pass,14,,sub_1e5534
+0x1e5548,8,leaf,arm,pass,14,,sub_1e5548
+0x1e5614,8,leaf,arm,pass,16,,sub_1e5614
+0x1e6c50,20,calls,arm,pass,16,,sub_1e6c50
+0x1e6c64,16,calls,arm,pass,16,,sub_1e6c64
+0x1e6ca0,28,leaf,arm,pass,10,,sub_1e6ca0
+0x1e6d5c,8,leaf,arm,pass,8,,sub_1e6d5c
+0x1e811c,868,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 4, ""unicorn: Invalid memory write"": 3, ""unicorn: Invalid memory read"": 4, ""import memcpy"": 5}",sub_1e7bd4+0x27c+0x168+0x1c+0x138+0x10
+0x1e84ac,2024,calls,arm,no-coverage,0,"{""import memcpy"": 4, ""unicorn: Write to write-protected memory"": 6, ""unicorn: Invalid memory write"": 6}",sub_1e8480+0x2c
+0x1e854c,1864,calls,arm,no-coverage,0,"{""import memcpy"": 4, ""unicorn: Write to write-protected memory"": 6, ""unicorn: Invalid memory write"": 6}",sub_1e8480+0xac+0x20
+0x1f2d54,5140,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 11, ""import memcpy"": 2, ""import memset"": 3}",sub_1f2d54
+0x1f5930,12,leaf,arm,pass,16,,sub_1f5930
+0x1f593c,28,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 11, ""unicorn: Invalid memory write"": 5}",sub_1f593c
+0x1f5da8,200,calls,arm,no-coverage,2,"{""unicorn: Invalid instruction"": 7, ""unicorn: Invalid memory read"": 5, ""unicorn: Invalid memory fetch"": 1, ""unicorn: Write to write-protected memory"": 1}",sub_1f5da8
+0x2004e4,8,leaf,arm,pass,16,,sub_2004e4
+0x2005a0,24,leaf,arm,pass,13,,sub_2005a0
+0x200728,24,leaf,arm,pass,13,,sub_200728
+0x2015a4,28,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 14, ""unicorn: Invalid memory write"": 2}",sub_2015a4
+0x2017e0,240,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 8, ""unicorn: Write to write-protected memory"": 3, ""unicorn: Invalid memory write"": 5}",sub_2017e0
+0x202760,8,calls,arm,pass,8,,sub_202760
+0x2055b8,8,calls,arm,pass,16,,sub_2055b8
+0x206798,2692,leaf,arm,pass,13,,sub_206798
+0x208f30,136,calls,arm,pass,9,,sub_208f30
+0x209204,28,calls,arm,no-coverage,1,"{""unicorn: Invalid memory read"": 10, ""unicorn: Invalid memory write"": 5}",sub_209204
+0x209274,28,calls,arm,no-coverage,0,"{""unicorn: Invalid memory write"": 3, ""unicorn: Invalid memory read"": 13}",sub_209274
+0x209290,8,calls,arm,no-coverage,1,"{""unicorn: Invalid memory read"": 9, ""unicorn: Write to write-protected memory"": 3, ""unicorn: Invalid memory write"": 3}",sub_209290
+0x209a48,8,leaf,arm,pass,7,,sub_209a48
+0x209d04,340,calls,arm,pass,6,,sub_209d04
+0x2133d8,28,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 9, ""import fclose"": 6, ""unicorn: Invalid memory write"": 1}",sub_2133d8
+0x2138f8,84,calls,arm,no-coverage,0,"{""import sysctlbyname"": 16}",sub_2138f8
+0x213a54,28,calls,arm,no-coverage,1,"{""unicorn: Invalid memory read"": 9, ""unicorn: Invalid memory write"": 6}",sub_213a54
+0x21408c,16,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 7, ""unicorn: Invalid instruction"": 4, ""unicorn: Write to write-protected memory"": 4, ""import __cxa_pure_virtual"": 1}",sub_21408c
+0x2166a8,28,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 14, ""unicorn: Invalid memory write"": 2}",sub_2166a8
+0x216b50,28,calls,arm,no-coverage,3,"{""unicorn: Invalid memory read"": 12, ""unicorn: Invalid memory write"": 1}",sub_216b50
+0x217c44,32,leaf,arm,pass,9,,sub_217c44
+0x219910,768,calls,arm,pass,5,,sub_219910
+0x21a0fc,392,calls,arm,pass,10,,sub_21a0fc
+0x21b928,2528,calls,arm,no-coverage,2,"{""unicorn: Invalid memory read"": 9, ""unicorn: Invalid memory write"": 3, ""unicorn: Write to write-protected memory"": 2}",sub_21b928
+0x22056c,324,calls,arm,no-coverage,1,"{""unicorn: Write to write-protected memory"": 3, ""unicorn: Invalid memory read"": 12}",sub_22056c
+0x224eec,5400,calls,arm,no-coverage,3,"{""unicorn: Write to write-protected memory"": 6, ""unicorn: Invalid memory read"": 5, ""unicorn: Invalid memory write"": 2}",sub_224eec
+0x2267b4,24,calls,arm,no-coverage,2,"{""unicorn: Invalid memory read"": 12, ""unicorn: Invalid instruction"": 2}",sub_2267b4
+0x226848,384,calls,arm,no-coverage,2,"{""import memset"": 1, ""unicorn: Invalid memory read"": 5, ""unicorn: Write to write-protected memory"": 5, ""unicorn: Invalid memory write"": 2, ""unicorn stopped"": 1}",sub_226848
+0x2284a4,80,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 5, ""unicorn: Invalid memory read"": 8, ""unicorn: Invalid memory fetch"": 3}",sub_2284a4
+0x228ac0,4,leaf,arm,pass,16,,sub_228ac0
+0x22eba4,320,calls,arm,no-coverage,2,"{""import memset"": 12, ""unicorn: Invalid memory read"": 2}",sub_22eba4
+0x238928,84,calls,arm,pass,16,,sub_238928
+0x23c524,32,leaf,arm,pass,14,,sub_23c524
+0x23d4e8,288,calls,arm,pass,5,,sub_23d4e8
+0x23dad0,788,calls,arm,pass,9,,sub_23dad0
+0x23f1a0,60,calls,arm,no-coverage,2,"{""unicorn: Write to write-protected memory"": 4, ""unicorn: Invalid memory read"": 6, ""unicorn: Invalid instruction"": 3, ""unicorn: Invalid memory write"": 1}",sub_23f1a0
+0x2414b8,124,calls,arm,pass,16,,sub_2414b8
+0x241534,112,calls,arm,pass,16,,sub_241534
+0x241610,36,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 11, ""unicorn: Invalid memory read"": 2, ""unicorn: Invalid memory fetch"": 2, ""unicorn: Write to write-protected memory"": 1}",sub_241610
+0x2419ac,16,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 8, ""unicorn: Invalid instruction"": 8}",sub_2419ac
+0x24213c,8,leaf,arm,pass,13,,sub_24213c
+0x242a40,12,leaf,arm,no-coverage,2,"{""unicorn: Invalid memory write"": 11, ""unicorn: Write to write-protected memory"": 2, ""unicorn: Invalid memory read"": 1}",sub_242a40
+0x242c58,28,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 15, ""unicorn: Invalid memory write"": 1}",sub_242c58
+0x242e9c,92,calls,arm,no-coverage,2,"{""unicorn: Invalid memory read"": 2, ""unicorn: Write to write-protected memory"": 6, ""unicorn: Invalid instruction"": 5, ""unicorn: Invalid memory write"": 1}",sub_242e9c
+0x2430e0,216,calls,arm,pass,4,,sub_2430e0
+0x244d40,204,calls,arm,pass,5,,sub_244d40
+0x244e34,8,leaf,arm,pass,16,,sub_244e34
+0x245548,12,leaf,arm,pass,16,,sub_245548
+0x2456e4,120,calls,arm,no-coverage,1,"{""unicorn: Invalid memory read"": 5, ""unicorn: Write to write-protected memory"": 6, ""unicorn: Invalid memory write"": 4}",sub_2456e4
+0x247494,276,calls,arm,no-coverage,2,"{""unicorn: Invalid memory read"": 2, ""unicorn: Invalid memory write"": 5, ""unicorn: Write to write-protected memory"": 7}",sub_247494
+0x248610,144,calls,arm,no-coverage,3,"{""unicorn: Invalid memory read"": 8, ""unicorn: Write to write-protected memory"": 5}",sub_248610
+0x2486bc,136,calls,arm,no-coverage,1,"{""unicorn: Invalid memory read"": 10, ""unicorn: Write to write-protected memory"": 5}",sub_2486bc
+0x249768,92,calls,arm,no-coverage,3,"{""unicorn: Write to write-protected memory"": 4, ""unicorn: Invalid memory read"": 7, ""unicorn: Invalid memory write"": 2}",sub_249768
+0x2497c4,28,calls,arm,no-coverage,1,"{""unicorn: Invalid memory read"": 12, ""unicorn: Invalid memory write"": 3}",sub_2497c4
+0x24cec0,28,calls,arm,no-coverage,1,"{""unicorn: Invalid memory read"": 15}",sub_24cec0
+0x24d110,8,leaf,arm,pass,16,,sub_24d110
+0x24ded8,8,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 11, ""unicorn: Write to write-protected memory"": 3, ""unicorn: Invalid memory write"": 2}",sub_24ded8
+0x24ee24,28,calls,arm,no-coverage,1,"{""unicorn: Invalid memory read"": 13, ""unicorn: Invalid memory write"": 2}",sub_24ee24
+0x25185c,3052,calls,arm,no-coverage,1,"{""unicorn: Write to write-protected memory"": 10, ""import memset"": 1, ""unicorn: Invalid memory read"": 2, ""unicorn stopped"": 2}",sub_25185c
+0x255b88,280,leaf,arm,pass,6,,sub_255b88
+0x2565b8,568,calls,arm,no-coverage,2,"{""unicorn: Write to write-protected memory"": 5, ""unicorn: Invalid instruction"": 2, ""unicorn: Invalid memory read"": 3, ""unicorn: Invalid memory write"": 3, ""import printf"": 1}",sub_2565b8
+0x258da0,44,calls,arm,pass,12,,sub_258da0
+0x259538,152,calls,arm,pass,7,,sub_259538
+0x259654,136,calls,arm,pass,8,,sub_259654
+0x25a720,1500,calls,arm,no-coverage,1,"{""unicorn: Invalid memory read"": 6, ""unicorn: Invalid memory write"": 2, ""import memset"": 4, ""unicorn: Write to write-protected memory"": 3}",sub_25a720
+0x25c040,240,calls,arm,pass,4,,sub_25c040
+0x25c130,548,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 1, ""unicorn: Invalid memory read"": 9, ""unicorn: Write to write-protected memory"": 6}",sub_25c130
+0x25c354,372,calls,arm,no-coverage,1,"{""unicorn: Invalid memory read"": 14, ""unicorn: Invalid instruction"": 1}",sub_25c354
+0x25fba8,900,calls,arm,no-coverage,2,"{""unicorn: Write to write-protected memory"": 5, ""unicorn: Invalid memory read"": 6, ""unicorn: Invalid instruction"": 3}",sub_25fba8
+0x26705c,28,leaf,arm,pass,9,,sub_26705c
+0x2670d0,16,leaf,arm,pass,16,,sub_2670d0
+0x2673e0,12,leaf,arm,pass,16,,sub_2673e0
+0x2675b8,8,leaf,arm,pass,16,,sub_2675b8
+0x267e00,44,calls,arm,no-coverage,2,"{""unicorn: Write to write-protected memory"": 7, ""import strcmp"": 6, ""unicorn: Invalid memory write"": 1}",sub_267e00
+0x267eb0,76,leaf,arm,pass,5,,sub_267eb0
+0x2686a8,88,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 12, ""unicorn: Invalid memory read"": 2, ""unicorn: Invalid memory fetch"": 2}",sub_2686a8
+0x268b28,348,leaf,arm,pass,6,,sub_268b28
+0x26aa14,64,calls,arm,pass,11,,sub_26aa14
+0x26ae74,36,leaf,arm,pass,12,,sub_26ae74
+0x26b3dc,1252,calls,arm,pass,5,,sub_26b3dc
+0x26e7c8,112,calls,arm,pass,9,,sub_26e7c8
+0x26f8dc,28,calls,arm,no-coverage,1,"{""unicorn: Invalid memory read"": 10, ""unicorn: Invalid memory write"": 5}",sub_26f8dc
+0x26f958,60,calls,arm,pass,8,,sub_26f958
+0x271e38,544,calls,arm,pass,11,,sub_271e38
+0x272058,2676,calls,arm,pass,7,,sub_272058
+0x274264,28,calls,arm,pass,6,,sub_274264
+0x27429c,40,leaf,arm,pass,7,,sub_27429c
+0x2742fc,252,calls,arm,pass,7,,sub_2742fc
+0x2745dc,312,calls,arm,no-coverage,2,"{""unicorn: Invalid memory fetch"": 3, ""unicorn: Invalid instruction"": 7, ""import memcpy"": 4}",sub_2745dc
+0x277174,8052,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 7, ""unicorn: Invalid memory write"": 4, ""unicorn: Unhandled CPU exception"": 1, ""unicorn: Invalid memory read"": 2, ""unicorn: Write to write-protected memory"": 2}",sub_277174
+0x27abb8,184,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 13, ""unicorn: Write to write-protected memory"": 3}",sub_27abb8
+0x27c2e8,12,leaf,arm,pass,16,,sub_27c2e8
+0x27d83c,24,calls,arm,pass,6,,sub_27d83c
+0x27dbe4,100,calls,arm,pass,7,,sub_27dbe4
+0x27dfa0,28,calls,arm,no-coverage,2,"{""unicorn: Invalid memory read"": 13, ""unicorn: Invalid memory write"": 1}",sub_27dfa0
+0x27ee6c,100,calls,arm,pass,9,,sub_27ee6c
+0x280370,8,leaf,arm,pass,11,,sub_280370
+0x280fec,24,calls,arm,pass,7,,sub_280fec
+0x281088,28,leaf,arm,pass,10,,sub_281088
+0x2812ac,28,calls,arm,pass,4,,sub_2812ac
+0x282340,8,leaf,arm,pass,14,,sub_282340
+0x282458,28,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 10, ""unicorn: Invalid memory write"": 6}",sub_282458
+0x282474,172,calls,arm,pass,10,,sub_282474
+0x283a90,4,leaf,arm,pass,16,,sub_283a90
+0x283dcc,28,calls,arm,no-coverage,0,"{""import glDeleteFramebuffersOES"": 8, ""import glDeleteTextures"": 8}",sub_283dcc
+0x283fd8,4,leaf,arm,pass,16,,sub_283fd8
+0x284998,20,leaf,arm,pass,4,,sub_284998
+0x284d3c,28,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 13, ""unicorn: Invalid memory write"": 3}",sub_284d3c
+0x284d58,40,calls,arm,pass,6,,sub_284d58
+0x286d68,8,leaf,arm,pass,15,,sub_286d68
+0x287804,28,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 16}",sub_287804
+0x2889e8,8,leaf,arm,pass,6,,sub_2889e8
+0x288ce8,8,calls,arm,no-coverage,1,"{""unicorn: Invalid memory write"": 5, ""unicorn: Invalid memory read"": 9, ""unicorn: Write to write-protected memory"": 1}",sub_288ce8
+0x289834,28,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 11, ""unicorn: Invalid memory write"": 5}",sub_289834
+0x2898a4,28,calls,arm,no-coverage,1,"{""unicorn: Invalid memory read"": 13, ""unicorn: Invalid memory write"": 2}",sub_2898a4
+0x28a188,8,leaf,arm,pass,6,,sub_28a188
+0x28a1b0,8,leaf,arm,pass,16,,sub_28a1b0
+0x28a1e4,124,leaf,arm,pass,9,,sub_28a1e4
+0x28ab18,8,leaf,arm,pass,14,,sub_28ab18
+0x28ab9c,8,leaf,arm,pass,15,,sub_28ab9c
+0x28b750,644,calls,arm,pass,13,,sub_28b750
+0x28b9d4,452,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 9, ""import memset"": 6, ""unicorn: Invalid memory write"": 1}",sub_28b9d4
+0x28bdac,416,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 7, ""import memset"": 6, ""unicorn: Invalid memory write"": 2, ""unicorn: Invalid memory fetch"": 1}",sub_28bdac
+0x28d5b0,228,calls,arm,pass,6,,sub_28d5b0
+0x28e0cc,24,leaf,arm,pass,16,,sub_28e0cc
+0x28ec2c,308,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 16}",sub_28ec2c
+0x2968b4,2716,calls,arm,no-coverage,1,"{""unicorn: Invalid instruction"": 9, ""unicorn: Invalid memory fetch"": 2, ""unicorn: Invalid memory read"": 4}",sub_2968b4
+0x297b0c,424,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 16}",sub_297b0c
+0x297f40,12,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 11, ""unicorn: Invalid memory read"": 3, ""unicorn: Invalid memory fetch"": 2}",sub_297f40
+0x2985dc,100,leaf,arm,no-coverage,2,"{""unicorn: Invalid memory read"": 14}",sub_2985dc
+0x298734,16,leaf,arm,pass,16,,sub_298734
+0x298938,116,calls,arm,pass,4,,sub_298938
+0x2990b0,168,calls,arm,pass,8,,sub_2990b0
+0x2992d0,168,calls,arm,pass,4,,sub_2992d0
+0x299a2c,8,leaf,arm,pass,16,,sub_299a2c
+0x299a84,8,leaf,arm,pass,16,,sub_299a84
+0x299cbc,56,calls,arm,pass,6,,sub_299cbc
+0x299eb4,56,calls,arm,pass,6,,sub_299eb4
+0x29a39c,64,calls,arm,pass,4,,sub_29a39c
+0x29a850,116,calls,arm,no-coverage,3,"{""import memcpy"": 4, ""unicorn: Invalid memory read"": 8, ""unicorn: Write to write-protected memory"": 1}",sub_29a850
+0x29a9c0,136,calls,arm,no-coverage,3,"{""unicorn: Write to write-protected memory"": 1, ""unicorn: Invalid memory read"": 8, ""unicorn: Invalid memory write"": 2, ""import memcpy"": 2}",sub_29a9c0
+0x29b62c,84,leaf,arm,pass,4,,sub_29b62c
+0x29bef8,152,calls,arm,pass,10,,sub_29bef8
+0x29cc68,256,calls,arm,pass,5,,sub_29cc68
+0x29ce28,256,calls,arm,pass,7,,sub_29ce28
+0x29d6d8,88,calls,arm,no-coverage,0,"{""import __cxa_guard_acquire"": 16}",sub_29d6d8
+0x29e038,180,leaf,arm,no-coverage,1,"{""unicorn: Invalid memory read"": 15}",sub_29e038
+0x29f10c,68,calls,arm,pass,10,,sub_29f10c
+0x29f6b0,28,calls,arm,no-coverage,2,"{""unicorn: Invalid memory read"": 14}",sub_29f6b0
+0x29f768,28,calls,arm,no-coverage,3,"{""unicorn: Invalid memory write"": 5, ""unicorn: Invalid memory read"": 8}",sub_29f768
+0x29fc34,60,calls,arm,pass,7,,sub_29fc34
+0x2a0564,28,calls,arm,no-coverage,2,"{""unicorn: Invalid memory read"": 11, ""unicorn: Invalid memory write"": 3}",sub_2a0564
+0x2a063c,680,calls,arm,no-coverage,2,"{""unicorn stopped"": 11, ""unicorn: Invalid memory read"": 3}",sub_2a063c
+0x2a321c,88,calls,arm,no-coverage,2,"{""unicorn: Invalid memory read"": 4, ""unicorn stopped"": 9, ""import memcpy"": 1}",sub_2a321c
+0x2a6a24,1144,calls,arm,pass,6,,sub_2a6a24
+0x2af14c,1144,calls,arm,no-coverage,3,"{""unicorn: Invalid memory read"": 4, ""unicorn stopped"": 8, ""unicorn: Invalid memory write"": 1}",sub_2af14c
+0x2b2328,144,calls,arm,no-coverage,3,"{""unicorn: Invalid memory read"": 13}",sub_2b2328
+0x2b2638,12,leaf,arm,pass,16,,sub_2b2638
+0x2b2944,8,calls,arm,no-coverage,0,"{""unicorn: Invalid memory fetch"": 3, ""unicorn: Invalid memory read"": 3, ""unicorn: Invalid instruction"": 10}",sub_2b2944
+0x2b294c,72,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 7, ""unicorn: Invalid instruction"": 7, ""unicorn: Write to write-protected memory"": 1, ""unicorn: Invalid memory fetch"": 1}",sub_2b294c
+0x2b2b60,104,calls,arm,no-coverage,2,"{""unicorn: Write to write-protected memory"": 7, ""unicorn: Invalid memory read"": 6, ""unicorn: Invalid memory write"": 1}",sub_2b2b60
+0x2b382c,240,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 10, ""unicorn: Invalid memory read"": 6}",sub_2b382c
+0x2b5050,84,calls,arm,pass,15,,sub_2b5050
+0x2b50a4,16,leaf,arm,pass,14,,sub_2b50a4
+0x2b57f4,12,leaf,arm,pass,9,,sub_2b57f4
+0x2b6534,384,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 11, ""unicorn: Write to write-protected memory"": 5}",sub_2b6534
+0x2b6eb4,36,leaf,arm,pass,10,,sub_2b6eb4
+0x2b8e28,408,calls,arm,no-coverage,1,"{""unicorn: Invalid memory read"": 5, ""unicorn: Write to write-protected memory"": 10}",sub_2b8e28
+0x2bdd18,32,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 9, ""unicorn: Invalid memory read"": 5, ""unicorn: Write to write-protected memory"": 1, ""unicorn: Invalid memory fetch"": 1}",sub_2bdd18
+0x2c1170,144,calls,arm,pass,9,,sub_2c1170
+0x2c1950,92,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 5, ""unicorn: Invalid memory write"": 5, ""unicorn: Invalid memory read"": 6}",sub_2c1950
+0x2c1d28,56,calls,arm,no-coverage,1,"{""unicorn: Invalid instruction"": 12, ""unicorn: Invalid memory read"": 2, ""unicorn: Invalid memory fetch"": 1}",sub_2c1d28
+0x2c2034,88,calls,arm,pass,9,,sub_2c2034
+0x2c212c,8,leaf,arm,pass,15,,sub_2c212c
+0x2c21a8,16,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 3, ""unicorn: Invalid instruction"": 12, ""unicorn: Invalid memory fetch"": 1}",sub_2c21a8
+0x2c2de0,476,leaf,arm,no-coverage,3,"{""unicorn: Invalid memory read"": 4, ""unicorn stopped"": 9}",sub_2c2de0
+0x2c3068,208,calls,arm,no-coverage,0,"{""import memset"": 8, ""unicorn: Invalid memory read"": 7, ""unicorn: Invalid memory write"": 1}",sub_2c3068
+0x2c316c,24,leaf,arm,pass,13,,sub_2c316c
+0x2c4ab0,60,leaf,arm,no-coverage,1,"{""unicorn: Invalid memory read"": 14, ""unicorn: Invalid memory write"": 1}",sub_2c4ab0
+0x2c5114,20,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 6, ""unicorn: Invalid memory fetch"": 4, ""unicorn: Invalid instruction"": 6}",sub_2c5114
+0x2c6c5c,28,calls,arm,no-coverage,2,"{""unicorn: Invalid memory read"": 13, ""unicorn: Invalid memory write"": 1}",sub_2c6c5c
+0x2c6c78,176,calls,arm,no-coverage,2,"{""unicorn: Invalid memory read"": 8, ""unicorn: Write to write-protected memory"": 4, ""unicorn: Invalid memory write"": 2}",sub_2c6c78
+0x2c6e04,4,leaf,arm,pass,16,,sub_2c6e04
+0x2c7120,188,calls,arm,no-coverage,1,"{""unicorn: Invalid memory read"": 15}",sub_2c7120
+0x2c7354,1352,calls,arm,pass,9,,sub_2c7354
+0x2c7afc,16,calls,arm,no-coverage,3,"{""unicorn: Invalid instruction"": 9, ""unicorn: Invalid memory read"": 4}",sub_2c7afc
+0x2c7c64,164,calls,arm,pass,16,,sub_2c7c64
+0x2c872c,16,leaf,arm,pass,14,,sub_2c872c
+0x2c8b18,16,leaf,arm,pass,14,,sub_2c8b18
+0x2c8c28,16,leaf,arm,pass,14,,sub_2c8c28
+0x2cb9cc,1132,calls,arm,no-coverage,1,"{""import memset"": 10, ""unicorn: Invalid memory read"": 5}",sub_2cb9cc
+0x2cc5ec,28,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 16}",sub_2cc5ec
+0x2cc914,16,leaf,arm,pass,13,,sub_2cc914
+0x2ccf64,8,calls,arm,pass,16,,sub_2ccf64
+0x2ccf94,32,calls,arm,pass,16,,sub_2ccf94
+0x2d7944,16,leaf,arm,pass,9,,sub_2d7944
+0x2d88c8,8,leaf,arm,pass,16,,sub_2d88c8
+0x2d88f0,8,leaf,arm,pass,16,,sub_2d88f0
+0x2dbf10,88,calls,arm,pass,14,,sub_2dbf10
+0x2dd2c4,268,calls,arm,no-coverage,0,"{""import glCheckFramebufferStatusOES"": 16}",sub_2dd2c4
+0x2ddb60,364,calls,arm,no-coverage,0,"{""import glDeleteTextures"": 7, ""import glDeleteFramebuffersOES"": 9}",sub_2ddb60
+0x2df170,312,calls,arm,pass,16,,sub_2df170
+0x2e1dc0,68,calls,arm,no-coverage,1,"{""unicorn: Invalid memory read"": 8, ""unicorn: Invalid memory fetch"": 1, ""unicorn: Write to write-protected memory"": 4, ""unicorn: Invalid memory write"": 2}",sub_2e1dc0
+0x2e38d4,44,calls,arm,pass,16,,sub_2e38d4
+0x2e3aa4,16,calls,arm,no-coverage,0,"{""import puts"": 16}",sub_2e3aa4
+0x2e3e68,8,leaf,arm,pass,8,,sub_2e3e68
+0x2e3e70,100,calls,arm,no-coverage,0,"{""unicorn: Invalid instruction"": 12, ""unicorn: Invalid memory fetch"": 2, ""unicorn: Invalid memory read"": 2}",sub_2e3e70
+0x2e3f10,4,leaf,arm,pass,16,,sub_2e3f10
+0x2e4220,1260,calls,arm,no-coverage,2,"{""unicorn: Write to write-protected memory"": 6, ""unicorn: Invalid memory read"": 8}",sub_2e4220
+0x2e5ef8,4,leaf,arm,pass,16,,sub_2e5ef8
+0x2e5f28,96,calls,arm,pass,7,,sub_2e5f28
+0x2e6080,28,calls,arm,pass,7,,sub_2e6080
+0x2e744c,12,calls,arm,no-coverage,1,"{""unicorn: Invalid memory read"": 5, ""unicorn: Invalid instruction"": 8, ""unicorn: Invalid memory fetch"": 2}",sub_2e744c
+0x2ea61c,384,calls,arm,no-coverage,0,"{""import glDepthMask"": 16}",sub_2ea61c
+0x2ec550,76,calls,arm,pass,9,,sub_2ec550
+0x2ed05c,60,calls,arm,pass,10,,sub_2ed05c
+0x2ee040,476,calls,arm,pass,9,,sub_2ee040
+0x2ef1a0,744,calls,arm,no-coverage,1,"{""import printf"": 11, ""unicorn: Invalid memory read"": 2, ""unicorn: Invalid instruction"": 2}",sub_2ef1a0
+0x2f08e8,52,calls,arm,pass,12,,sub_2f08e8
+0x2f091c,80,calls,arm,pass,8,,sub_2f091c
+0x2f1f04,132,calls,thumb,no-coverage,0,"{""unicorn: Invalid memory read"": 6, ""unicorn: Invalid instruction"": 9, ""unicorn: Invalid memory fetch"": 1}",sub_2f1f04
+0x2f2fd8,68,leaf,thumb,pass,15,,sub_2f2fd8
+0x2f301c,3300,leaf,thumb,pass,15,,sub_2f301c
+0x2f3d00,720,calls,thumb,pass,11,,sub_2f3d00
+0x2f50d8,312,calls,thumb,no-coverage,0,"{""unicorn: Invalid instruction"": 7, ""unicorn: Invalid memory read"": 7, ""unicorn: Invalid memory fetch"": 1, ""unicorn: Unhandled CPU exception"": 1}",sub_2f50d8
+0x2f7474,450,calls,thumb,no-coverage,0,"{""import _Unwind_SjLj_Register"": 16}",sub_2f7474
+0x2f960c,240,calls,thumb,no-coverage,0,"{""unicorn: Invalid instruction"": 7, ""import memset"": 6, ""unicorn: Invalid memory read"": 2, ""unicorn: Invalid memory fetch"": 1}",sub_2f960c
+0x2f9978,504,calls,thumb,pass,4,,sub_2f9978
+0x2fafa8,28,leaf,thumb,pass,16,,sub_2fafa8
+0x2fb054,26,leaf,thumb,pass,11,,sub_2fb054
+0x2fb168,132,calls,thumb,no-coverage,1,"{""unicorn: Invalid instruction"": 4, ""unicorn: Invalid memory read"": 3, ""unicorn: Write to write-protected memory"": 8}",sub_2fb168
+0x2fb820,292,calls,thumb,no-coverage,0,"{""import printf"": 16}",sub_2fb820
+0x2fe2fa,22,leaf,thumb,pass,16,,sub_2fe2fa
+0x2ff1ee,30,leaf,thumb,pass,13,,ZN10Connection9GetSocketEv
+0x2ff2c6,14,leaf,thumb,pass,16,,ZN15GLXPlayerMPBase21mpProcessPushMessagesEv
+0x2ff346,28,leaf,thumb,pass,15,,ZN16GLXPlayerMPLobby10mpIsMasterEv
+0x301578,276,calls,thumb,no-coverage,0,"{""import _Unwind_SjLj_Register"": 16}",sub_301578
+0x30236a,46,calls,thumb,pass,9,,sub_30236a
+0x302706,694,calls,thumb,no-coverage,0,"{""import NSSearchPathForDirectoriesInDomains"": 16}",sub_302706
+0x304ad0,358,calls,thumb,no-coverage,0,"{""import _Unwind_SjLj_Register"": 16}",sub_304ad0
+0x304d70,22,leaf,thumb,pass,7,,sub_304d70
+0x304f7e,46,calls,thumb,pass,11,,ZNSt16reverse_iteratorISt17_Rb_tree_iteratorISt4pairIKSsSsEEEC1ES4_
+0x3050e4,60,calls,thumb,pass,11,,sub_3050e4
+0x3072f8,60,calls,thumb,no-coverage,0,"{""import _Unwind_SjLj_Register"": 9, ""import memset"": 2, ""import strlen"": 3, ""unicorn: Invalid memory write"": 2}",sub_3072f8
+0x30763c,216,leaf,thumb,pass,8,,sub_30763c
+0x307828,28,leaf,thumb,pass,8,,sub_307828
+0x30788c,212,calls,thumb,no-coverage,1,"{""unicorn: Invalid memory read"": 6, ""unicorn: Invalid instruction"": 1, ""unicorn: Write to write-protected memory"": 7, ""unicorn stopped"": 1}",sub_30788c
+0x3088b4,52,calls,thumb,pass,11,,sub_3088b4
+0x3096f4,76,leaf,arm,pass,7,,sub_3096f4
+0x30a94c,828,calls,arm,no-coverage,0,"{""import _Unwind_SjLj_Register"": 16}",sub_30a94c
+0x30acfc,112,leaf,arm,pass,8,,sub_30ac94+0x68
+0x30b3d0,432,calls,arm,pass,6,,sub_30b3d0
+0x30c204,676,calls,arm,no-coverage,1,"{""unicorn: Invalid memory read"": 14, ""unicorn stopped"": 1}",sub_30c204
+0x30cd70,60,calls,arm,pass,8,,sub_30cd70
+0x30cf88,48,calls,arm,no-coverage,0,"{""import fread"": 16}",sub_30cf88
+0x30cfb8,52,calls,arm,no-coverage,0,"{""import fread"": 16}",sub_30cfb8
+0x30d2c0,4,calls,arm,no-coverage,1,"{""import fclose"": 8, ""unicorn: Invalid memory write"": 3, ""unicorn: Write to write-protected memory"": 4}",sub_30d2c0
+0x30d5f0,124,leaf,arm,pass,8,,sub_30d5f0
+0x30e544,288,calls,arm,no-coverage,0,"{""unicorn stopped"": 13, ""unicorn: Invalid memory fetch"": 1, ""unicorn: Invalid memory read"": 2}",sub_30e544
+0x30ed84,384,calls,arm,no-coverage,0,"{""import glDisable"": 16}",sub_30ed84
+0x30ef04,60,calls,arm,pass,7,,sub_30ef04
+0x30ef68,24,leaf,arm,pass,9,,sub_30ef44+0x24
+0x310150,56,leaf,arm,pass,8,,sub_310150
+0x310274,24,leaf,arm,pass,5,,sub_310250+0x24
+0x3102b8,60,calls,arm,pass,7,,sub_3102b8
+0x3109bc,92,calls,arm,pass,5,,sub_3109bc
+0x311158,328,calls,arm,no-coverage,0,"{""import objc_msgSend"": 16}",sub_311158
+0x3112a0,484,calls,arm,pass,13,,sub_3112a0
+0x312b14,396,calls,arm,pass,16,,sub_312b14
+0x312d64,88,calls,arm,pass,14,,sub_312d18+0x4c
+0x31465c,428,calls,arm,no-coverage,0,"{""unicorn stopped"": 9, ""unicorn: Invalid instruction"": 1, ""unicorn: Invalid memory read"": 6}",sub_31465c
+0x31554c,2576,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 6, ""unicorn stopped"": 9, ""unicorn: Invalid memory fetch"": 1}",sub_31554c
+0x31651c,148,calls,arm,no-coverage,0,"{""unicorn stopped"": 9, ""unicorn: Invalid memory read"": 7}",sub_31651c
+0x31af58,52,calls,arm,pass,6,,sub_31af58
+0x31bc30,224,calls,arm,no-coverage,0,"{""import _Unwind_SjLj_Register"": 16}",sub_31bc30
+0x31d0b4,32,calls,arm,no-coverage,0,"{""import _Unwind_SjLj_Register"": 16}",sub_31d0b4
+0x31d25c,76,leaf,arm,pass,11,,sub_31d25c
+0x321bb8,308,calls,arm,pass,15,,sub_321bb8
+0x324710,20,leaf,arm,pass,10,,sub_324710
+0x324b5c,64,calls,arm,no-coverage,0,"{""unicorn: Write to write-protected memory"": 5, ""unicorn: Invalid memory read"": 11}",sub_324b5c
+0x325a28,72,calls,arm,pass,15,,sub_325a28
+0x3260ac,632,calls,arm,no-coverage,1,"{""unicorn: Invalid memory read"": 4, ""import memset"": 7, ""import memcpy"": 1, ""unicorn: Write to write-protected memory"": 1, ""unicorn: Invalid memory write"": 2}",sub_3260ac
+0x32a080,4,leaf,arm,pass,16,,sub_32a080
+0x32b948,148,calls,arm,no-coverage,1,"{""unicorn: Invalid memory read"": 5, ""import sprintf"": 7, ""unicorn: Write to write-protected memory"": 3}",sub_32b948
+0x32d140,8,leaf,arm,pass,16,,sub_32d140
+0x332978,20,leaf,arm,pass,14,,sub_332978
+0x332ef8,276,calls,arm,no-coverage,0,"{""import _Unwind_SjLj_Register"": 8, ""unicorn: Invalid memory read"": 2, ""import strcpy"": 5, ""unicorn: Write to write-protected memory"": 1}",sub_332ef8
+0x337b60,352,calls,arm,no-coverage,0,"{""unicorn stopped"": 13, ""unicorn: Invalid memory read"": 1, ""unicorn: Invalid instruction"": 1, ""unicorn: Invalid memory fetch"": 1}",sub_337b60
+0x33ad3c,1468,calls,arm,pass,13,,sub_33ad3c
+0x33be48,60,calls,arm,no-coverage,0,"{""import objc_msgSendSuper2"": 16}",sub_33be48
+0x33f670,308,calls,arm,no-coverage,0,"{""import objc_msgSend"": 16}",sub_33f608+0x68
+0x33f7a4,68,calls,arm,no-coverage,0,"{""import objc_msgSend"": 16}",sub_33f7a4
+0x33f84c,144,calls,arm,no-coverage,0,"{""import UIImageJPEGRepresentation"": 16}",sub_33f84c
+0x34015c,52,leaf,arm,pass,15,,sub_34015c
+0x34021c,868,calls,arm,no-coverage,1,"{""unicorn: Write to write-protected memory"": 10, ""unicorn: Invalid memory read"": 3, ""unicorn stopped"": 2}",sub_34021c
+0x340c58,144,calls,arm,no-coverage,0,"{""import sprintf"": 16}",sub_340c58
+0x342524,8,leaf,arm,pass,16,,sub_342524
+0x34252c,60,leaf,arm,pass,11,,sub_34252c
+0x342618,60,calls,arm,no-coverage,0,"{""import _ZNSs6assignERKSs"": 16}",sub_342618
+0x344c78,164,calls,arm,no-coverage,0,"{""unicorn stopped"": 10, ""unicorn: Invalid memory read"": 4, ""import _ZNKSs7compareERKSs"": 2}",sub_344c78
+0x34653c,64,calls,arm,no-coverage,3,"{""unicorn: Invalid memory read"": 9, ""import _Unwind_SjLj_Register"": 4}",sub_34653c
+0x3487f8,3648,calls,arm,no-coverage,0,"{""import _Unwind_SjLj_Register"": 16}",sub_3487f8
+0x34af00,8,leaf,arm,pass,16,,sub_34af00
+0x34af18,4,leaf,arm,pass,16,,sub_34af18
+0x34b3a4,44,calls,arm,no-coverage,2,"{""unicorn stopped"": 9, ""unicorn: Invalid memory read"": 5}",sub_34b3a4
+0x34c218,40,calls,arm,no-coverage,0,"{""import _ZNSt15_List_node_base6unhookEv"": 16}",sub_34c218
+0x34c35c,148,calls,arm,no-coverage,1,"{""import _ZSt18_Rb_tree_incrementPSt18_Rb_tree_node_base"": 15}",sub_34c35c
+0x34c3f0,24,leaf,arm,pass,5,,sub_34c3f0
+0x34d47c,48,leaf,arm,pass,11,,sub_34d47c
+0x34d94c,224,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 2, ""import select"": 14}",sub_34d94c
+0x350104,60,leaf,arm,pass,9,,sub_350104
+0x350274,312,calls,arm,no-coverage,0,"{""import _Unwind_SjLj_Register"": 16}",sub_350274
+0x352f34,8,leaf,arm,pass,14,,sub_352f34
+0x3532d8,164,calls,arm,no-coverage,1,"{""import _Unwind_SjLj_Register"": 8, ""unicorn: Write to write-protected memory"": 3, ""unicorn: Invalid memory read"": 4}",sub_3532d8
+0x354444,2328,calls,arm,no-coverage,0,"{""import _Unwind_SjLj_Register"": 16}",sub_354444
+0x354e40,40,calls,arm,no-coverage,0,"{""import _ZNSs6assignERKSs"": 16}",sub_354e40
+0x358a28,88,calls,arm,no-coverage,0,"{""import _Unwind_SjLj_Register"": 12, ""unicorn: Invalid memory read"": 4}",sub_358a28
+0x35a5e8,1404,calls,arm,no-coverage,0,"{""import _Unwind_SjLj_Register"": 16}",sub_35a5e8
+0x360038,172,calls,arm,pass,12,,sub_360038
+0x364460,32,leaf,arm,pass,7,,sub_364460
+0x365c94,4,calls,arm,no-coverage,0,"{""import _Unwind_SjLj_Register"": 16}",sub_365c94
+0x365c98,8,calls,arm,no-coverage,0,"{""import _Unwind_SjLj_Register"": 16}",sub_365c98
+0x36be4c,8,leaf,arm,pass,16,,sub_36be4c
+0x36be5c,284,calls,arm,no-coverage,0,"{""import _Unwind_SjLj_Register"": 16}",sub_36be5c
+0x36cb5c,24,leaf,arm,pass,9,,sub_36cb5c
+0x36cf80,28,calls,arm,pass,9,,sub_36cf80
+0x36d1d4,272,calls,arm,no-coverage,0,"{""import _Unwind_SjLj_Register"": 16}",sub_36d1d4
+0x371ad0,44,calls,arm,no-coverage,3,"{""import memset"": 11, ""import _ZSt17__throw_bad_allocv"": 2}",sub_371ad0
+0x371afc,280,calls,arm,no-coverage,0,"{""import _Unwind_SjLj_Register"": 16}",sub_371afc
+0x371d14,68,calls,arm,no-coverage,0,"{""import _ZSt28_Rb_tree_rebalance_for_erasePSt18_Rb_tree_node_baseRS_"": 16}",sub_371d14
+0x372b2c,4,calls,arm,no-coverage,0,"{""import _Unwind_SjLj_Register"": 16}",sub_372b2c
+0x373794,232,calls,arm,no-coverage,0,"{""import _ZSt18_Rb_tree_decrementPSt18_Rb_tree_node_base"": 10, ""import _ZNKSs7compareERKSs"": 6}",sub_373794
+0x376cac,4,calls,arm,no-coverage,0,"{""import _Unwind_SjLj_Register"": 16}",sub_376cac
+0x378a8c,64,leaf,arm,pass,10,,sub_378a8c
+0x378d2c,36,calls,arm,pass,13,,sub_378d2c
+0x378e8c,68,calls,arm,no-coverage,0,"{""import _ZSt28_Rb_tree_rebalance_for_erasePSt18_Rb_tree_node_baseRS_"": 16}",sub_378e8c
+0x381b58,824,calls,arm,no-coverage,0,"{""import _Unwind_SjLj_Register"": 16}",sub_381b4c+0xc
+0x3820ec,32,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 4, ""unicorn stopped"": 11, ""unicorn: Invalid instruction"": 1}",sub_3820ec
+0x382f40,32,calls,arm,no-coverage,0,"{""import _ZNSs6assignERKSs"": 14, ""import _Unwind_SjLj_Register"": 2}",sub_382f40
+0x383a84,2204,calls,arm,no-coverage,0,"{""import _Unwind_SjLj_Register"": 16}",sub_383a84
+0x384538,48,calls,arm,no-coverage,0,"{""unicorn stopped"": 14, ""unicorn: Invalid instruction"": 1, ""unicorn: Invalid memory read"": 1}",sub_384538
+0x384dd0,8,calls,arm,pass,12,,sub_384dd0
+0x385a90,560,calls,arm,no-coverage,0,"{""import _Unwind_SjLj_Register"": 16}",sub_385a90
+0x387d8c,324,calls,arm,no-coverage,0,"{""import _Unwind_SjLj_Register"": 16}",sub_387d8c
+0x388034,28,calls,arm,pass,16,,sub_388034
+0x3883b8,40,calls,arm,pass,14,,sub_3883b8
+0x389d8c,428,calls,arm,no-coverage,0,"{""import _Unwind_SjLj_Register"": 16}",sub_389d8c
+0x38cd5c,4,calls,arm,no-coverage,0,"{""import _Unwind_SjLj_Register"": 16}",sub_38cd5c
+0x38e948,236,calls,arm,pass,16,,sub_38e948
+0x38ea60,96,calls,arm,no-coverage,0,"{""import gethostname"": 16}",sub_38ea60
+0x38ed80,64,calls,arm,no-coverage,0,"{""import close"": 16}",sub_38ed80
+0x38f1dc,264,calls,arm,pass,5,,sub_38f1dc
+0x38fb50,128,calls,arm,no-coverage,0,"{""import recvfrom"": 16}",sub_38fb50
+0x39060c,52,calls,arm,no-coverage,0,"{""import _Unwind_SjLj_Register"": 16}",sub_3905cc+0x40
+0x39079c,304,calls,arm,pass,7,,sub_39079c
+0x391474,8,leaf,arm,no-coverage,0,"{""unicorn stopped"": 3, ""import sprintf"": 12, ""unicorn: Invalid memory read"": 1}",sub_391474
+0x39147c,84,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 2, ""import sprintf"": 11, ""unicorn stopped"": 3}",sub_39147c
+0x39154c,20,leaf,arm,pass,11,,sub_391524+0x28
+0x39186c,84,calls,arm,no-coverage,0,"{""import sprintf"": 16}",sub_39186c
+0x391b0c,84,calls,arm,no-coverage,0,"{""import sprintf"": 16}",sub_391b0c
+0x391e44,16,leaf,arm,pass,6,,sub_391e44
+0x391f50,4,leaf,arm,pass,16,,sub_391f50
+0x391ff8,28,calls,arm,no-coverage,0,"{""import fclose"": 16}",sub_391ff8
+0x392268,48,calls,arm,no-coverage,0,"{""import memset"": 11, ""unicorn: Invalid memory read"": 5}",sub_392268
+0x3924e8,32,leaf,arm,pass,7,,sub_3924e8
+0x3928d8,20,calls,arm,pass,11,,sub_3928d8
+0x393a44,192,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 8, ""unicorn stopped"": 6, ""unicorn: Invalid instruction"": 2}",sub_393a44
+0x394098,120,calls,arm,no-coverage,0,"{""import sprintf"": 16}",sub_394098
+0x3948d8,196,calls,arm,no-coverage,0,"{""import sprintf"": 16}",sub_3948d8
+0x395360,264,calls,arm,no-coverage,0,"{""unicorn: Invalid memory read"": 3, ""unicorn: Write to write-protected memory"": 2, ""unicorn: Invalid memory write"": 3, ""import _Unwind_SjLj_Register"": 8}",sub_395250+0x110
+0x395838,24,calls,arm,no-coverage,0,"{""import _ZNSt8ios_base4InitD1Ev"": 16}",sub_395838
+0x395850,40,calls,arm,pass,16,,sub_395850
+0x395a78,2100,calls,arm,pass,16,,sub_395a78

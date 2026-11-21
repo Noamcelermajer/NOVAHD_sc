@@ -1,0 +1,7 @@
+build/
+*.ipa
+*.obb
+*.apk
+*.i64
+__pycache__/
+/NovaHD
