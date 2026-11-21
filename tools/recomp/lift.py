@@ -400,8 +400,10 @@ class Lifter:
         elif len(ops) == 2:
             dst = ops[0]
             a, o = (None, ops[1]) if name in ("mov", "mvn") else (ops[0], ops[1])
-        else:
+        elif len(ops) == 3:
             dst, a, o = ops
+        else:
+            raise Unsupported(f"{name} with {len(ops)} operands")
         if dst is not None and self.reg(dst.reg) == 15 and self.sbit:
             raise Unsupported("flag-setting write to pc (exception return)")
         setup, b, carry = self.op2(o)
@@ -756,8 +758,8 @@ def entries(image: Image) -> dict:
             parent = out[ordered[k]]
             if not parent.address < t < parent.address + parent.size or parent.is_data(t):
                 continue
-            if getattr(parent, "thumb", False) and t & 1 == 0 and is_bl and False:
-                continue
+            if getattr(parent, "thumb", False) != getattr(f, "thumb", False) and not is_bl:
+                continue  # a plain branch never changes mode: this target is not code of that parent
             g = Function(t, parent.address + parent.size - t, f"{parent.name}+0x{t - parent.address:x}",
                          [(max(s, t), e) for s, e in parent.data_ranges if e > t], getattr(parent, "thumb", False))
             out[t] = g

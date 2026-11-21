@@ -343,7 +343,10 @@ class _Descent:
                     continue
                 if name == "b" or (name in ("cbz", "cbnz")):
                     t = ops[-1].imm & 0xFFFFFFFF
-                    todo.append(t)
+                    if t < start and not thumb:  # backwards out of the function: a tail call (static initializer helpers)
+                        calls.add((t, thumb))
+                    else:
+                        todo.append(t)
                     if name == "b" and _uncond(i):
                         break
                     pc = nxt
