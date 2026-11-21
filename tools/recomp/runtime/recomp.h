@@ -81,6 +81,7 @@ enum {
 void rc_dispatch(struct cpu *c, uint8_t *m, uint32_t target);
 void rc_import(struct cpu *c, uint8_t *m, uint32_t slot);
 void rc_hostcall(struct cpu *c, uint8_t *m, uint32_t slot); /* runtime functions called through a game address */
+int rc_is_entry(uint32_t target); /* a function entry, import or host function (Thumb bit ignored) */
 
 /* Loads and stores (little-endian host, unaligned allowed as on ARMv7). */
 #define RC_LD(bits)                                                                         \

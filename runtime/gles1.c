@@ -1,0 +1,893 @@
+/* OpenGL ES 1.1 imports, forwarded to the host's GL (an ANGLE ES1 context on Windows, libGLESv1_CM through EGL on
+ * Android), and the iOS drawable mapped onto the EGL window surface.
+ *
+ * Shims. Every gl* import of the executable is a host function that looks its host entry point up once through
+ * rt_gl_getproc (the OES name first; for the framebuffer-object calls the core GLES2 name as a fallback) and
+ * calls it with the arguments translated from the iOS softfp ABI:
+ *   GLenum/GLint/GLuint/GLsizei/GLbitfield/GLfixed   one argument word each, as is
+ *   GLfloat                                          its bits in one argument word (rt_farg)
+ *   GLboolean/GLubyte                                the low byte of a word
+ *   pointers                                         game addresses -> rt_mem + addr
+ * except the client-array pointers (glVertexPointer, glTexCoordPointer, glColorPointer, glNormalPointer) while a
+ * buffer object is bound to GL_ARRAY_BUFFER, and the glDrawElements indices while one is bound to
+ * GL_ELEMENT_ARRAY_BUFFER: those are offsets into the buffer and pass unchanged. The bindings are tracked here.
+ * The GLfixed (x) variants go to the host's x entry point, or to the float one converted when it has none.
+ *
+ * Headless runs (rt_gl_getproc NULL, or a function the host lacks): a shim does nothing and returns 0, except
+ * that glGen* hand out distinct names (the game keeps and compares them), glCheckFramebufferStatusOES reports
+ * complete, and the state tracked here (bindings, the drawable) answers its queries as usual.
+ *
+ * glGetString: the host string is copied into game memory once per name (the game keeps the pointer; it checks
+ * for NULL, so a headless run returns 0). GL_EXTENSIONS also lists the formats emulated here.
+ * Textures: the game's textures are PVRTC; when the host does not list GL_IMG_texture_compression_pvrtc each
+ * glCompressedTexImage2D level is decoded to RGBA8 in software and uploaded with glTexImage2D. GL_BGRA_EXT
+ * pixel data (APPLE_texture_format_BGRA8888, RGBA internal format) is swapped to RGBA before upload.
+ * glGetPointerv: the host writes a host pointer (8 bytes on 64-bit hosts) into a local, converted back to the
+ * 32-bit game address (or the buffer offset) the game passed.
+ *
+ * The drawable. On iOS the game creates its own framebuffer object and colour renderbuffer, gives the renderbuffer
+ * the layer's storage with -[EAGLContext renderbufferStorage:fromDrawable:] (UIKit then calls rt_gl_bind_drawable
+ * with the renderbuffer bound at that moment, which it reads with glGetIntegerv(GL_RENDERBUFFER_BINDING_OES)), adds
+ * a depth renderbuffer, and presents with -presentRenderbuffer: (rt_gl_present). With EGL the window surface is
+ * framebuffer 0 and already has depth, so:
+ *   - the renderbuffer passed to rt_gl_bind_drawable is the drawable renderbuffer; the framebuffer it gets attached
+ *     to (glFramebufferRenderbufferOES, in either order with rt_gl_bind_drawable) is the drawable framebuffer;
+ *   - glBindFramebufferOES(drawable framebuffer) binds 0 on the host; glGetIntegerv(GL_FRAMEBUFFER_BINDING_OES)
+ *     still answers the game's name;
+ *   - storage and attachment calls for the drawable renderbuffer, and for renderbuffers attached to the drawable
+ *     framebuffer as depth/stencil, are ignored; glGetRenderbufferParameterivOES on the drawable renderbuffer
+ *     answers the drawable size (RGBA8), glGetFramebufferAttachmentParameterivOES on the drawable framebuffer the
+ *     game's own attachments, and glCheckFramebufferStatusOES on it GL_FRAMEBUFFER_COMPLETE_OES;
+ *   - every other (offscreen) framebuffer and renderbuffer passes through.
+ * GL calls come from the game's render thread only, so the tracked state needs no lock.
+ */
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "rt.h"
+
+#if defined(_WIN32) && !defined(_WIN64)
+#define GLAPI __stdcall
+#else
+#define GLAPI
+#endif
+
+/* ---- GL constants used here ---------------------------------------------------------------------------------- */
+#define GL_NO_ERROR 0
+#define GL_RENDERBUFFER_BINDING_OES 0x8CA7
+#define GL_FRAMEBUFFER_BINDING_OES 0x8CA6
+#define GL_ARRAY_BUFFER 0x8892
+#define GL_ELEMENT_ARRAY_BUFFER 0x8893
+#define GL_ARRAY_BUFFER_BINDING 0x8894
+#define GL_ELEMENT_ARRAY_BUFFER_BINDING 0x8895
+#define GL_FRAMEBUFFER_COMPLETE_OES 0x8CD5
+#define GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE_OES 0x8CD0
+#define GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME_OES 0x8CD1
+#define GL_COLOR_ATTACHMENT0_OES 0x8CE0
+#define GL_RENDERBUFFER_OES 0x8D41
+#define GL_RENDERBUFFER_WIDTH_OES 0x8D42
+#define GL_RENDERBUFFER_HEIGHT_OES 0x8D43
+#define GL_RENDERBUFFER_INTERNAL_FORMAT_OES 0x8D44
+#define GL_RENDERBUFFER_RED_SIZE_OES 0x8D50
+#define GL_RENDERBUFFER_GREEN_SIZE_OES 0x8D51
+#define GL_RENDERBUFFER_BLUE_SIZE_OES 0x8D52
+#define GL_RENDERBUFFER_ALPHA_SIZE_OES 0x8D53
+#define GL_RENDERBUFFER_DEPTH_SIZE_OES 0x8D54
+#define GL_RENDERBUFFER_STENCIL_SIZE_OES 0x8D55
+#define GL_RGBA8_OES 0x8058
+#define GL_RGB_SCALE 0x8573
+#define GL_ALPHA_SCALE 0x0D1C
+
+/* ---- host entry points ------------------------------------------------------------------------------------------ */
+typedef struct {
+    const char *names[2]; /* tried in order */
+    void *fn;
+    int tried;
+} glproc;
+
+static void *gl_lookup(glproc *p) {
+    if (p->tried) return p->fn;
+    if (!rt_gl_getproc) return NULL; /* headless (or not set yet): look again next time */
+    p->tried = 1;
+    for (int k = 0; k < 2 && p->names[k] && !p->fn; k++) p->fn = rt_gl_getproc(p->names[k]);
+    if (!p->fn) rt_log("gl: host has no %s (ignored)", p->names[0]);
+    return p->fn;
+}
+
+/* DECL(name, return, (parameters)) declares the host type T_name and its lookup record; DECL2 adds a second name */
+#define DECL2(name, alt, ret, params) \
+    typedef ret (GLAPI *T_##name) params; \
+    static glproc P_##name = {{#name, alt}, NULL, 0};
+#define DECL(name, ret, params) DECL2(name, NULL, ret, params)
+#define F(name) ((T_##name)gl_lookup(&P_##name))
+
+#define A(k) rt_arg(c, k)
+#define FA(k) rt_farg(c, k)
+#define B(k) ((uint8_t)rt_arg(c, k))
+#define RET(v) rt_ret(c, (uint32_t)(v))
+#define IMP(name) static void imp_##name(cpu_t *c)
+#define REG(name) rt_import_register(#name, imp_##name)
+
+typedef uint32_t E; /* GLenum, GLuint, GLbitfield */
+typedef int32_t I;  /* GLint, GLsizei, GLfixed */
+
+DECL(glActiveTexture, void, (E))
+DECL(glAlphaFunc, void, (E, float))
+DECL(glBindBuffer, void, (E, E))
+DECL2(glBindFramebufferOES, "glBindFramebuffer", void, (E, E))
+DECL2(glBindRenderbufferOES, "glBindRenderbuffer", void, (E, E))
+DECL(glBindTexture, void, (E, E))
+DECL(glBlendFunc, void, (E, E))
+DECL(glBufferData, void, (E, intptr_t, const void *, E))
+DECL(glBufferSubData, void, (E, intptr_t, intptr_t, const void *))
+DECL2(glCheckFramebufferStatusOES, "glCheckFramebufferStatus", E, (E))
+DECL(glClear, void, (E))
+DECL(glClearColor, void, (float, float, float, float))
+DECL(glClearDepthf, void, (float))
+DECL(glClientActiveTexture, void, (E))
+DECL(glClipPlanef, void, (E, const float *))
+DECL(glColor4f, void, (float, float, float, float))
+DECL(glColor4ub, void, (uint8_t, uint8_t, uint8_t, uint8_t))
+DECL(glColor4x, void, (I, I, I, I))
+DECL(glColorMask, void, (uint8_t, uint8_t, uint8_t, uint8_t))
+DECL(glColorPointer, void, (I, E, I, const void *))
+DECL(glCompressedTexImage2D, void, (E, I, E, I, I, I, I, const void *))
+DECL(glCopyTexImage2D, void, (E, I, E, I, I, I, I, I))
+DECL(glCullFace, void, (E))
+DECL(glDeleteBuffers, void, (I, const E *))
+DECL2(glDeleteFramebuffersOES, "glDeleteFramebuffers", void, (I, const E *))
+DECL2(glDeleteRenderbuffersOES, "glDeleteRenderbuffers", void, (I, const E *))
+DECL(glDeleteTextures, void, (I, const E *))
+DECL(glDepthFunc, void, (E))
+DECL(glDepthMask, void, (uint8_t))
+DECL(glDepthRangef, void, (float, float))
+DECL(glDisable, void, (E))
+DECL(glDisableClientState, void, (E))
+DECL(glDrawArrays, void, (E, I, I))
+DECL(glDrawElements, void, (E, I, E, const void *))
+DECL(glEnable, void, (E))
+DECL(glEnableClientState, void, (E))
+DECL(glFlush, void, (void))
+DECL(glFogf, void, (E, float))
+DECL(glFogfv, void, (E, const float *))
+DECL2(glFramebufferRenderbufferOES, "glFramebufferRenderbuffer", void, (E, E, E, E))
+DECL2(glFramebufferTexture2DOES, "glFramebufferTexture2D", void, (E, E, E, E, I))
+DECL(glFrontFace, void, (E))
+DECL(glFrustumf, void, (float, float, float, float, float, float))
+DECL(glGenBuffers, void, (I, E *))
+DECL2(glGenFramebuffersOES, "glGenFramebuffers", void, (I, E *))
+DECL2(glGenRenderbuffersOES, "glGenRenderbuffers", void, (I, E *))
+DECL(glGenTextures, void, (I, E *))
+DECL(glGetBooleanv, void, (E, uint8_t *))
+DECL(glGetError, E, (void))
+DECL(glGetFloatv, void, (E, float *))
+DECL2(glGetFramebufferAttachmentParameterivOES, "glGetFramebufferAttachmentParameteriv", void, (E, E, E, I *))
+DECL(glGetIntegerv, void, (E, I *))
+DECL(glGetPointerv, void, (E, void **))
+DECL2(glGetRenderbufferParameterivOES, "glGetRenderbufferParameteriv", void, (E, E, I *))
+DECL(glGetString, const char *, (E))
+DECL(glHint, void, (E, E))
+DECL(glIsEnabled, uint8_t, (E))
+DECL(glLightModelfv, void, (E, const float *))
+DECL(glLightf, void, (E, E, float))
+DECL(glLightfv, void, (E, E, const float *))
+DECL(glLineWidth, void, (float))
+DECL(glLoadIdentity, void, (void))
+DECL(glLoadMatrixf, void, (const float *))
+DECL(glMaterialf, void, (E, E, float))
+DECL(glMaterialfv, void, (E, E, const float *))
+DECL(glMatrixMode, void, (E))
+DECL(glMultMatrixf, void, (const float *))
+DECL(glNormal3f, void, (float, float, float))
+DECL(glNormalPointer, void, (E, I, const void *))
+DECL(glOrthof, void, (float, float, float, float, float, float))
+DECL(glOrthox, void, (I, I, I, I, I, I))
+DECL(glPixelStorei, void, (E, I))
+DECL(glPointParameterf, void, (E, float))
+DECL(glPointSize, void, (float))
+DECL(glPolygonOffset, void, (float, float))
+DECL(glPopMatrix, void, (void))
+DECL(glPushMatrix, void, (void))
+DECL(glReadPixels, void, (I, I, I, I, E, E, void *))
+DECL2(glRenderbufferStorageOES, "glRenderbufferStorage", void, (E, E, I, I))
+DECL(glRotatef, void, (float, float, float, float))
+DECL(glRotatex, void, (I, I, I, I))
+DECL(glScalef, void, (float, float, float))
+DECL(glScalex, void, (I, I, I))
+DECL(glScissor, void, (I, I, I, I))
+DECL(glShadeModel, void, (E))
+DECL(glStencilFunc, void, (E, I, E))
+DECL(glStencilMask, void, (E))
+DECL(glStencilOp, void, (E, E, E))
+DECL(glTexCoordPointer, void, (I, E, I, const void *))
+DECL(glTexEnvf, void, (E, E, float))
+DECL(glTexEnvfv, void, (E, E, const float *))
+DECL(glTexEnvi, void, (E, E, I))
+DECL(glTexEnvx, void, (E, E, I))
+DECL(glTexImage2D, void, (E, I, I, I, I, I, E, E, const void *))
+DECL(glTexParameterf, void, (E, E, float))
+DECL(glTexParameteri, void, (E, E, I))
+DECL(glTexSubImage2D, void, (E, I, I, I, I, I, E, E, const void *))
+DECL(glTranslatef, void, (float, float, float))
+DECL(glTranslatex, void, (I, I, I))
+DECL(glVertexPointer, void, (I, E, I, const void *))
+DECL(glViewport, void, (I, I, I, I))
+
+static float fx(int32_t v) { return (float)v / 65536.0f; } /* GLfixed -> GLfloat */
+
+/* ---- tracked state ------------------------------------------------------------------------------------------- */
+static uint32_t array_buffer, element_buffer;     /* GL_ARRAY_BUFFER / GL_ELEMENT_ARRAY_BUFFER bindings */
+static uint32_t bound_fb, bound_rb;               /* the game's view of the bindings */
+static uint32_t drawable_rb, drawable_fb;         /* the window (0 until known) */
+static int drawable_w, drawable_h;
+static uint32_t fake_names = 0x10000;             /* glGen* names in headless runs */
+
+#define MAX_ATTACH 32
+/* drawable-framebuffer depth/stencil renderbuffers (ignored), and the colour renderbuffer attached to each
+ * framebuffer seen so far (for a drawable bound after its framebuffer was set up) */
+static uint32_t drawable_extra_rb[MAX_ATTACH];
+static uint32_t drawable_extra_att[MAX_ATTACH];
+static struct { uint32_t fb, rb; } color_att[MAX_ATTACH];
+
+static int is_drawable_extra(uint32_t rb) {
+    if (!rb) return 0;
+    for (int k = 0; k < MAX_ATTACH; k++) if (drawable_extra_rb[k] == rb) return 1;
+    return 0;
+}
+static void add_drawable_extra(uint32_t attachment, uint32_t rb) {
+    int free_slot = -1;
+    for (int k = 0; k < MAX_ATTACH; k++) {
+        if (drawable_extra_att[k] == attachment && drawable_extra_rb[k]) { drawable_extra_rb[k] = rb; return; }
+        if (!drawable_extra_rb[k] && free_slot < 0) free_slot = k;
+    }
+    if (free_slot >= 0) { drawable_extra_rb[free_slot] = rb; drawable_extra_att[free_slot] = attachment; }
+    else rt_log("gl: too many drawable attachments");
+}
+static uint32_t drawable_extra_for(uint32_t attachment) {
+    for (int k = 0; k < MAX_ATTACH; k++)
+        if (drawable_extra_rb[k] && drawable_extra_att[k] == attachment) return drawable_extra_rb[k];
+    return 0;
+}
+static void set_color_att(uint32_t fb, uint32_t rb) {
+    int free_slot = -1;
+    for (int k = 0; k < MAX_ATTACH; k++) {
+        if (color_att[k].fb == fb) { color_att[k].rb = rb; if (!rb) color_att[k].fb = 0; return; }
+        if (!color_att[k].fb && free_slot < 0) free_slot = k;
+    }
+    if (rb && free_slot >= 0) { color_att[free_slot].fb = fb; color_att[free_slot].rb = rb; }
+}
+static int is_drawable_fb(uint32_t fb) { return fb && fb == drawable_fb; }
+static uint32_t host_fb(uint32_t fb) { return is_drawable_fb(fb) ? 0 : fb; }
+
+static void host_bind_fb(E target, uint32_t fb) {
+    T_glBindFramebufferOES f = F(glBindFramebufferOES);
+    if (f) f(target ? target : 0x8D40 /* GL_FRAMEBUFFER_OES */, host_fb(fb));
+}
+
+/* that framebuffer becomes the window */
+static void make_drawable_fb(uint32_t fb) {
+    if (drawable_fb == fb) return;
+    drawable_fb = fb;
+    memset(drawable_extra_rb, 0, sizeof drawable_extra_rb);
+    if (bound_fb == fb) host_bind_fb(0, fb);
+}
+
+void rt_gl_bind_drawable(uint32_t renderbuffer, int width, int height) {
+    drawable_rb = renderbuffer;
+    drawable_w = width;
+    drawable_h = height;
+    if (rt_verbose) rt_log("gl: drawable renderbuffer %u (%dx%d)", renderbuffer, width, height);
+    for (int k = 0; k < MAX_ATTACH; k++)
+        if (renderbuffer && color_att[k].fb && color_att[k].rb == renderbuffer) make_drawable_fb(color_att[k].fb);
+}
+
+void rt_gl_present(void) { rt_platform_swap(); }
+
+/* ---- pointers ---------------------------------------------------------------------------------------------- */
+static const void *array_ptr(uint32_t v) { return array_buffer ? (const void *)(uintptr_t)v : G(v); }
+static const void *index_ptr(uint32_t v) { return element_buffer ? (const void *)(uintptr_t)v : G(v); }
+
+/* glGen*: host names, or distinct made-up names when headless */
+static void gen_names(void (GLAPI *f)(I, E *), int32_t n, uint32_t out) {
+    if (n <= 0 || !out) return;
+    if (f) { f(n, (E *)G(out)); return; }
+    for (int32_t k = 0; k < n; k++) rt_st32(out + 4u * (uint32_t)k, fake_names++);
+}
+
+/* ---- buffers --------------------------------------------------------------------------------------------- */
+IMP(glBindBuffer) {
+    E target = A(0), buf = A(1);
+    if (target == GL_ARRAY_BUFFER) array_buffer = buf;
+    else if (target == GL_ELEMENT_ARRAY_BUFFER) element_buffer = buf;
+    T_glBindBuffer f = F(glBindBuffer); if (f) f(target, buf);
+}
+IMP(glGenBuffers) { gen_names(F(glGenBuffers), (I)A(0), A(1)); }
+IMP(glDeleteBuffers) {
+    I n = (I)A(0); uint32_t p = A(1);
+    for (I k = 0; k < n && p; k++) {
+        uint32_t b = rt_ld32(p + 4u * (uint32_t)k);
+        if (b && b == array_buffer) array_buffer = 0;
+        if (b && b == element_buffer) element_buffer = 0;
+    }
+    T_glDeleteBuffers f = F(glDeleteBuffers); if (f && n > 0) f(n, (const E *)G(p));
+}
+IMP(glBufferData) { T_glBufferData f = F(glBufferData); if (f) f(A(0), (intptr_t)(I)A(1), G(A(2)), A(3)); }
+IMP(glBufferSubData) { T_glBufferSubData f = F(glBufferSubData); if (f) f(A(0), (intptr_t)(I)A(1), (intptr_t)(I)A(2), G(A(3))); }
+
+/* ---- client arrays and drawing ---------------------------------------------------------------------------------- */
+IMP(glVertexPointer) { T_glVertexPointer f = F(glVertexPointer); if (f) f((I)A(0), A(1), (I)A(2), array_ptr(A(3))); }
+IMP(glTexCoordPointer) { T_glTexCoordPointer f = F(glTexCoordPointer); if (f) f((I)A(0), A(1), (I)A(2), array_ptr(A(3))); }
+IMP(glColorPointer) { T_glColorPointer f = F(glColorPointer); if (f) f((I)A(0), A(1), (I)A(2), array_ptr(A(3))); }
+IMP(glNormalPointer) { T_glNormalPointer f = F(glNormalPointer); if (f) f(A(0), (I)A(1), array_ptr(A(2))); }
+IMP(glDrawElements) { T_glDrawElements f = F(glDrawElements); if (f) f(A(0), (I)A(1), A(2), index_ptr(A(3))); }
+IMP(glDrawArrays) { T_glDrawArrays f = F(glDrawArrays); if (f) f(A(0), (I)A(1), (I)A(2)); }
+IMP(glEnableClientState) { T_glEnableClientState f = F(glEnableClientState); if (f) f(A(0)); }
+IMP(glDisableClientState) { T_glDisableClientState f = F(glDisableClientState); if (f) f(A(0)); }
+IMP(glClientActiveTexture) { T_glClientActiveTexture f = F(glClientActiveTexture); if (f) f(A(0)); }
+IMP(glGetPointerv) {
+    uint32_t out = A(1);
+    T_glGetPointerv f = F(glGetPointerv);
+    if (!out) return;
+    if (!f) { rt_st32(out, 0); return; }
+    void *p = NULL;
+    f(A(0), &p);
+    uintptr_t v = (uintptr_t)p, base = (uintptr_t)rt_mem;
+    /* a game pointer comes back as rt_mem + addr; a buffer offset as itself */
+    rt_st32(out, (v >= base && v - base <= 0xffffffffu) ? (uint32_t)(v - base) : (uint32_t)v);
+}
+
+/* ---- framebuffers and renderbuffers (the drawable) ----------------------------------------------------------------- */
+IMP(glGenFramebuffersOES) { gen_names(F(glGenFramebuffersOES), (I)A(0), A(1)); }
+IMP(glGenRenderbuffersOES) { gen_names(F(glGenRenderbuffersOES), (I)A(0), A(1)); }
+IMP(glBindFramebufferOES) {
+    bound_fb = A(1);
+    host_bind_fb(A(0), bound_fb);
+}
+IMP(glBindRenderbufferOES) {
+    bound_rb = A(1);
+    T_glBindRenderbufferOES f = F(glBindRenderbufferOES); if (f) f(A(0), bound_rb);
+}
+IMP(glDeleteFramebuffersOES) {
+    I n = (I)A(0); uint32_t p = A(1);
+    for (I k = 0; k < n && p; k++) {
+        uint32_t fb = rt_ld32(p + 4u * (uint32_t)k);
+        if (!fb) continue;
+        if (fb == bound_fb) bound_fb = 0;
+        if (fb == drawable_fb) { drawable_fb = 0; memset(drawable_extra_rb, 0, sizeof drawable_extra_rb); }
+        set_color_att(fb, 0);
+    }
+    T_glDeleteFramebuffersOES f = F(glDeleteFramebuffersOES); if (f && n > 0) f(n, (const E *)G(p));
+}
+IMP(glDeleteRenderbuffersOES) {
+    I n = (I)A(0); uint32_t p = A(1);
+    for (I k = 0; k < n && p; k++) {
+        uint32_t rb = rt_ld32(p + 4u * (uint32_t)k);
+        if (!rb) continue;
+        if (rb == bound_rb) bound_rb = 0;
+        if (rb == drawable_rb) drawable_rb = 0;
+        for (int j = 0; j < MAX_ATTACH; j++) {
+            if (drawable_extra_rb[j] == rb) drawable_extra_rb[j] = 0;
+            if (color_att[j].fb && color_att[j].rb == rb) color_att[j].fb = color_att[j].rb = 0;
+        }
+    }
+    T_glDeleteRenderbuffersOES f = F(glDeleteRenderbuffersOES); if (f && n > 0) f(n, (const E *)G(p));
+}
+IMP(glRenderbufferStorageOES) {
+    /* the window's colour buffer, and the depth buffer the EGL surface already has */
+    if (bound_rb && (bound_rb == drawable_rb || is_drawable_extra(bound_rb))) return;
+    T_glRenderbufferStorageOES f = F(glRenderbufferStorageOES); if (f) f(A(0), A(1), (I)A(2), (I)A(3));
+}
+IMP(glFramebufferRenderbufferOES) {
+    E target = A(0), attachment = A(1), rbtarget = A(2), rb = A(3);
+    if (attachment == GL_COLOR_ATTACHMENT0_OES && bound_fb) set_color_att(bound_fb, rb);
+    if (attachment == GL_COLOR_ATTACHMENT0_OES && rb && rb == drawable_rb && bound_fb) {
+        make_drawable_fb(bound_fb);
+        return;
+    }
+    if (is_drawable_fb(bound_fb)) {
+        if (attachment != GL_COLOR_ATTACHMENT0_OES) add_drawable_extra(attachment, rb);
+        return; /* the window surface's own buffers stand in */
+    }
+    T_glFramebufferRenderbufferOES f = F(glFramebufferRenderbufferOES); if (f) f(target, attachment, rbtarget, rb);
+}
+IMP(glFramebufferTexture2DOES) {
+    if (is_drawable_fb(bound_fb)) { rt_log("gl: texture attached to the window framebuffer (ignored)"); return; }
+    if (A(1) == GL_COLOR_ATTACHMENT0_OES && bound_fb) set_color_att(bound_fb, 0);
+    T_glFramebufferTexture2DOES f = F(glFramebufferTexture2DOES); if (f) f(A(0), A(1), A(2), A(3), (I)A(4));
+}
+IMP(glCheckFramebufferStatusOES) {
+    T_glCheckFramebufferStatusOES f = F(glCheckFramebufferStatusOES);
+    if (is_drawable_fb(bound_fb) || !f) { RET(GL_FRAMEBUFFER_COMPLETE_OES); return; }
+    RET(f(A(0)));
+}
+IMP(glGetRenderbufferParameterivOES) {
+    E pname = A(1); uint32_t out = A(2);
+    if (!out) return;
+    if (bound_rb && bound_rb == drawable_rb) {
+        I v = 0;
+        switch (pname) {
+        case GL_RENDERBUFFER_WIDTH_OES: v = drawable_w; break;
+        case GL_RENDERBUFFER_HEIGHT_OES: v = drawable_h; break;
+        case GL_RENDERBUFFER_INTERNAL_FORMAT_OES: v = GL_RGBA8_OES; break;
+        case GL_RENDERBUFFER_RED_SIZE_OES: case GL_RENDERBUFFER_GREEN_SIZE_OES:
+        case GL_RENDERBUFFER_BLUE_SIZE_OES: case GL_RENDERBUFFER_ALPHA_SIZE_OES: v = 8; break;
+        case GL_RENDERBUFFER_DEPTH_SIZE_OES: case GL_RENDERBUFFER_STENCIL_SIZE_OES: v = 0; break;
+        default: break;
+        }
+        rt_st32(out, (uint32_t)v);
+        return;
+    }
+    T_glGetRenderbufferParameterivOES f = F(glGetRenderbufferParameterivOES);
+    if (f) f(A(0), pname, (I *)G(out));
+    else rt_st32(out, 0);
+}
+IMP(glGetFramebufferAttachmentParameterivOES) {
+    E attachment = A(1), pname = A(2); uint32_t out = A(3);
+    if (!out) return;
+    if (is_drawable_fb(bound_fb)) {
+        uint32_t rb = attachment == GL_COLOR_ATTACHMENT0_OES ? drawable_rb : drawable_extra_for(attachment);
+        uint32_t v = 0;
+        if (pname == GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE_OES) v = rb ? GL_RENDERBUFFER_OES : 0;
+        else if (pname == GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME_OES) v = rb;
+        rt_st32(out, v);
+        return;
+    }
+    T_glGetFramebufferAttachmentParameterivOES f = F(glGetFramebufferAttachmentParameterivOES);
+    if (f) f(A(0), attachment, pname, (I *)G(out));
+    else rt_st32(out, 0);
+}
+
+/* ---- queries -------------------------------------------------------------------------------------------------- */
+IMP(glGetIntegerv) {
+    E pname = A(0); uint32_t out = A(1);
+    if (!out) return;
+    switch (pname) { /* bindings: the game's names (the host would say 0 for the window) */
+    case GL_RENDERBUFFER_BINDING_OES: rt_st32(out, bound_rb); return;
+    case GL_FRAMEBUFFER_BINDING_OES: rt_st32(out, bound_fb); return;
+    case GL_ARRAY_BUFFER_BINDING: rt_st32(out, array_buffer); return;
+    case GL_ELEMENT_ARRAY_BUFFER_BINDING: rt_st32(out, element_buffer); return;
+    default: break;
+    }
+    T_glGetIntegerv f = F(glGetIntegerv);
+    if (f) f(pname, (I *)G(out));
+    else rt_st32(out, 0);
+}
+/* headless: the first value reads as 0 instead of whatever the game's buffer held */
+IMP(glGetFloatv) {
+    T_glGetFloatv f = F(glGetFloatv); uint32_t out = A(1);
+    if (!out) return;
+    if (f) f(A(0), (float *)G(out)); else rt_st32(out, 0);
+}
+IMP(glGetBooleanv) {
+    T_glGetBooleanv f = F(glGetBooleanv); uint32_t out = A(1);
+    if (!out) return;
+    if (f) f(A(0), (uint8_t *)G(out)); else rt_mem[out] = 0;
+}
+IMP(glGetError) { T_glGetError f = F(glGetError); RET(f ? f() : GL_NO_ERROR); }
+IMP(glIsEnabled) { T_glIsEnabled f = F(glIsEnabled); RET(f ? f(A(0)) : 0); }
+
+static struct { uint32_t name, addr; } strings[16];
+IMP(glGetString) {
+    E name = A(0);
+    for (int k = 0; k < 16; k++) if (strings[k].addr && strings[k].name == name) { RET(strings[k].addr); return; }
+    T_glGetString f = F(glGetString);
+    const char *s = f ? f(name) : NULL;
+    if (!s) { RET(0); return; }
+    uint32_t a;
+    if (name == 0x1F03 /* GL_EXTENSIONS */) {
+        /* the formats emulated below (PVRTC decoded in software, BGRA swizzled) are listed as supported: the game
+         * matches this list against its table of extension names (0x2d8008) */
+        static const char *const extra[] = {"GL_IMG_texture_compression_pvrtc", "GL_APPLE_texture_format_BGRA8888",
+                                            "GL_EXT_texture_format_BGRA8888"};
+        size_t len = strlen(s), cap = len + 1;
+        for (size_t k = 0; k < sizeof extra / sizeof extra[0]; k++) cap += strlen(extra[k]) + 1;
+        char *buf = malloc(cap);
+        if (!buf) { RET(0); return; }
+        memcpy(buf, s, len + 1);
+        for (size_t k = 0; k < sizeof extra / sizeof extra[0]; k++) {
+            size_t n = strlen(extra[k]);
+            int have = 0;
+            for (const char *p = s; !have && (p = strstr(p, extra[k])) != NULL; p += n)
+                have = (p == s || p[-1] == ' ') && (p[n] == ' ' || p[n] == 0);
+            if (have) continue;
+            if (len && buf[len - 1] != ' ') buf[len++] = ' ';
+            memcpy(buf + len, extra[k], n + 1);
+            len += n;
+        }
+        a = rt_static_string(buf);
+        free(buf);
+    } else {
+        a = rt_static_string(s);
+    }
+    if (rt_verbose) rt_log("gl: glGetString(0x%x) = %s", name, s);
+    for (int k = 0; k < 16; k++) if (!strings[k].addr) { strings[k].name = name; strings[k].addr = a; break; }
+    RET(a);
+}
+
+/* ---- PVRTC (software fallback) ------------------------------------------------------------------------------------
+ * The game's textures are PVRTC1 (GL_IMG_texture_compression_pvrtc, 0x8C00-0x8C03: the loader at 0x2dcea0 picks
+ * them and calls glCompressedTexImage2D, then checks glGetError). Only PowerVR GPUs decode that format; elsewhere
+ * (ANGLE, Adreno, Mali) each level is decoded here to RGBA8 and given to glTexImage2D instead.
+ *
+ * Format (as in the PowerVR SDK's PVRTDecompress): 64-bit blocks of 4x4 (4bpp) or 8x4 (2bpp) pixels, at least 2x2
+ * blocks, stored in Morton order (y in the low bit; for non-square sizes the larger axis keeps its extra high bits
+ * on top). Block = modulation word (bytes 0-3), then colour word (bytes 4-7). Colour word: bit 0 mode; bits 1-15
+ * colour A (bit 15 set: RGB 5-5-4, else ARGB 3-4-4-3); bits 16-31 colour B (bit 31 set: RGB 5-5-5, else ARGB
+ * 3-4-4-4). Colours A and B are upscaled bilinearly between block centres (wrapping at the edges), then mixed per
+ * pixel by the modulation weight (out of 8):
+ *   4bpp: 2 bits per pixel, weights {0,3,5,8}; mode 1 = punch-through {0,4,4 with alpha 0,8}.
+ *   2bpp: mode 0: 1 bit per pixel, weights {0,8}; mode 1: 2-bit weights on a checkerboard, the other pixels
+ *         averaged from their neighbours (modulation bit 0 / bit 20 choose H+V, H only or V only). */
+#define GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG 0x8C00
+#define GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG 0x8C01
+#define GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG 0x8C02
+#define GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG 0x8C03
+#define GL_EXTENSIONS 0x1F03
+
+typedef struct { int r, g, b, a; } pvr_col; /* r, g, b 5 bits; a 4 bits */
+
+static pvr_col pvr_colour_a(uint32_t w) {
+    pvr_col k;
+    if (w & 0x8000) {
+        k.r = (int)((w & 0x7c00) >> 10);
+        k.g = (int)((w & 0x3e0) >> 5);
+        k.b = (int)(w & 0x1e) | (int)((w & 0x1e) >> 4);
+        k.a = 0xf;
+    } else {
+        k.r = (int)((w & 0xf00) >> 7) | (int)((w & 0xf00) >> 11);
+        k.g = (int)((w & 0xf0) >> 3) | (int)((w & 0xf0) >> 7);
+        k.b = (int)((w & 0xe) << 1) | (int)((w & 0xe) >> 2);
+        k.a = (int)((w & 0x7000) >> 11);
+    }
+    return k;
+}
+static pvr_col pvr_colour_b(uint32_t w) {
+    pvr_col k;
+    if (w & 0x80000000u) {
+        k.r = (int)((w & 0x7c000000) >> 26);
+        k.g = (int)((w & 0x3e00000) >> 21);
+        k.b = (int)((w & 0x1f0000) >> 16);
+        k.a = 0xf;
+    } else {
+        k.r = (int)((w & 0xf000000) >> 23) | (int)((w & 0xf000000) >> 27);
+        k.g = (int)((w & 0xf00000) >> 19) | (int)((w & 0xf00000) >> 23);
+        k.b = (int)((w & 0xf0000) >> 15) | (int)((w & 0xf0000) >> 19);
+        k.a = (int)((w & 0x70000000) >> 27);
+    }
+    return k;
+}
+
+static uint32_t pvr_twiddle(uint32_t xs, uint32_t ys, uint32_t x, uint32_t y) {
+    uint32_t minax = xs < ys ? xs : ys, out = 0, bit = 1, dst = 1;
+    int shift = 0;
+    while (bit < minax) {
+        if (y & bit) out |= dst;
+        if (x & bit) out |= dst << 1;
+        bit <<= 1; dst <<= 2; shift++;
+    }
+    out |= ((xs > ys ? x : y) >> shift) << (2 * shift);
+    return out;
+}
+
+typedef struct {
+    const uint8_t *data;
+    int nbx, nby, bw; /* blocks across/down, block width in pixels (height is 4) */
+    int bpp4;
+} pvr_img;
+
+static void pvr_block(const pvr_img *im, int bx, int by, uint32_t *mod, uint32_t *col) {
+    uint32_t x = (uint32_t)((bx % im->nbx + im->nbx) % im->nbx);
+    uint32_t y = (uint32_t)((by % im->nby + im->nby) % im->nby);
+    const uint8_t *p = im->data + 8u * pvr_twiddle((uint32_t)im->nbx, (uint32_t)im->nby, x, y);
+    *mod = (uint32_t)p[0] | (uint32_t)p[1] << 8 | (uint32_t)p[2] << 16 | (uint32_t)p[3] << 24;
+    *col = (uint32_t)p[4] | (uint32_t)p[5] << 8 | (uint32_t)p[6] << 16 | (uint32_t)p[7] << 24;
+}
+
+static const int pvr_rep[4] = {0, 3, 5, 8};
+
+/* 2bpp: the weight stored for a pixel (wrapping); asked only for pixels that store one */
+static int pvr_stored2(const pvr_img *im, int px, int py) {
+    int W = im->nbx * 8, H = im->nby * 4;
+    px = (px % W + W) % W; py = (py % H + H) % H;
+    uint32_t mod, col;
+    pvr_block(im, px / 8, py / 4, &mod, &col);
+    int x = px % 8, y = py % 4;
+    if (!(col & 1)) return (mod >> (y * 8 + x)) & 1 ? 8 : 0;
+    /* bits 0 and 20 are flags: those pixels repeat their other bit */
+    if (mod & 1) { if (mod & (1u << 21)) mod |= 1u << 20; else mod &= ~(1u << 20); }
+    if (mod & 2) mod |= 1; else mod &= ~1u;
+    return pvr_rep[(mod >> (2 * ((y * 8 + x) / 2))) & 3];
+}
+
+/* modulation weight 0..8 of a pixel; *punch set for a punch-through (alpha 0) pixel */
+static int pvr_weight(const pvr_img *im, int px, int py, int *punch) {
+    uint32_t mod, col;
+    int bw = im->bw;
+    pvr_block(im, px / bw, py / 4, &mod, &col);
+    int x = px % bw, y = py % 4;
+    *punch = 0;
+    if (im->bpp4) {
+        int v = (int)((mod >> (2 * (y * 4 + x))) & 3);
+        if (!(col & 1)) return pvr_rep[v];
+        if (v == 2) *punch = 1;
+        return v == 0 ? 0 : v == 3 ? 8 : 4;
+    }
+    if (!(col & 1)) return (mod >> (y * 8 + x)) & 1 ? 8 : 0;
+    if (((x ^ y) & 1) == 0) return pvr_stored2(im, px, py);
+    if (!(mod & 1)) /* horizontal and vertical */
+        return (pvr_stored2(im, px, py - 1) + pvr_stored2(im, px, py + 1) + pvr_stored2(im, px - 1, py) +
+                pvr_stored2(im, px + 1, py) + 2) / 4;
+    if (mod & (1u << 20)) /* vertical only */
+        return (pvr_stored2(im, px, py - 1) + pvr_stored2(im, px, py + 1) + 1) / 2;
+    return (pvr_stored2(im, px - 1, py) + pvr_stored2(im, px + 1, py) + 1) / 2; /* horizontal only */
+}
+
+static int floordiv(int a, int b) { return a >= 0 ? a / b : -((-a + b - 1) / b); }
+
+static int is_pvrtc(E format) { return format >= GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG && format <= GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG; }
+
+/* decode a w x h level into out (w*h RGBA8); 0 if the data is too short */
+static int pvr_decode(const uint8_t *data, uint32_t size, int w, int h, E format, uint8_t *out) {
+    pvr_img im;
+    im.data = data;
+    im.bpp4 = format == GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG || format == GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG;
+    im.bw = im.bpp4 ? 4 : 8;
+    im.nbx = (w + im.bw - 1) / im.bw; if (im.nbx < 2) im.nbx = 2;
+    im.nby = (h + 3) / 4; if (im.nby < 2) im.nby = 2;
+    if (!data || size < (uint32_t)im.nbx * (uint32_t)im.nby * 8u) return 0;
+    int opaque = format == GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG || format == GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG;
+    int bw = im.bw, bh = 4;
+    for (int py = 0; py < h; py++) {
+        int fy = py - bh / 2, by = floordiv(fy, bh), wy = fy - by * bh;
+        for (int px = 0; px < w; px++) {
+            int fx = px - bw / 2, bx = floordiv(fx, bw), wx = fx - bx * bw;
+            uint32_t m, c[4];
+            pvr_block(&im, bx, by, &m, &c[0]);         /* P (top left) */
+            pvr_block(&im, bx + 1, by, &m, &c[1]);     /* Q (top right) */
+            pvr_block(&im, bx, by + 1, &m, &c[2]);     /* R (bottom left) */
+            pvr_block(&im, bx + 1, by + 1, &m, &c[3]); /* S (bottom right) */
+            int f[4] = {(bw - wx) * (bh - wy), wx * (bh - wy), (bw - wx) * wy, wx * wy};
+            int ca[4] = {0, 0, 0, 0}, cb[4] = {0, 0, 0, 0};
+            for (int k = 0; k < 4; k++) {
+                pvr_col a = pvr_colour_a(c[k]), b = pvr_colour_b(c[k]);
+                ca[0] += a.r * f[k]; ca[1] += a.g * f[k]; ca[2] += a.b * f[k]; ca[3] += a.a * f[k];
+                cb[0] += b.r * f[k]; cb[1] += b.g * f[k]; cb[2] += b.b * f[k]; cb[3] += b.a * f[k];
+            }
+            /* to 8 bits: the sums are 5-bit (alpha 4-bit) values times bw*bh (16 or 32) */
+            for (int k = 0; k < 4; k++) {
+                if (im.bpp4) {
+                    ca[k] = k < 3 ? (ca[k] >> 6) + (ca[k] >> 1) : (ca[k] >> 4) + ca[k];
+                    cb[k] = k < 3 ? (cb[k] >> 6) + (cb[k] >> 1) : (cb[k] >> 4) + cb[k];
+                } else {
+                    ca[k] = k < 3 ? (ca[k] >> 7) + (ca[k] >> 2) : (ca[k] >> 5) + (ca[k] >> 1);
+                    cb[k] = k < 3 ? (cb[k] >> 7) + (cb[k] >> 2) : (cb[k] >> 5) + (cb[k] >> 1);
+                }
+            }
+            int punch, wt = pvr_weight(&im, px, py, &punch);
+            uint8_t *o = out + 4 * ((size_t)py * (size_t)w + (size_t)px);
+            for (int k = 0; k < 4; k++) o[k] = (uint8_t)((ca[k] * (8 - wt) + cb[k] * wt) / 8);
+            if (punch) o[3] = 0;
+            if (opaque) o[3] = 255;
+        }
+    }
+    return 1;
+}
+
+/* does the host GL list that extension? 1 yes, 0 no, -1 cannot tell yet (no current context) */
+static int host_ext_state(const char *ext) {
+    T_glGetString f = F(glGetString);
+    const char *s = f ? f(GL_EXTENSIONS) : NULL;
+    if (!s) return -1;
+    size_t n = strlen(ext);
+    for (const char *p = s; (p = strstr(p, ext)) != NULL; p += n)
+        if ((p == s || p[-1] == ' ') && (p[n] == ' ' || p[n] == 0)) return 1;
+    return 0;
+}
+static int host_has_pvrtc(void) {
+    static int known = -1;
+    if (known < 0) {
+        known = host_ext_state("GL_IMG_texture_compression_pvrtc");
+        if (known == 0) rt_log("gl: host GL has no PVRTC; decoding PVRTC textures in software");
+    }
+    return known == 1;
+}
+
+/* glTexImage2D/glTexSubImage2D with format GL_BGRA_EXT and an RGBA internal format (APPLE_texture_format_BGRA8888;
+ * ANGLE wants BGRA for both, many Android drivers have no BGRA at all): swapped to RGBA in a host copy. Rows of
+ * 4-byte pixels are always 4-aligned, so GL_UNPACK_ALIGNMENT does not matter. */
+#define GL_BGRA_EXT 0x80E1
+#define GL_RGBA 0x1908
+#define GL_UNSIGNED_BYTE 0x1401
+static uint8_t *bgra_swizzle(const uint8_t *src, I w, I h) {
+    if (!src || w <= 0 || h <= 0) return NULL;
+    size_t n = (size_t)w * (size_t)h;
+    uint8_t *t = malloc(n * 4);
+    if (!t) return NULL;
+    for (size_t k = 0; k < n; k++) {
+        t[4 * k] = src[4 * k + 2]; t[4 * k + 1] = src[4 * k + 1];
+        t[4 * k + 2] = src[4 * k]; t[4 * k + 3] = src[4 * k + 3];
+    }
+    return t;
+}
+
+/* ---- textures ------------------------------------------------------------------------------------------------- */
+IMP(glActiveTexture) { T_glActiveTexture f = F(glActiveTexture); if (f) f(A(0)); }
+IMP(glBindTexture) { T_glBindTexture f = F(glBindTexture); if (f) f(A(0), A(1)); }
+IMP(glGenTextures) { gen_names(F(glGenTextures), (I)A(0), A(1)); }
+IMP(glDeleteTextures) { T_glDeleteTextures f = F(glDeleteTextures); if (f && (I)A(0) > 0) f((I)A(0), (const E *)G(A(1))); }
+IMP(glTexImage2D) {
+    T_glTexImage2D f = F(glTexImage2D);
+    if (!f) return;
+    E internal = A(2), format = A(6), type = A(7);
+    I w = (I)A(3), h = (I)A(4);
+    const void *pixels = G(A(8));
+    uint8_t *tmp = NULL;
+    if (format == GL_BGRA_EXT && type == GL_UNSIGNED_BYTE) {
+        internal = format = GL_RGBA;
+        pixels = tmp = bgra_swizzle(pixels, w, h);
+    }
+    f(A(0), (I)A(1), (I)internal, w, h, (I)A(5), format, type, pixels);
+    free(tmp);
+}
+IMP(glTexSubImage2D) {
+    T_glTexSubImage2D f = F(glTexSubImage2D);
+    if (!f) return;
+    E format = A(6), type = A(7);
+    I w = (I)A(4), h = (I)A(5);
+    const void *pixels = G(A(8));
+    uint8_t *tmp = NULL;
+    if (format == GL_BGRA_EXT && type == GL_UNSIGNED_BYTE) { /* the texture was made RGBA above */
+        format = GL_RGBA;
+        pixels = tmp = bgra_swizzle(pixels, w, h);
+    }
+    f(A(0), (I)A(1), (I)A(2), (I)A(3), w, h, format, type, pixels);
+    free(tmp);
+}
+IMP(glCompressedTexImage2D) {
+    E target = A(0), format = A(2);
+    I level = (I)A(1), w = (I)A(3), h = (I)A(4), border = (I)A(5), size = (I)A(6);
+    const void *data = G(A(7));
+    if (is_pvrtc(format) && !host_has_pvrtc()) {
+        T_glTexImage2D t = F(glTexImage2D);
+        if (!t || w <= 0 || h <= 0) return;
+        uint8_t *rgba = malloc((size_t)w * (size_t)h * 4);
+        if (!rgba) return;
+        if (pvr_decode(data, (uint32_t)size, w, h, format, rgba))
+            t(target, level, GL_RGBA, w, h, border, GL_RGBA, GL_UNSIGNED_BYTE, rgba);
+        else
+            rt_log("gl: PVRTC level %d (%dx%d, format 0x%x) has only %d bytes (ignored)", level, w, h, format, size);
+        free(rgba);
+        return;
+    }
+    T_glCompressedTexImage2D f = F(glCompressedTexImage2D);
+    if (f) f(target, level, format, w, h, border, size, data);
+}
+IMP(glCopyTexImage2D) {
+    T_glCopyTexImage2D f = F(glCopyTexImage2D);
+    if (f) f(A(0), (I)A(1), A(2), (I)A(3), (I)A(4), (I)A(5), (I)A(6), (I)A(7));
+}
+IMP(glTexParameterf) { T_glTexParameterf f = F(glTexParameterf); if (f) f(A(0), A(1), FA(2)); }
+IMP(glTexParameteri) { T_glTexParameteri f = F(glTexParameteri); if (f) f(A(0), A(1), (I)A(2)); }
+IMP(glTexEnvf) { T_glTexEnvf f = F(glTexEnvf); if (f) f(A(0), A(1), FA(2)); }
+IMP(glTexEnvfv) { T_glTexEnvfv f = F(glTexEnvfv); if (f && A(2)) f(A(0), A(1), (const float *)G(A(2))); }
+IMP(glTexEnvi) { T_glTexEnvi f = F(glTexEnvi); if (f) f(A(0), A(1), (I)A(2)); }
+IMP(glTexEnvx) {
+    E target = A(0), pname = A(1); I v = (I)A(2);
+    T_glTexEnvx f = F(glTexEnvx);
+    if (f) { f(target, pname, v); return; }
+    /* scales are fixed-point numbers; every other parameter of glTexEnvx is an enum given as an integer */
+    if (pname == GL_RGB_SCALE || pname == GL_ALPHA_SCALE) { T_glTexEnvf g = F(glTexEnvf); if (g) g(target, pname, fx(v)); }
+    else { T_glTexEnvi g = F(glTexEnvi); if (g) g(target, pname, v); }
+}
+IMP(glPixelStorei) { T_glPixelStorei f = F(glPixelStorei); if (f) f(A(0), (I)A(1)); }
+IMP(glReadPixels) {
+    T_glReadPixels f = F(glReadPixels);
+    if (f) f((I)A(0), (I)A(1), (I)A(2), (I)A(3), A(4), A(5), G(A(6)));
+}
+
+/* ---- state ---------------------------------------------------------------------------------------------------- */
+IMP(glEnable) { T_glEnable f = F(glEnable); if (f) f(A(0)); }
+IMP(glDisable) { T_glDisable f = F(glDisable); if (f) f(A(0)); }
+IMP(glAlphaFunc) { T_glAlphaFunc f = F(glAlphaFunc); if (f) f(A(0), FA(1)); }
+IMP(glBlendFunc) { T_glBlendFunc f = F(glBlendFunc); if (f) f(A(0), A(1)); }
+IMP(glClear) { T_glClear f = F(glClear); if (f) f(A(0)); }
+IMP(glClearColor) { T_glClearColor f = F(glClearColor); if (f) f(FA(0), FA(1), FA(2), FA(3)); }
+IMP(glClearDepthf) { T_glClearDepthf f = F(glClearDepthf); if (f) f(FA(0)); }
+IMP(glColorMask) { T_glColorMask f = F(glColorMask); if (f) f(B(0), B(1), B(2), B(3)); }
+IMP(glCullFace) { T_glCullFace f = F(glCullFace); if (f) f(A(0)); }
+IMP(glDepthFunc) { T_glDepthFunc f = F(glDepthFunc); if (f) f(A(0)); }
+IMP(glDepthMask) { T_glDepthMask f = F(glDepthMask); if (f) f(B(0)); }
+IMP(glDepthRangef) { T_glDepthRangef f = F(glDepthRangef); if (f) f(FA(0), FA(1)); }
+IMP(glFlush) { T_glFlush f = F(glFlush); if (f) f(); }
+IMP(glFrontFace) { T_glFrontFace f = F(glFrontFace); if (f) f(A(0)); }
+IMP(glHint) { T_glHint f = F(glHint); if (f) f(A(0), A(1)); }
+IMP(glLineWidth) { T_glLineWidth f = F(glLineWidth); if (f) f(FA(0)); }
+IMP(glPointSize) { T_glPointSize f = F(glPointSize); if (f) f(FA(0)); }
+IMP(glPointParameterf) { T_glPointParameterf f = F(glPointParameterf); if (f) f(A(0), FA(1)); }
+IMP(glPolygonOffset) { T_glPolygonOffset f = F(glPolygonOffset); if (f) f(FA(0), FA(1)); }
+IMP(glScissor) { T_glScissor f = F(glScissor); if (f) f((I)A(0), (I)A(1), (I)A(2), (I)A(3)); }
+IMP(glViewport) { T_glViewport f = F(glViewport); if (f) f((I)A(0), (I)A(1), (I)A(2), (I)A(3)); }
+IMP(glShadeModel) { T_glShadeModel f = F(glShadeModel); if (f) f(A(0)); }
+IMP(glStencilFunc) { T_glStencilFunc f = F(glStencilFunc); if (f) f(A(0), (I)A(1), A(2)); }
+IMP(glStencilMask) { T_glStencilMask f = F(glStencilMask); if (f) f(A(0)); }
+IMP(glStencilOp) { T_glStencilOp f = F(glStencilOp); if (f) f(A(0), A(1), A(2)); }
+IMP(glClipPlanef) { T_glClipPlanef f = F(glClipPlanef); if (f && A(1)) f(A(0), (const float *)G(A(1))); }
+
+/* ---- fixed-function: colour, lighting, fog --------------------------------------------------------------------------- */
+IMP(glColor4f) { T_glColor4f f = F(glColor4f); if (f) f(FA(0), FA(1), FA(2), FA(3)); }
+IMP(glColor4ub) { T_glColor4ub f = F(glColor4ub); if (f) f(B(0), B(1), B(2), B(3)); }
+IMP(glColor4x) {
+    T_glColor4x f = F(glColor4x);
+    if (f) { f((I)A(0), (I)A(1), (I)A(2), (I)A(3)); return; }
+    T_glColor4f g = F(glColor4f); if (g) g(fx((I)A(0)), fx((I)A(1)), fx((I)A(2)), fx((I)A(3)));
+}
+IMP(glNormal3f) { T_glNormal3f f = F(glNormal3f); if (f) f(FA(0), FA(1), FA(2)); }
+IMP(glFogf) { T_glFogf f = F(glFogf); if (f) f(A(0), FA(1)); }
+IMP(glFogfv) { T_glFogfv f = F(glFogfv); if (f && A(1)) f(A(0), (const float *)G(A(1))); }
+IMP(glLightf) { T_glLightf f = F(glLightf); if (f) f(A(0), A(1), FA(2)); }
+IMP(glLightfv) { T_glLightfv f = F(glLightfv); if (f && A(2)) f(A(0), A(1), (const float *)G(A(2))); }
+IMP(glLightModelfv) { T_glLightModelfv f = F(glLightModelfv); if (f && A(1)) f(A(0), (const float *)G(A(1))); }
+IMP(glMaterialf) { T_glMaterialf f = F(glMaterialf); if (f) f(A(0), A(1), FA(2)); }
+IMP(glMaterialfv) { T_glMaterialfv f = F(glMaterialfv); if (f && A(2)) f(A(0), A(1), (const float *)G(A(2))); }
+
+/* ---- matrices ----------------------------------------------------------------------------------------------- */
+IMP(glMatrixMode) { T_glMatrixMode f = F(glMatrixMode); if (f) f(A(0)); }
+IMP(glLoadIdentity) { T_glLoadIdentity f = F(glLoadIdentity); if (f) f(); }
+IMP(glPushMatrix) { T_glPushMatrix f = F(glPushMatrix); if (f) f(); }
+IMP(glPopMatrix) { T_glPopMatrix f = F(glPopMatrix); if (f) f(); }
+IMP(glLoadMatrixf) { T_glLoadMatrixf f = F(glLoadMatrixf); if (f && A(0)) f((const float *)G(A(0))); }
+IMP(glMultMatrixf) { T_glMultMatrixf f = F(glMultMatrixf); if (f && A(0)) f((const float *)G(A(0))); }
+IMP(glFrustumf) { T_glFrustumf f = F(glFrustumf); if (f) f(FA(0), FA(1), FA(2), FA(3), FA(4), FA(5)); }
+IMP(glOrthof) { T_glOrthof f = F(glOrthof); if (f) f(FA(0), FA(1), FA(2), FA(3), FA(4), FA(5)); }
+IMP(glRotatef) { T_glRotatef f = F(glRotatef); if (f) f(FA(0), FA(1), FA(2), FA(3)); }
+IMP(glScalef) { T_glScalef f = F(glScalef); if (f) f(FA(0), FA(1), FA(2)); }
+IMP(glTranslatef) { T_glTranslatef f = F(glTranslatef); if (f) f(FA(0), FA(1), FA(2)); }
+IMP(glOrthox) {
+    T_glOrthox f = F(glOrthox);
+    if (f) { f((I)A(0), (I)A(1), (I)A(2), (I)A(3), (I)A(4), (I)A(5)); return; }
+    T_glOrthof g = F(glOrthof);
+    if (g) g(fx((I)A(0)), fx((I)A(1)), fx((I)A(2)), fx((I)A(3)), fx((I)A(4)), fx((I)A(5)));
+}
+IMP(glRotatex) {
+    T_glRotatex f = F(glRotatex);
+    if (f) { f((I)A(0), (I)A(1), (I)A(2), (I)A(3)); return; }
+    T_glRotatef g = F(glRotatef); if (g) g(fx((I)A(0)), fx((I)A(1)), fx((I)A(2)), fx((I)A(3)));
+}
+IMP(glScalex) {
+    T_glScalex f = F(glScalex);
+    if (f) { f((I)A(0), (I)A(1), (I)A(2)); return; }
+    T_glScalef g = F(glScalef); if (g) g(fx((I)A(0)), fx((I)A(1)), fx((I)A(2)));
+}
+IMP(glTranslatex) {
+    T_glTranslatex f = F(glTranslatex);
+    if (f) { f((I)A(0), (I)A(1), (I)A(2)); return; }
+    T_glTranslatef g = F(glTranslatef); if (g) g(fx((I)A(0)), fx((I)A(1)), fx((I)A(2)));
+}
+
+/* ---- registration --------------------------------------------------------------------------------------------- */
+void *(*rt_gl_getproc)(const char *name) = NULL;
+
+void rt_gl_register(void) {
+    REG(glActiveTexture); REG(glAlphaFunc); REG(glBindBuffer); REG(glBindFramebufferOES);
+    REG(glBindRenderbufferOES); REG(glBindTexture); REG(glBlendFunc); REG(glBufferData); REG(glBufferSubData);
+    REG(glCheckFramebufferStatusOES); REG(glClear); REG(glClearColor); REG(glClearDepthf);
+    REG(glClientActiveTexture); REG(glClipPlanef); REG(glColor4f); REG(glColor4ub); REG(glColor4x);
+    REG(glColorMask); REG(glColorPointer); REG(glCompressedTexImage2D); REG(glCopyTexImage2D); REG(glCullFace);
+    REG(glDeleteBuffers); REG(glDeleteFramebuffersOES); REG(glDeleteRenderbuffersOES); REG(glDeleteTextures);
+    REG(glDepthFunc); REG(glDepthMask); REG(glDepthRangef); REG(glDisable); REG(glDisableClientState);
+    REG(glDrawArrays); REG(glDrawElements); REG(glEnable); REG(glEnableClientState); REG(glFlush); REG(glFogf);
+    REG(glFogfv); REG(glFramebufferRenderbufferOES); REG(glFramebufferTexture2DOES); REG(glFrontFace);
+    REG(glFrustumf); REG(glGenBuffers); REG(glGenFramebuffersOES); REG(glGenRenderbuffersOES); REG(glGenTextures);
+    REG(glGetBooleanv); REG(glGetError); REG(glGetFloatv); REG(glGetFramebufferAttachmentParameterivOES);
+    REG(glGetIntegerv); REG(glGetPointerv); REG(glGetRenderbufferParameterivOES); REG(glGetString); REG(glHint);
+    REG(glIsEnabled); REG(glLightModelfv); REG(glLightf); REG(glLightfv); REG(glLineWidth); REG(glLoadIdentity);
+    REG(glLoadMatrixf); REG(glMaterialf); REG(glMaterialfv); REG(glMatrixMode); REG(glMultMatrixf);
+    REG(glNormal3f); REG(glNormalPointer); REG(glOrthof); REG(glOrthox); REG(glPixelStorei);
+    REG(glPointParameterf); REG(glPointSize); REG(glPolygonOffset); REG(glPopMatrix); REG(glPushMatrix);
+    REG(glReadPixels); REG(glRenderbufferStorageOES); REG(glRotatef); REG(glRotatex); REG(glScalef);
+    REG(glScalex); REG(glScissor); REG(glShadeModel); REG(glStencilFunc); REG(glStencilMask); REG(glStencilOp);
+    REG(glTexCoordPointer); REG(glTexEnvf); REG(glTexEnvfv); REG(glTexEnvi); REG(glTexEnvx); REG(glTexImage2D);
+    REG(glTexParameterf); REG(glTexParameteri); REG(glTexSubImage2D); REG(glTranslatef); REG(glTranslatex);
+    REG(glVertexPointer); REG(glViewport);
+}

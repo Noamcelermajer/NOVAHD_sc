@@ -564,7 +564,12 @@ M(o_perform_main) {
     if (imp) rt_call(c, imp, 3, SELF, ARG(0), ARG(1));
 }
 M(o_initialize) { (void)m; (void)c; }
-M(o_cancel_previous) { (void)m; (void)c; }
+M(o_perform_later) { /* performSelector:withObject:afterDelay: (the delay is a double in words 4-5) */
+    (void)m;
+    rt_runloop_perform_later(SELF, ARG(0), ARG(1), rt_darg(c, 4));
+}
+M(o_cancel_previous) { (void)m; rt_runloop_cancel_performs(c, SELF, 0, 0, 0); }
+M(o_cancel_previous_sel) { (void)m; rt_runloop_cancel_performs(c, SELF, ARG(0), ARG(1), 1); }
 
 /* NSAutoreleasePool */
 M(p_init) { (void)m; pool_push(SELF); }
@@ -687,7 +692,7 @@ void rt_objc_define_root(void) {
         {"mutableCopy", o_mutable_copy}, {"description", o_description}, {"performSelector:", o_perform},
         {"performSelector:withObject:", o_perform}, {"performSelector:withObject:withObject:", o_perform},
         {"performSelectorOnMainThread:withObject:waitUntilDone:", o_perform_main},
-        {"performSelector:withObject:afterDelay:", o_perform_main},
+        {"performSelector:withObject:afterDelay:", o_perform_later},
     };
     for (size_t k = 0; k < sizeof inst / sizeof *inst; k++) rt_objc_method(o, inst[k].sel, inst[k].fn);
     struct { const char *sel; rt_hostfn fn; } cls[] = {
@@ -695,7 +700,7 @@ void rt_objc_define_root(void) {
         {"superclass", o_class_superclass}, {"initialize", o_initialize}, {"load", o_initialize},
         {"instancesRespondToSelector:", o_instances_respond},
         {"cancelPreviousPerformRequestsWithTarget:", o_cancel_previous},
-        {"cancelPreviousPerformRequestsWithTarget:selector:object:", o_cancel_previous},
+        {"cancelPreviousPerformRequestsWithTarget:selector:object:", o_cancel_previous_sel},
     };
     for (size_t k = 0; k < sizeof cls / sizeof *cls; k++) rt_objc_cmethod(o, cls[k].sel, cls[k].fn);
     /* class objects answer retain/release/autorelease too (the root metaclass inherits NSObject's instance

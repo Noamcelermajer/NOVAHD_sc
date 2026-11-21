@@ -23,7 +23,8 @@ from lift import Lifter, Unsupported, entries  # noqa: E402
 from macho import Image  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
-RUNTIME_SRC = ["core", "mem", "printf", "pthread", "libc", "cxx", "objc", "foundation", "uikit", "host_main"]
+RUNTIME_SRC = ["core", "mem", "printf", "pthread", "libc", "cxx", "libstdcxx", "objc", "foundation", "collections",
+               "system", "uikit", "graphics", "offline", "gles1", "openal", "audio_win", "host_main"]
 X86_FAST = ("x86_64-windows-gnu", ["-O2"], "unused")
 
 
@@ -32,6 +33,8 @@ def main():
     ap.add_argument("--exe", type=Path, required=True)
     ap.add_argument("--out", type=Path, default=Path("build/runner"))
     ap.add_argument("--fast", action="store_true", help="optimized, unchecked translated code")
+    ap.add_argument("--runtime", type=Path, default=ROOT / "runtime", help="runtime source folder")
+    ap.add_argument("--src", nargs="*", help="runtime files to build (default: RUNTIME_SRC)")
     args = ap.parse_args()
     t0 = time.time()
     subprocess.run([sys.executable, str(ROOT / "tools/recomp/pack_image.py"), "--exe", str(args.exe), "--out",
@@ -50,11 +53,11 @@ def main():
     objs = compile_objects(image, ents, sources, work, target=target, variant="runtime")
     print(f"translated code: {len(objs)} objects, {time.time() - t0:.0f}s")
 
-    flags = ["-O1", "-g", "-target", "x86_64-windows-gnu", "-Wall", "-Wno-unused-parameter", f"-I{ROOT / 'runtime'}",
+    flags = ["-O1", "-g", "-target", "x86_64-windows-gnu", "-Wall", "-Wno-unused-parameter", f"-I{args.runtime}",
              f"-I{ROOT / 'tools/recomp/runtime'}"] + ([] if args.fast else ["-DRECOMP_CHECKED"])
     rt_dir = args.out / "obj"
     rt_dir.mkdir(parents=True, exist_ok=True)
-    srcs = [ROOT / "runtime" / f"{n}.c" for n in RUNTIME_SRC] + [args.out / "image_meta.c"]
+    srcs = [args.runtime / f"{n}.c" for n in (args.src or RUNTIME_SRC)] + [args.out / "image_meta.c"]
 
     def cc(src):
         obj = rt_dir / (src.stem + ".o")
@@ -70,7 +73,7 @@ def main():
         rt_objs = list(pool.map(cc, srcs))
     exe = args.out / "novahd_runner.exe"
     r = subprocess.run([sys.executable, "-m", "ziglang", "cc", "-target", "x86_64-windows-gnu", *map(str, objs),
-                        *map(str, rt_objs), "-o", str(exe)], capture_output=True, text=True)
+                        *map(str, rt_objs), "-lwinmm", "-o", str(exe)], capture_output=True, text=True)
     if r.returncode:
         raise RuntimeError(f"link failed:\n{r.stderr[-4000:]}")
     print(f"{exe}: {exe.stat().st_size} bytes, {time.time() - t0:.0f}s")

@@ -174,6 +174,7 @@ void rt_notify(cpu_t *c, const char *name, id object, id user_info);
  * until the next timer is due (or a large value) */
 double rt_runloop_run_once(cpu_t *c);
 void rt_runloop_perform_later(id target, SEL sel, id arg, double delay); /* retained until performed */
+int rt_runloop_cancel_performs(cpu_t *c, id target, SEL sel, id arg, int match_sel);
 double rt_now(void);                                /* seconds, monotonic */
 
 /* OpenGL ES 1.1 (gles1.c) and the drawable (renderbuffer bound by -[EAGLContext renderbufferStorage:fromDrawable:]) */
@@ -219,6 +220,10 @@ void rt_platform_size(int *width, int *height);     /* the window surface in pix
 /* UIApplicationMain never returns on iOS: after the launch it calls this, which pumps window events into
  * rt_uikit_touch/rt_uikit_accelerometer and calls rt_uikit_frame once per display frame until the app quits */
 void rt_platform_run(cpu_t *c);
+/* make the GL context current on the calling thread (+[EAGLContext setCurrentContext:]). The game creates its GL
+ * objects on the main thread during the launch and renders on a pthread of its own afterwards; EGL allows a context
+ * on one thread at a time, so the main thread gives it up when it enters rt_platform_run. */
+void rt_platform_make_current(void);
 
 /* diagnostics */
 void rt_log(const char *fmt, ...);

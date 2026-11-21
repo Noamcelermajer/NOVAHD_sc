@@ -176,8 +176,35 @@ class Image:
             self._bind(raw[lazy_off:lazy_off + lazy_size], lazy=True)
 
         self.text = self.section("__TEXT", "__text")
+        self.switch32 = self._find_switch32()
         self.functions = discover(self) if discover_functions else []
         self.by_address = {f.address: f for f in self.functions}
+
+    # GCC's __switch32 for Thumb code (ARM): the table follows the call, at the return address
+    #   ldr ip, [lr, #-1]; cmp r0, ip; add r0, lr, r0, lsl #2; ldrlo r0, [r0, #3]; add ip, lr, ip, lsl #2;
+    #   ldrhs r0, [ip, #3]; add ip, lr, r0; bx ip
+    SWITCH32 = (0xE51EC001, 0xE150000C, 0xE08E0100, 0x35900003, 0xE08EC10C, 0x259C0003, 0xE08EC000, 0xE12FFF1C)
+
+    def _find_switch32(self) -> set:
+        t = self.text
+        words = self.memory[t.addr:t.addr + t.size]
+        out, first = set(), self.SWITCH32[0].to_bytes(4, "little")
+        k = words.find(first)
+        while k >= 0:
+            a = t.addr + k
+            if a % 4 == 0 and all(self.u32(a + 4 * j) == w for j, w in enumerate(self.SWITCH32)):
+                out.add(a)
+            k = words.find(first, k + 1)
+        return out
+
+    def switch_table(self, ret: int):
+        """The __switch32 table at a call's return address (Thumb, 4-byte aligned): (count, case targets, default
+        target), targets as code addresses."""
+        n = self.u32(ret)
+        base = ret + 1  # lr carries the Thumb bit; offsets are added to it
+        offs = [self.u32(ret + 4 + 4 * k) for k in range(n + 1)]
+        tg = [((base + o) & 0xFFFFFFFF) & ~1 for o in offs]
+        return n, tg[:n], tg[n]
 
     def _bind(self, ops: bytes, lazy: bool):
         """Run dyld's bind opcodes: each bound word becomes the import's slot address plus the addend."""
@@ -338,6 +365,10 @@ class _Descent:
                         literals.add(lit + 4)
                 if name in ("bl", "blx") and ops and ops[0].type == A.ARM_OP_IMM:
                     t = ops[0].imm & 0xFFFFFFFF
+                    if thumb and (t & ~3) in img.switch32:  # inline jump table after the call
+                        n, cases, default = img.switch_table(nxt)
+                        todo.extend(cases + [default])
+                        break
                     calls.add((t & ~1, (not thumb) if name == "blx" else thumb))
                     pc = nxt
                     continue
@@ -423,12 +454,15 @@ def discover(image: Image) -> list:
             seeds.setdefault(v & ~1, (bool(v & 1), f"init_{v & ~1:x}", True))
     weak = _data_pointers(image)
 
-    funcs = {}  # address -> (thumb, name, reached)
+    funcs = {}  # address -> (thumb, name, reached, trusted)
     literals = set()
-    work = [(a, t, n, True) for a, (t, n, _) in seeds.items()] + [(a, t, f"sub_{a:x}", False) for a, t in weak]
+    # Trusted seeds (symbols, entry point, constructors) and everything they call are walked first; seeds from data
+    # pointers come after, and what an untrusted function calls stays untrusted.
+    trusted_work = [(a, t, n, True) for a, (t, n, _) in seeds.items()]
+    weak_work = [(a, t, f"sub_{a:x}", False) for a, t in weak]
     rejected = 0
-    while work:
-        a, thumb, name, trusted = work.pop()
+    while trusted_work or weak_work:
+        a, thumb, name, trusted = trusted_work.pop() if trusted_work else weak_work.pop()
         if a in funcs or not image.in_text(a) or (thumb is False and a & 3):
             continue
         if not trusted and not thumb:  # compiled ARM functions start unconditionally
@@ -440,26 +474,35 @@ def discover(image: Image) -> list:
         if not ok and not trusted:
             rejected += 1
             continue
-        funcs[a] = (thumb, name, reached)
+        funcs[a] = (thumb, name, reached, trusted)
         literals |= lits
         for t, th in calls:
-            work.append((t, th, f"sub_{t:x}", True))
+            (trusted_work if trusted else weak_work).append((t, th, f"sub_{t:x}", trusted))
         # literal words that point into __text: function pointers passed as arguments
         for lit in lits:
             if image.in_text(lit):
                 v = image.u32(lit)
                 if image.in_text(v & ~1) and not v & 2:
-                    work.append((v & ~1, bool(v & 1), f"sub_{v & ~1:x}", False))
-    # a weak seed that lands in the middle of a code word reached in the other mode or inside a literal is noise
-    code_at = {}
-    for a, (thumb, _, reached) in funcs.items():
-        for pc, n in reached.items():
-            code_at.setdefault(pc, thumb)
+                    weak_work.append((v & ~1, bool(v & 1), f"sub_{v & ~1:x}", False))
+    # A start that lies inside an instruction reached in the other mode, or inside a literal, is noise, unless the
+    # symbol table names it. Coverage from trusted functions decides first.
+    cover = {}
+    for pass_trusted in (True, False):
+        for a, (thumb, _, reached, trusted) in funcs.items():
+            if trusted != pass_trusted:
+                continue
+            for pc, n in reached.items():
+                for b in range(pc, pc + max(n, 2), 2):
+                    cover.setdefault(b, thumb)
+    symbol_starts = {a for a, (_, _, tr) in seeds.items() if tr}
     for a in list(funcs):
-        thumb, name, _ = funcs[a]
-        if name.startswith("sub_") and (a in literals or code_at.get(a, thumb) != thumb):
+        thumb, name, _, trusted = funcs[a]
+        if a in symbol_starts:
+            continue
+        if a in literals or cover.get(a, thumb) != thumb:
             del funcs[a]
             rejected += 1
+    funcs = {a: (t, n, r) for a, (t, n, r, _) in funcs.items()}
 
     # entries: branches into another function's range make the target an entry of its own
     starts = sorted(funcs)
@@ -467,7 +510,8 @@ def discover(image: Image) -> list:
     reached_all = {}
     for a, (thumb, _, reached) in funcs.items():
         for pc, n in reached.items():
-            reached_all.setdefault(pc, n)
+            if pc not in literals:  # a word loaded as a PC-relative constant is data, whatever walked over it
+                reached_all.setdefault(pc, n)
 
     out = []
     for k, a in enumerate(starts):

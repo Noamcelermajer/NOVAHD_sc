@@ -111,7 +111,8 @@ uint32_t rt_callv(cpu_t *c, uint32_t fn, int nargs, const uint32_t *words) {
     if (c->r[15] != RT_RETURN_SENTINEL && !fault)
         rt_log("call to %#x came back to %#x", fn, c->r[15]);
     if (fault) {
-        rt_log("fault %u in a call to %#x (%s)", fault, fn, rt_func_name(fn, NULL));
+        rt_log("fault %u in a call to %#x (%s); pc %#x (%s)", fault, fn, rt_func_name(fn, NULL), c->r[15],
+               rt_func_name(c->r[15], NULL));
         rt_print_trace(c);
     }
     *c = saved;
@@ -173,6 +174,12 @@ void rt_imports_init(void) {
     rt_libc_register();
     rt_pthread_register();
     rt_cxx_register();
+    rt_libstdcxx_register();
+    rt_system_register();
+    rt_gl_register();
+    rt_openal_register();
+    rt_graphics_register();
+    rt_offline_register();
     rt_uikit_register();
     uint32_t missing = 0;
     for (uint32_t k = 0; k < rt_import_count; k++) missing += !imports[k];
@@ -246,9 +253,11 @@ const char *rt_func_name(uint32_t addr, uint32_t *offset) {
 void rt_print_trace(cpu_t *c) {
     if (!c) return;
     uint32_t d = c->depth;
-    rt_log("game call chain (innermost first), depth %u:", d);
-    for (uint32_t k = 0; k < 24 && d - k >= 1; k++) {
-        uint32_t fn = c->trace[(d - k) & 63];
-        rt_log("  %#010x %s", fn, rt_func_name(fn, NULL));
+    /* entries above the current depth are the frames that just returned (the faulting chain, innermost last) */
+    rt_log("game call chain at depth %u (checked builds; frames above the depth already returned):", d);
+    for (uint32_t k = d + 12; k >= 1 && k + 24 > d + 12; k--) {
+        uint32_t fn = c->trace[k & 63];
+        if (!fn) continue;
+        rt_log("  %c%3u %#010x %s", k > d ? '^' : ' ', k, fn, rt_func_name(fn, NULL));
     }
 }

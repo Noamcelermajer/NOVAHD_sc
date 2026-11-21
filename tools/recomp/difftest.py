@@ -191,7 +191,8 @@ def compile_objects(image: Image, ents: dict, sources: dict, workdir: Path, muta
         for a in part:
             src = sources.get(a)
             if src is None:
-                src = f"void f_{a:07x}(cpu_t *c, uint8_t *m) {{ (void)m; c->fault = RC_FAULT_UNLIFTED; }}"
+                src = (f"void f_{a:07x}(cpu_t *c, uint8_t *m) {{ (void)m; c->fault = RC_FAULT_UNLIFTED; "
+                       f"c->r[15] = {a:#x}u; }}")  # r15: which function was missing
             elif mutate:
                 src = src.replace(*mutate)
             body.append(src)
@@ -204,6 +205,13 @@ def compile_objects(image: Image, ents: dict, sources: dict, workdir: Path, muta
                  "void rc_import(cpu_t *c, uint8_t *m, uint32_t slot) { handler(c, m, slot); c->r[15] = c->r[14]; }",
                  "void rc_hostcall(cpu_t *c, uint8_t *m, uint32_t slot) { (void)m; (void)slot; c->fault = RC_FAULT_DISPATCH; }",
                  "RC_EXPORT void rc_run(uint32_t addr, cpu_t *c, uint8_t *m) { rc_dispatch(c, m, addr); }"]
+    disp += ["int rc_is_entry(uint32_t t) {",
+             f"  if (t >= {HOSTFN_BASE:#x}u && t < {HOSTFN_BASE + 4 * HOSTFN_MAX:#x}u) return 1;",
+             f"  if (t >= {IMPORT_STUB_BASE:#x}u && t < {IMPORT_STUB_BASE + 4 * len(image.imports):#x}u) return 1;",
+             "  switch (t & ~1u) {"]
+    disp += [f"  case {IMAGE_BASE + a:#x}u:" for a in addrs]
+    disp += [f"  case {IMAGE_BASE + a:#x}u:" for a in sorted(image.plt)]
+    disp += ["    return 1;", "  }", "  return 0;", "}"]
     disp += ["void rc_dispatch(cpu_t *c, uint8_t *m, uint32_t t) {",
             f"  if (t >= {HOSTFN_BASE:#x}u && t < {HOSTFN_BASE + 4 * HOSTFN_MAX:#x}u) "
             f"{{ rc_hostcall(c, m, (t - {HOSTFN_BASE:#x}u) / 4); return; }}",

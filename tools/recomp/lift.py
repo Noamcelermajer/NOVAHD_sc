@@ -829,6 +829,32 @@ class ThumbLifter(Lifter):
     def table_targets(self) -> list:
         return []
 
+    def jump(self, expr: str) -> str:
+        """Thumb-1 code built for ARMv4T returns with `pop {rX}; bx rX` as well as with `pop {pc}`: a computed jump to
+        an address that is no function entry is a return (to the caller's return address)."""
+        if self.returns:
+            return f"pcv = {expr}; goto out;"
+        return (f"pcv = {expr}; if (!rc_is_entry(pcv)) goto out; "
+                f"c->r[15] = pcv; RC_SAVE(); rc_dispatch(c, m, pcv); RC_TAIL();")
+
+    def switch32(self, i) -> str:
+        """A call to GCC's __switch32 with its table after the call: the helper sets lr, compares r0 with the case
+        count (flags), leaves the table offset in r0 and the target in ip, and jumps there. Done inline."""
+        ret = i.address + i.size
+        n, cases, default = self.image.switch_table(ret)
+        lr = (ret | 1) & 0xFFFFFFFF
+        out = [f"r14 = {hexu(lr)}; {{ uint32_t co, vo; uint32_t res = addc(r0, ~{hexu(n)}, 1, &co, &vo); "
+               f"n = res >> 31; z = res == 0; cf = co; v = vo; }} switch (r0) {{"]
+        def go(t):  # a label of this function, or a tail call into the entry that starts there
+            if t in self.code_addrs and self.f.address <= t < self.end:
+                return f"goto L_{t:07x};"
+            return self.tail(t)
+
+        for k, t in enumerate(cases):
+            out.append(f"case {k}u: r0 = {hexu(self.image.u32(ret + 4 + 4 * k))}; r12 = {hexu(t | 1)}; {go(t)}")
+        out.append(f"default: r0 = {hexu(self.image.u32(ret + 4 + 4 * n))}; r12 = {hexu(default | 1)}; {go(default)} }}")
+        return " ".join(out)
+
     def op2(self, op):
         if op.type == A.ARM_OP_IMM:
             return "", hexu(op.imm & 0xFFFFFFFF), "cf"
@@ -864,6 +890,8 @@ class ThumbLifter(Lifter):
             if i.writeback and not (load and base_k in ks):
                 s += f" r{base_k} = b0 + {4 * len(ks)};"
             return s
+        if name in ("bl", "blx") and ops and ops[0].type == A.ARM_OP_IMM and                 (ops[0].imm & ~3) in getattr(self.image, "switch32", ()):
+            return self.switch32(i)
         if name == "movs":  # capstone's name for the flag-setting register move (lsls rd, rm, #0)
             x = self.rd(ops[1].reg)
             return f"uint32_t res = {x}; n = res >> 31; z = res == 0; " + self.wr(ops[0].reg, "res")
