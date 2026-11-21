@@ -245,6 +245,6 @@ int rt_vscan(const char *in, const char *fmt, rt_args *a);
 /* paths: the app bundle and the Documents folder */
 void rt_path_alias(const char *from, const char *to);
 const char *rt_host_path(const char *path); /* thread-local result */
-extern char rt_bundle_path[512], rt_home_path[512];
+extern char rt_bundle_path[512], rt_home_path[512], rt_cwd[512]; /* rt_cwd: set by chdir */
 
 #endif

@@ -58,8 +58,16 @@ void rt_path_alias(const char *from, const char *to) {
     nalias++;
 }
 
+/* The game's working directory (a game path). iOS starts apps in "/"; the game chdir()s to its bundle and then
+ * opens its data with relative names (sprites.pack, ...). */
+char rt_cwd[512];
+
 const char *rt_host_path(const char *path) {
-    static __thread char buf[1024];
+    static __thread char buf[1024], abs[1024];
+    if (path[0] != '/') { /* relative: against the game's working directory (the bundle until chdir says otherwise) */
+        snprintf(abs, sizeof abs, "%s/%s", rt_cwd[0] ? rt_cwd : rt_bundle_path, path);
+        path = abs;
+    }
     for (int k = 0; k < nalias; k++)
         if (!strncmp(path, aliases[k].from, aliases[k].n)) {
             snprintf(buf, sizeof buf, "%s%s", aliases[k].to, path + aliases[k].n);

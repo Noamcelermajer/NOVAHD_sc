@@ -346,6 +346,8 @@ class _Descent:
         literal words read with PC-relative loads, ok). Calls and tail branches are followed by the caller."""
         img, md = self.image, self.md[thumb]
         reached, calls, literals = {}, set(), set()
+        self.pointers = set()  # code addresses built PC-relatively (Thumb PIC: ldr rX, =off; add rX, pc)
+        lit_reg = {}
         todo = [start]
         while todo:
             pc = todo.pop()
@@ -363,6 +365,16 @@ class _Descent:
                     literals.add(lit)
                     if name == "vldr" and md.reg_name(ops[0].reg).startswith("d"):
                         literals.add(lit + 4)
+                    if name == "ldr" and thumb:
+                        lit_reg[ops[0].reg] = img.u32(lit)
+                        pc = nxt
+                        continue
+                if thumb and name == "add" and len(ops) == 2 and ops[1].type == A.ARM_OP_REG                         and md.reg_name(ops[1].reg) == "pc" and ops[0].reg in lit_reg:
+                    v = (lit_reg.pop(ops[0].reg) + pc + 4) & 0xFFFFFFFF
+                    if img.in_text(v & ~1) and (v & 1 or not v & 3):
+                        self.pointers.add((v & ~1, bool(v & 1)))
+                elif thumb and ops and ops[0].type == A.ARM_OP_REG:
+                    lit_reg.pop(ops[0].reg, None)
                 if name in ("bl", "blx") and ops and ops[0].type == A.ARM_OP_IMM:
                     t = ops[0].imm & 0xFFFFFFFF
                     if thumb and (t & ~3) in img.switch32:  # inline jump table after the call
@@ -434,7 +446,7 @@ def _data_pointers(image: Image):
     for lo, hi in ranges:
         for a in range(lo & ~3, hi, 4):
             v = image.u32(a)
-            if image.in_text(v & ~1) and not (v & 2):
+            if image.in_text(v & ~1) and (v & 1 or not v & 3):  # Thumb: any halfword; ARM: word aligned
                 out.add((v & ~1, bool(v & 1)))
     return out
 
@@ -459,18 +471,26 @@ def discover(image: Image) -> list:
     # Trusted seeds (symbols, entry point, constructors) and everything they call are walked first; seeds from data
     # pointers come after, and what an untrusted function calls stays untrusted.
     trusted_work = [(a, t, n, True) for a, (t, n, _) in seeds.items()]
-    weak_work = [(a, t, f"sub_{a:x}", False) for a, t in weak]
+    weak_work = [(a, t, f"sub_{a:x}", None) for a, t in weak]  # None: an address found in data (not a call target)
     rejected = 0
     while trusted_work or weak_work:
         a, thumb, name, trusted = trusted_work.pop() if trusted_work else weak_work.pop()
+        from_data = trusted is None
+        trusted = bool(trusted)
         if a in funcs or not image.in_text(a) or (thumb is False and a & 3):
             continue
-        if not trusted and not thumb:  # compiled ARM functions start unconditionally
+        if from_data and not thumb:  # compiled ARM functions start unconditionally
             first = d.decode(a, False)
             if first is None or not _uncond(first):
                 rejected += 1
                 continue
+        if from_data and thumb:  # a Thumb pointer from data must start with GCC's prologue: push {..., lr}
+            hw = int.from_bytes(image.memory[a:a + 2], "little")
+            if (hw & 0xFF00) != 0xB500:
+                rejected += 1
+                continue
         reached, calls, lits, ok = d.walk(a, thumb)
+        pic_pointers = d.pointers
         if not ok and not trusted:
             rejected += 1
             continue
@@ -478,12 +498,17 @@ def discover(image: Image) -> list:
         literals |= lits
         for t, th in calls:
             (trusted_work if trusted else weak_work).append((t, th, f"sub_{t:x}", trusted))
+        for t, th in pic_pointers:  # callbacks built PC-relatively: Thumb ones as trusted as the code building them;
+            if th:                  # an even value may be data in __text, so it gets the checks of a data pointer
+                (trusted_work if trusted else weak_work).append((t, th, f"sub_{t:x}", trusted))
+            else:
+                weak_work.append((t, th, f"sub_{t:x}", None))
         # literal words that point into __text: function pointers passed as arguments
         for lit in lits:
             if image.in_text(lit):
                 v = image.u32(lit)
-                if image.in_text(v & ~1) and not v & 2:
-                    weak_work.append((v & ~1, bool(v & 1), f"sub_{v & ~1:x}", False))
+                if image.in_text(v & ~1) and (v & 1 or not v & 3):
+                    weak_work.append((v & ~1, bool(v & 1), f"sub_{v & ~1:x}", None))
     # A start that lies inside an instruction reached in the other mode, or inside a literal, is noise, unless the
     # symbol table names it. Coverage from trusted functions decides first.
     cover = {}

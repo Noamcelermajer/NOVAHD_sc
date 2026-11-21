@@ -211,8 +211,8 @@ IMP(stat) {
 }
 IMP(remove) { RET(remove(rt_host_path(S(0))) ? -1 : 0); }
 IMP(rename) { char from[1024]; snprintf(from, sizeof from, "%s", rt_host_path(S(0))); RET(rename(from, rt_host_path(S(1))) ? -1 : 0); }
-IMP(chdir) { RET(0); }
-IMP(getcwd) { const char *p = rt_bundle_path; size_t n = strlen(p); if (A(0) && n < A(1)) memcpy(G(A(0)), p, n + 1); RET(A(0)); }
+IMP(chdir) { const char *p = S(0); if (p[0] == '/') snprintf(rt_cwd, sizeof rt_cwd, "%s", p); else rt_log("chdir %s (relative: ignored)", p); RET(0); }
+IMP(getcwd) { const char *p = rt_cwd[0] ? rt_cwd : rt_bundle_path; size_t n = strlen(p); if (A(0) && n < A(1)) memcpy(G(A(0)), p, n + 1); RET(A(0)); }
 IMP(realpath$DARWIN_EXTSN) {
     const char *p = S(0);
     uint32_t dst = A(1) ? A(1) : rt_malloc(1024);
