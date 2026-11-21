@@ -62,6 +62,69 @@ void rt_path_alias(const char *from, const char *to) {
  * opens its data with relative names (sprites.pack, ...). */
 char rt_cwd[512];
 
+#ifdef _WIN32
+#define RT_CASE_FALLBACK 0 /* Windows file systems are case-insensitive already */
+#else
+#define RT_CASE_FALLBACK 1
+#endif
+
+#if RT_CASE_FALLBACK
+#include <dirent.h>
+#include <pthread.h>
+#include <strings.h>
+#include <sys/stat.h>
+/* iOS (HFS+) is case-insensitive, Android is not: when a path does not exist as written, look up each component
+ * in its directory ignoring case. Results (including misses) are cached. */
+static struct ci_ent { char *key, *val; } ci_cache[1024];
+static int ci_count;
+static pthread_mutex_t ci_lock = PTHREAD_MUTEX_INITIALIZER;
+
+static int ci_exists(const char *p) { struct stat st; return stat(p, &st) == 0; }
+
+static void ci_resolve(const char *path, char *out, size_t cap) {
+    snprintf(out, cap, "%s", path);
+    if (ci_exists(path)) return;
+    pthread_mutex_lock(&ci_lock);
+    for (int k = 0; k < ci_count; k++)
+        if (!strcmp(ci_cache[k].key, path)) { snprintf(out, cap, "%s", ci_cache[k].val); pthread_mutex_unlock(&ci_lock); return; }
+    pthread_mutex_unlock(&ci_lock);
+    char cur[1024] = "";
+    const char *p = path;
+    int ok = 1;
+    while (*p) {
+        while (*p == '/') p++;
+        if (!*p) break;
+        const char *e = p;
+        while (*e && *e != '/') e++;
+        char comp[256];
+        size_t n = (size_t)(e - p);
+        if (n >= sizeof comp) { ok = 0; break; }
+        memcpy(comp, p, n); comp[n] = 0;
+        char next[1024];
+        snprintf(next, sizeof next, "%s/%s", cur, comp);
+        if (!ci_exists(next)) {
+            DIR *d = opendir(cur[0] ? cur : "/");
+            int found = 0;
+            if (d) {
+                struct dirent *de;
+                while ((de = readdir(d)))
+                    if (!strcasecmp(de->d_name, comp)) { snprintf(next, sizeof next, "%s/%s", cur, de->d_name); found = 1; break; }
+                closedir(d);
+            }
+            if (!found) { ok = 0; break; }
+        }
+        snprintf(cur, sizeof cur, "%s", next);
+        p = e;
+    }
+    char res[1024];
+    snprintf(res, sizeof res, "%s", ok ? cur : path);
+    pthread_mutex_lock(&ci_lock);
+    if (ci_count < 1024) { ci_cache[ci_count].key = strdup(path); ci_cache[ci_count].val = strdup(res); ci_count++; }
+    pthread_mutex_unlock(&ci_lock);
+    snprintf(out, cap, "%s", res);
+}
+#endif
+
 const char *rt_host_path(const char *path) {
     static __thread char buf[1024], abs[1024];
     if (path[0] != '/') { /* relative: against the game's working directory (the bundle until chdir says otherwise) */
@@ -71,9 +134,19 @@ const char *rt_host_path(const char *path) {
     for (int k = 0; k < nalias; k++)
         if (!strncmp(path, aliases[k].from, aliases[k].n)) {
             snprintf(buf, sizeof buf, "%s%s", aliases[k].to, path + aliases[k].n);
+#if RT_CASE_FALLBACK
+            char fixed[1024];
+            ci_resolve(buf, fixed, sizeof fixed);
+            snprintf(buf, sizeof buf, "%s", fixed);
+#endif
             return buf;
         }
+#if RT_CASE_FALLBACK
+    ci_resolve(path, buf, sizeof buf);
+    return buf;
+#else
     return path;
+#endif
 }
 
 /* ---- arguments (ARM softfp): words 0-3 in r0-r3, then the caller's stack ----------------------- */
@@ -228,6 +301,12 @@ void rt_data_imports_bind(void) {
         else if (b->addend || (strncmp(rt_import_names[b->slot], "OBJC_", 5) == 0)) unresolved++;
     }
     rt_log("data imports: %u words bound, %u left on import slots", bound, unresolved);
+    if (rt_verbose) { /* function imports nobody registered (data symbols are not listed) */
+        uint32_t nmiss = 0;
+        for (uint32_t k = 0; k < rt_import_count; k++)
+            if (!imports[k] && !value[k]) { rt_log("import missing: %s", rt_import_names[k]); nmiss++; }
+        rt_log("imports missing: %u functions", nmiss);
+    }
     free(value);
 }
 

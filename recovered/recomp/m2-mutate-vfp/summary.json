@@ -1,0 +1,26 @@
+{
+ "executable": "NovaHD",
+ "entries": 21230,
+ "translated": 21230,
+ "untranslated": {},
+ "tested": 300,
+ "kind": "leaf",
+ "select": "all",
+ "runs_per_function": 16,
+ "seed": 1,
+ "results": {
+  "leaf": {
+   "pass": 270,
+   "fail": 16,
+   "no-coverage": 14
+  }
+ },
+ "incomplete_runs_by_reason": {
+  "unicorn: Invalid memory read": 146,
+  "unicorn: Invalid memory write": 25,
+  "unicorn: Write to write-protected memory": 19,
+  "unicorn stopped": 14,
+  "returned elsewhere": 8
+ },
+ "seconds": 326
+}

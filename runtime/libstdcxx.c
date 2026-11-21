@@ -43,7 +43,10 @@
 
 #define A(k) rt_arg(c, k)
 #define RET(v) rt_ret(c, (uint32_t)(v))
-#define IMP(name) static void imp_##name(cpu_t *c)
+static void cxx_trace(const char *name, cpu_t *c) {
+    rt_log("[cxx] %s(%#x, %#x, %#x, %#x)", name, rt_arg(c, 0), rt_arg(c, 1), rt_arg(c, 2), rt_arg(c, 3));
+}
+#define IMP(name)     static void imp0_##name(cpu_t *c);     static void imp_##name(cpu_t *c) { if (rt_verbose >= 3) cxx_trace(#name, c); imp0_##name(c); }     static void imp0_##name(cpu_t *c)
 #define REG(name) rt_import_register(#name, imp_##name)
 
 #define NPOS 0xffffffffu

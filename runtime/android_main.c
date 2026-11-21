@@ -32,6 +32,11 @@
  * the window surface and keeps the context current on this thread without a window (EGL_KHR_surfaceless_context,
  * else a 1x1 pbuffer, else the context is released), so GL objects the game creates meanwhile are real ones;
  * APP_CMD_INIT_WINDOW creates a new surface on the new window and makes the same context current with it. A lost
+ * Context ownership: the main thread has the context during the launch and releases it when rt_platform_run starts;
+ * the game's render thread takes it in rt_platform_make_current and keeps it. After that the main thread only creates and
+ * destroys surfaces: it posts the wanted surface (want_surf/want_gen) and, before destroying one, waits (2 s at most)
+ * until the render thread has rebound at its next swap (render_sync).
+ * A lost
  * context (EGL_CONTEXT_LOST) cannot be rebuilt (the game's textures are gone): the process exits. Frames run only while there is a surface and the activity is
  * resumed. Destroying the activity (Back, or the system) exits the process: the game keeps global state, so the next
  * start is a fresh boot.
@@ -114,6 +119,20 @@ static unsigned long long frames, swaps;
 static EGLSurface idle_surf = EGL_NO_SURFACE; /* 1x1 pbuffer that keeps the context current without a window */
 static int surfaceless;                        /* EGL_KHR_surfaceless_context */
 static pthread_t main_thread;                  /* the android_main thread (the game's main thread) */
+
+/* GL context hand-over (see rt_platform_make_current). Under gl_mx: handed_over (the main thread has given the context
+ * up for good: from here on only the render thread may have it), render_owns (a thread has taken it), want_surf and
+ * want_gen (what the render thread must be bound to: the window surface, the idle pbuffer, or EGL_NO_SURFACE, and a
+ * counter that changes whenever that does), bound_gen (the generation the render thread has bound; the main thread
+ * waits for it to catch up before it destroys a surface the render thread may still have current). tl_bound is the
+ * surface the calling thread has current. */
+static pthread_mutex_t gl_mx = PTHREAD_MUTEX_INITIALIZER;
+static pthread_cond_t gl_cv = PTHREAD_COND_INITIALIZER;
+static int handed_over, render_owns;
+static EGLSurface want_surf = EGL_NO_SURFACE;
+static unsigned want_gen, bound_gen;
+static __thread EGLSurface tl_bound = EGL_NO_SURFACE;
+static __thread int tl_has;
 
 static double now_s(void) {
     struct timespec t;
@@ -311,7 +330,12 @@ static int surface_create(void) {
     window_geometry(w);
     surf = eglCreateWindowSurface(dpy, cfg, w, NULL);
     if (surf == EGL_NO_SURFACE) { rt_log("android: eglCreateWindowSurface failed (%#x)", eglGetError()); return 0; }
-    if (!eglMakeCurrent(dpy, surf, surf, ctx)) {
+    if (handed_over) { /* the render thread owns the context: it rebinds to the new surface before its next frame */
+        pthread_mutex_lock(&gl_mx);
+        want_surf = surf;
+        want_gen++;
+        pthread_mutex_unlock(&gl_mx);
+    } else if (!eglMakeCurrent(dpy, surf, surf, ctx)) {
         EGLint e = eglGetError();
         rt_log("android: eglMakeCurrent failed (%#x)", e);
         eglDestroySurface(dpy, surf);
@@ -327,8 +351,29 @@ static int surface_create(void) {
     return 1;
 }
 
+/* no window, and no way to keep a context bound without one */
+static int idle_none(void) { return !surfaceless && idle_surf == EGL_NO_SURFACE; }
+
 static void surface_destroy(void) {
     if (surf == EGL_NO_SURFACE) return;
+    if (handed_over) {
+        /* the render thread may have the surface current: it rebinds to the idle state at its next swap (it renders
+         * at 60 Hz); wait until it has, and only then destroy the surface. The native window must not be used after
+         * this returns, so a stuck render thread is waited for 2 s at most. */
+        pthread_mutex_lock(&gl_mx);
+        want_surf = surfaceless ? EGL_NO_SURFACE : idle_surf;
+        unsigned gen = ++want_gen;
+        struct timespec dl;
+        clock_gettime(CLOCK_REALTIME, &dl);
+        dl.tv_sec += 2;
+        int rc = 0;
+        while (render_owns && (int)(bound_gen - gen) < 0 && rc == 0) rc = pthread_cond_timedwait(&gl_cv, &gl_mx, &dl);
+        if (rc) rt_log("android: the render thread did not release the window surface in 2 s");
+        pthread_mutex_unlock(&gl_mx);
+        eglDestroySurface(dpy, surf); /* EGL defers it until no thread has it current */
+        surf = EGL_NO_SURFACE;
+        return;
+    }
     /* the context itself is kept, and stays current on this thread when EGL allows it without a window */
     EGLBoolean ok = EGL_FALSE;
     if (surfaceless) ok = eglMakeCurrent(dpy, EGL_NO_SURFACE, EGL_NO_SURFACE, ctx);
@@ -466,10 +511,37 @@ void rt_platform_size(int *width, int *height) {
     if (height) *height = SCREEN_H;
 }
 
+/* the render thread: bring its EGL binding up to date with want_surf/want_gen (a surface created, or about to be
+ * destroyed) and tell the main thread */
+static void render_sync(void) {
+    pthread_mutex_lock(&gl_mx);
+    if (tl_has && bound_gen != want_gen) {
+        EGLSurface s = want_surf;
+        if (s == EGL_NO_SURFACE && idle_none()) {
+            eglMakeCurrent(dpy, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+            tl_bound = EGL_NO_SURFACE;
+        } else if (eglMakeCurrent(dpy, s, s, ctx)) {
+            tl_bound = s;
+        } else {
+            EGLint e = eglGetError();
+            rt_log("android: render thread rebind failed (%#x)", e);
+            if (e == EGL_CONTEXT_LOST) context_lost();
+        }
+        bound_gen = want_gen;
+        pthread_cond_broadcast(&gl_cv);
+    }
+    pthread_mutex_unlock(&gl_mx);
+}
+
 void rt_platform_swap(void) {
-    if (surf != EGL_NO_SURFACE) {
+    EGLSurface target = surf;
+    if (handed_over) { /* only the thread that has the context swaps; never on the idle pbuffer */
+        render_sync();
+        target = (tl_has && tl_bound != idle_surf) ? tl_bound : EGL_NO_SURFACE;
+    }
+    if (target != EGL_NO_SURFACE) {
         swaps++;
-        if (!eglSwapBuffers(dpy, surf)) {
+        if (!eglSwapBuffers(dpy, target)) {
             EGLint e = eglGetError();
             static int logged;
             if (e == EGL_CONTEXT_LOST) context_lost();
@@ -482,9 +554,23 @@ void rt_platform_swap(void) {
     if (!booted && pthread_equal(pthread_self(), main_thread)) drain_events();
 }
 
+/* the main thread gives the context up when the display loop starts: it is the game's render thread's from now on */
+static void release_context(void) {
+    pthread_mutex_lock(&gl_mx);
+    if (ctx != EGL_NO_CONTEXT) eglMakeCurrent(dpy, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+    want_surf = surf != EGL_NO_SURFACE ? surf : (surfaceless ? EGL_NO_SURFACE : idle_surf);
+    want_gen++;
+    bound_gen = want_gen; /* nobody is bound yet: the render thread binds to want_surf when it arrives */
+    handed_over = 1;
+    pthread_cond_broadcast(&gl_cv);
+    pthread_mutex_unlock(&gl_mx);
+    rt_log("android: the main thread released the GL context");
+}
+
 void rt_platform_run(cpu_t *c) {
     game_cpu = c;
     booted = 1;
+    release_context();
     rt_log("android: display loop");
     sync_pause(); /* a pause that arrived during the launch */
     accel_enable(resumed);
@@ -602,14 +688,34 @@ void android_main(struct android_app *app) {
     boot();
 }
 
-/* +[EAGLContext setCurrentContext:] on the game's render thread: EGL allows the context on one thread at a time.
- * Minimal version: take it on the calling thread with the current window surface (or the idle pbuffer). The main
- * thread's surface handling (pause/resume) still makes the context current there; reconciling the two (handing the
- * context back and forth across a pause) is open work, see docs/RECOMP-M2.md. */
+/* +[EAGLContext setCurrentContext:] (any thread). EGL allows the context on one thread at a time: the main thread has
+ * it during the launch and gives it up for good when it enters rt_platform_run (release_context); the first other
+ * thread that asks afterwards (the game's render thread) waits for that, then takes it with the current window
+ * surface (or the idle state) and keeps it. From then on the main thread only hands surfaces over (surface_create,
+ * surface_destroy) and the render thread follows in render_sync() at its next swap, so the two never race. */
 void rt_platform_make_current(void) {
-    static __thread int have;
-    if (have || ctx == EGL_NO_CONTEXT) return;
-    EGLSurface s = surf != EGL_NO_SURFACE ? surf : idle_surf;
-    if (eglMakeCurrent(dpy, s, s, ctx)) have = 1;
-    else rt_log("android: eglMakeCurrent on the render thread failed (%#x)", eglGetError());
+    if (ctx == EGL_NO_CONTEXT || pthread_equal(pthread_self(), main_thread) || tl_has) return;
+    struct timespec dl;
+    clock_gettime(CLOCK_REALTIME, &dl);
+    dl.tv_sec += 10;
+    pthread_mutex_lock(&gl_mx);
+    int rc = 0;
+    while ((!handed_over || render_owns) && rc == 0) rc = pthread_cond_timedwait(&gl_cv, &gl_mx, &dl);
+    if (rc) {
+        rt_log("android: a thread waited 10 s for the GL context (%s)", render_owns ? "held by another thread" : "the main thread never released it");
+        pthread_mutex_unlock(&gl_mx);
+        return;
+    }
+    EGLSurface s = want_surf;
+    int ok = (s == EGL_NO_SURFACE && idle_none()) ? 1 : eglMakeCurrent(dpy, s, s, ctx); /* none: binds at the first surface */
+    if (ok) {
+        tl_has = 1;
+        tl_bound = s;
+        render_owns = 1;
+        bound_gen = want_gen;
+        pthread_cond_broadcast(&gl_cv);
+        rt_log("android: the GL context is on the render thread");
+    } else
+        rt_log("android: eglMakeCurrent on the render thread failed (%#x)", eglGetError());
+    pthread_mutex_unlock(&gl_mx);
 }

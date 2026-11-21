@@ -1,0 +1,4 @@
+address,size,kind,mode,status,runs,detail,name
+0x2f3fd0,2092,calls,thumb,pass,502,,sub_2f3fd0
+0x2f8740,348,calls,thumb,no-coverage,0,"{""import strlen"": 423, ""unicorn: Invalid instruction"": 90, ""unicorn: Invalid memory read"": 69, ""unicorn: Invalid memory fetch"": 12, ""import strlen: Invalid memory read"": 1, ""unicorn: Unhandled CPU exception"": 3, ""import _ZNSsD2Ev"": 1, ""unicorn: Write to write-protected memory"": 1}",sub_2f8740
+0x2fc2f8,8216,calls,thumb,pass,12,,sub_2fc2f8

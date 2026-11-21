@@ -165,6 +165,7 @@ IMP(pthread_once) {
 /* ---- threads -------------------------------------------------------------------------------------------- */
 typedef struct gthread {
     uint32_t id, start, arg, result;
+    volatile int cancel_pending, cancel_off;
     jmp_buf exit_jmp;
 #ifdef _WIN32
     HANDLE h;
@@ -225,6 +226,22 @@ IMP(pthread_exit) {
 IMP(pthread_self) { RET(self ? self->id : 1); }
 IMP(pthread_equal) { RET(A(0) == A(1)); }
 IMP(pthread_kill) { RET(0); }
+/* Deferred cancellation: pthread_cancel marks the thread; it exits (result PTHREAD_CANCELED, -1) at its next
+ * pthread_testcancel unless cancellation is disabled. Darwin: PTHREAD_CANCEL_ENABLE 1, DISABLE 0. */
+IMP(pthread_cancel) {
+    gthread *t = find_thread(A(0));
+    if (!t) { RET(3); return; }
+    t->cancel_pending = 1;
+    RET(0);
+}
+IMP(pthread_setcanceltype) { if (A(1)) rt_st32(A(1), 0); RET(0); }
+IMP(pthread_testcancel) {
+    if (self && self->cancel_pending && !self->cancel_off) {
+        self->result = 0xFFFFFFFFu;
+        longjmp(self->exit_jmp, 1);
+    }
+    RET(0);
+}
 IMP(pthread_attr_init) { memset(G(A(0)), 0, 24); RET(0); }
 IMP(pthread_attr_destroy) { RET(0); }
 IMP(pthread_attr_setdetachstate) { RET(0); }
@@ -248,6 +265,6 @@ void rt_pthread_register(void) {
     REG(sem_destroy); REG(sem_post); REG(sem_wait); REG(sem_trywait); REG(pthread_key_create);
     REG(pthread_key_delete); REG(pthread_getspecific); REG(pthread_setspecific); REG(pthread_once);
     REG(pthread_create); REG(pthread_join); REG(pthread_exit); REG(pthread_self); REG(pthread_equal);
-    REG(pthread_kill); REG(pthread_attr_init); REG(pthread_attr_destroy); REG(pthread_attr_setdetachstate);
+    REG(pthread_kill); REG(pthread_cancel); REG(pthread_setcanceltype); REG(pthread_testcancel); REG(pthread_attr_init); REG(pthread_attr_destroy); REG(pthread_attr_setdetachstate);
     REG(pthread_attr_setstacksize); REG(sched_yield);
 }

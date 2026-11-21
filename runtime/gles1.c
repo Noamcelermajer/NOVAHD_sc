@@ -39,6 +39,8 @@
  *     answers the drawable size (RGBA8), glGetFramebufferAttachmentParameterivOES on the drawable framebuffer the
  *     game's own attachments, and glCheckFramebufferStatusOES on it GL_FRAMEBUFFER_COMPLETE_OES;
  *   - every other (offscreen) framebuffer and renderbuffer passes through.
+ * Since the game draws a portrait 768x1024 layer, "framebuffer 0" above is really a host FBO of that size, shown
+ * rotated into the window at present time (see "the portrait drawable and its presentation" below).
  * GL calls come from the game's render thread only, so the tracked state needs no lock.
  */
 #include <stdio.h>
@@ -167,6 +169,7 @@ DECL(glGetIntegerv, void, (E, I *))
 DECL(glGetPointerv, void, (E, void **))
 DECL2(glGetRenderbufferParameterivOES, "glGetRenderbufferParameteriv", void, (E, E, I *))
 DECL(glGetString, const char *, (E))
+DECL(glGetTexEnviv, void, (E, E, I *))
 DECL(glHint, void, (E, E))
 DECL(glIsEnabled, uint8_t, (E))
 DECL(glLightModelfv, void, (E, const float *))
@@ -258,7 +261,8 @@ static void set_color_att(uint32_t fb, uint32_t rb) {
     if (rb && free_slot >= 0) { color_att[free_slot].fb = fb; color_att[free_slot].rb = rb; }
 }
 static int is_drawable_fb(uint32_t fb) { return fb && fb == drawable_fb; }
-static uint32_t host_fb(uint32_t fb) { return is_drawable_fb(fb) ? 0 : fb; }
+static uint32_t present_fbo;                      /* host framebuffer behind the portrait drawable (0: the window itself) */
+static uint32_t host_fb(uint32_t fb) { return is_drawable_fb(fb) ? present_fbo : fb; }
 
 static void host_bind_fb(E target, uint32_t fb) {
     T_glBindFramebufferOES f = F(glBindFramebufferOES);
@@ -273,6 +277,206 @@ static void make_drawable_fb(uint32_t fb) {
     if (bound_fb == fb) host_bind_fb(0, fb);
 }
 
+/* ---- the portrait drawable and its presentation ----------------------------------------------------------------------
+ * The iPad's EAGL layer is 768x1024 (portrait) and the game rotates its own projection for landscape, so the screen
+ * shows the layer turned a quarter turn. The game therefore draws into a 768x1024 host framebuffer object (a texture
+ * and a depth/stencil renderbuffer), and -presentRenderbuffer: draws that texture into the window surface turned 90
+ * degrees counter-clockwise (portrait (px, py) -> landscape (py, W - px), which is the inverse of the touch
+ * conversion in uikit.c), then swaps. The game's GL state is saved around the blit and put back. */
+static uint32_t present_tex, present_ds;
+static int present_w, present_h;
+static int present_failed;
+
+static void present_setup(void) {
+    if (present_fbo || present_failed || !drawable_w || !drawable_h || !rt_gl_getproc) return;
+    T_glGenFramebuffersOES gf = F(glGenFramebuffersOES);
+    T_glBindFramebufferOES bf = F(glBindFramebufferOES);
+    T_glFramebufferTexture2DOES ft = F(glFramebufferTexture2DOES);
+    T_glGenTextures gt = F(glGenTextures);
+    T_glBindTexture bt = F(glBindTexture);
+    T_glTexImage2D ti = F(glTexImage2D);
+    T_glTexParameteri tp = F(glTexParameteri);
+    T_glGenRenderbuffersOES gr = F(glGenRenderbuffersOES);
+    T_glBindRenderbufferOES br = F(glBindRenderbufferOES);
+    T_glRenderbufferStorageOES rs = F(glRenderbufferStorageOES);
+    T_glFramebufferRenderbufferOES fr = F(glFramebufferRenderbufferOES);
+    T_glCheckFramebufferStatusOES cs = F(glCheckFramebufferStatusOES);
+    T_glGetIntegerv gi = F(glGetIntegerv);
+    if (!gf || !bf || !ft || !gt || !bt || !ti || !tp || !gr || !br || !rs || !fr || !cs || !gi) { present_failed = 1; return; }
+    I old_tex = 0, old_rb = 0, old_fb = 0;
+    gi(0x8069 /* GL_TEXTURE_BINDING_2D */, &old_tex);
+    gi(GL_RENDERBUFFER_BINDING_OES, &old_rb);
+    gi(GL_FRAMEBUFFER_BINDING_OES, &old_fb);
+    present_w = drawable_w;
+    present_h = drawable_h;
+    gt(1, &present_tex);
+    bt(0x0DE1, present_tex);
+    ti(0x0DE1, 0, 0x1908 /* RGBA */, present_w, present_h, 0, 0x1908, 0x1401, NULL);
+    tp(0x0DE1, 0x2801 /* MIN_FILTER */, 0x2601 /* LINEAR */);
+    tp(0x0DE1, 0x2800 /* MAG_FILTER */, 0x2601);
+    tp(0x0DE1, 0x2802 /* WRAP_S */, 0x812F /* CLAMP_TO_EDGE */);
+    tp(0x0DE1, 0x2803 /* WRAP_T */, 0x812F);
+    uint32_t fbo = 0;
+    gf(1, &fbo);
+    bf(0x8D40, fbo);
+    ft(0x8D40, GL_COLOR_ATTACHMENT0_OES, 0x0DE1, present_tex, 0);
+    gr(1, &present_ds);
+    br(GL_RENDERBUFFER_OES, present_ds);
+    rs(GL_RENDERBUFFER_OES, 0x88F0 /* DEPTH24_STENCIL8_OES */, present_w, present_h);
+    fr(0x8D40, 0x8D00 /* DEPTH_ATTACHMENT */, GL_RENDERBUFFER_OES, present_ds);
+    fr(0x8D40, 0x8D20 /* STENCIL_ATTACHMENT */, GL_RENDERBUFFER_OES, present_ds);
+    E st = cs(0x8D40);
+    if (st != GL_FRAMEBUFFER_COMPLETE_OES) {
+        rt_log("gl: packed depth/stencil framebuffer incomplete (%#x); trying a plain depth buffer", st);
+        rs(GL_RENDERBUFFER_OES, 0x81A5 /* DEPTH_COMPONENT16 */, present_w, present_h);
+        fr(0x8D40, 0x8D20, GL_RENDERBUFFER_OES, 0);
+        st = cs(0x8D40);
+    }
+    if (st != GL_FRAMEBUFFER_COMPLETE_OES) {
+        rt_log("gl: the presentation framebuffer is incomplete (%#x): drawing straight into the window", st);
+        present_failed = 1;
+    } else {
+        present_fbo = fbo;
+        if (rt_verbose) rt_log("gl: portrait drawable %dx%d in framebuffer %u (texture %u)", present_w, present_h, fbo, present_tex);
+    }
+    bt(0x0DE1, (uint32_t)old_tex);
+    br(GL_RENDERBUFFER_OES, (uint32_t)old_rb);
+    bf(0x8D40, is_drawable_fb(bound_fb) ? host_fb(bound_fb) : (uint32_t)old_fb);
+}
+
+typedef struct { I size, type, stride, buffer; void *ptr; uint8_t enabled; } arr_state;
+
+/* draw the portrait texture into the window, turned a quarter turn, with the game's GL state saved and restored */
+static void present_blit(void) {
+    T_glGetIntegerv gi = F(glGetIntegerv);
+    T_glGetFloatv gfv = F(glGetFloatv);
+    T_glGetBooleanv gbv = F(glGetBooleanv);
+    T_glGetPointerv gp = F(glGetPointerv);
+    T_glGetTexEnviv gte = F(glGetTexEnviv);
+    T_glIsEnabled ie = F(glIsEnabled);
+    T_glEnable en = F(glEnable);
+    T_glDisable di = F(glDisable);
+    T_glEnableClientState ecs = F(glEnableClientState);
+    T_glDisableClientState dcs = F(glDisableClientState);
+    T_glBindFramebufferOES bf = F(glBindFramebufferOES);
+    T_glBindTexture bt = F(glBindTexture);
+    T_glBindBuffer bb = F(glBindBuffer);
+    T_glActiveTexture at = F(glActiveTexture);
+    T_glClientActiveTexture cat = F(glClientActiveTexture);
+    T_glMatrixMode mm = F(glMatrixMode);
+    T_glLoadIdentity li = F(glLoadIdentity);
+    T_glLoadMatrixf lm = F(glLoadMatrixf);
+    T_glViewport vp = F(glViewport);
+    T_glScissor sc = F(glScissor);
+    T_glColor4f c4 = F(glColor4f);
+    T_glColorMask cm = F(glColorMask);
+    T_glTexEnvi te = F(glTexEnvi);
+    T_glVertexPointer vptr = F(glVertexPointer);
+    T_glTexCoordPointer tptr = F(glTexCoordPointer);
+    T_glColorPointer cptr = F(glColorPointer);
+    T_glNormalPointer nptr = F(glNormalPointer);
+    T_glDrawArrays da = F(glDrawArrays);
+    T_glClearColor cc = F(glClearColor);
+    T_glClear cl = F(glClear);
+    if (!gi || !gfv || !gbv || !gp || !gte || !ie || !en || !di || !ecs || !dcs || !bf || !bt || !bb || !at || !cat || !mm ||
+        !li || !lm || !vp || !sc || !c4 || !cm || !te || !vptr || !tptr || !cptr || !nptr || !da || !cc || !cl) return;
+
+    /* save */
+    static const E caps[] = {0x0BE2 /* BLEND */, 0x0B71 /* DEPTH_TEST */, 0x0B44 /* CULL_FACE */, 0x0BC0 /* ALPHA_TEST */,
+                             0x0B50 /* LIGHTING */, 0x0B60 /* FOG */, 0x0B90 /* STENCIL_TEST */, 0x0C11 /* SCISSOR_TEST */,
+                             0x0BF2 /* COLOR_LOGIC_OP */};
+    enum { NCAPS = sizeof caps / sizeof caps[0] };
+    uint8_t cap_on[NCAPS];
+    for (int k = 0; k < NCAPS; k++) cap_on[k] = ie(caps[k]);
+    I vpt[4] = {0}, scb[4] = {0}, old_tex[2] = {0, 0}, old_active = 0, old_client = 0, old_mm = 0, old_env[2] = {0, 0};
+    float mv[16], pj[16], tx[16], color[4];
+    uint8_t cmask[4], tex_on[2], tcarr_on[2];
+    gi(0x0BA2 /* VIEWPORT */, vpt);
+    gi(0x0C10 /* SCISSOR_BOX */, scb);
+    gi(0x84E0 /* ACTIVE_TEXTURE */, &old_active);
+    gi(0x84E1 /* CLIENT_ACTIVE_TEXTURE */, &old_client);
+    gi(0x0BA0 /* MATRIX_MODE */, &old_mm);
+    gfv(0x0BA6 /* MODELVIEW_MATRIX */, mv);
+    gfv(0x0BA7 /* PROJECTION_MATRIX */, pj);
+    gfv(0x0B00 /* CURRENT_COLOR */, color);
+    gbv(0x0C23 /* COLOR_WRITEMASK */, cmask);
+    for (int u = 0; u < 2; u++) {
+        at(0x84C0 + u);
+        cat(0x84C0 + u);
+        gi(0x8069, &old_tex[u]);
+        gte(0x2300 /* TEXTURE_ENV */, 0x2200 /* TEXTURE_ENV_MODE */, &old_env[u]);
+        tex_on[u] = ie(0x0DE1);
+        tcarr_on[u] = ie(0x8078 /* TEXTURE_COORD_ARRAY */);
+    }
+    at(0x84C0);
+    cat(0x84C0);
+    mm(0x1702 /* TEXTURE */);
+    gfv(0x0BA8 /* TEXTURE_MATRIX */, tx);
+    arr_state av = {0}, an = {0}, ac = {0}, ax = {0};
+    gi(0x807A, &av.size); gi(0x807B, &av.type); gi(0x807C, &av.stride); gi(0x8896, &av.buffer); gp(0x808E, &av.ptr); av.enabled = ie(0x8074);
+    gi(0x807E, &an.type); gi(0x807F, &an.stride); gi(0x8897, &an.buffer); gp(0x808F, &an.ptr); an.enabled = ie(0x8075);
+    gi(0x8081, &ac.size); gi(0x8082, &ac.type); gi(0x8083, &ac.stride); gi(0x8898, &ac.buffer); gp(0x8090, &ac.ptr); ac.enabled = ie(0x8076);
+    gi(0x8088, &ax.size); gi(0x8089, &ax.type); gi(0x808A, &ax.stride); gi(0x889A, &ax.buffer); gp(0x8092, &ax.ptr); ax.enabled = tcarr_on[0];
+
+    /* draw */
+    int ww = 0, wh = 0;
+    rt_platform_size(&ww, &wh);
+    bf(0x8D40, 0);
+    for (int k = 0; k < NCAPS; k++) di(caps[k]);
+    at(0x84C1); cat(0x84C1); di(0x0DE1); dcs(0x8078);
+    at(0x84C0); cat(0x84C0);
+    cm(1, 1, 1, 1);
+    c4(1, 1, 1, 1);
+    mm(0x1700); li();
+    mm(0x1701); li();
+    mm(0x1702); li();
+    vp(0, 0, ww, wh);
+    cc(0, 0, 0, 1);
+    cl(0x4000);
+    en(0x0DE1);
+    bt(0x0DE1, present_tex);
+    te(0x2300, 0x2200, 0x1E01 /* REPLACE */);
+    bb(GL_ARRAY_BUFFER, 0);
+    static const float quad[] = { /* x, y, s, t: the portrait texture turned a quarter turn counter-clockwise */
+        1, -1, 0, 0,   1, 1, 1, 0,   -1, -1, 0, 1,   -1, 1, 1, 1 };
+    ecs(0x8074);
+    ecs(0x8078);
+    dcs(0x8076);
+    dcs(0x8075);
+    vptr(2, 0x1406 /* FLOAT */, 16, quad);
+    tptr(2, 0x1406, 16, quad + 2);
+    da(0x0005 /* TRIANGLE_STRIP */, 0, 4);
+
+    /* the frame is shown by the caller's swap; put the game's state back */
+    rt_platform_swap();
+    bf(0x8D40, host_fb(bound_fb));
+    bt(0x0DE1, 0);
+    bb(GL_ARRAY_BUFFER, (uint32_t)av.buffer); vptr(av.size, av.type, av.stride, av.ptr); (av.enabled ? ecs : dcs)(0x8074);
+    bb(GL_ARRAY_BUFFER, (uint32_t)an.buffer); nptr(an.type, an.stride, an.ptr); (an.enabled ? ecs : dcs)(0x8075);
+    bb(GL_ARRAY_BUFFER, (uint32_t)ac.buffer); cptr(ac.size, ac.type, ac.stride, ac.ptr); (ac.enabled ? ecs : dcs)(0x8076);
+    bb(GL_ARRAY_BUFFER, (uint32_t)ax.buffer); tptr(ax.size, ax.type, ax.stride, ax.ptr);
+    bb(GL_ARRAY_BUFFER, array_buffer);
+    for (int u = 1; u >= 0; u--) {
+        at(0x84C0 + u);
+        cat(0x84C0 + u);
+        bt(0x0DE1, (uint32_t)old_tex[u]);
+        te(0x2300, 0x2200, old_env[u]);
+        (tex_on[u] ? en : di)(0x0DE1);
+        (tcarr_on[u] ? ecs : dcs)(0x8078);
+    }
+    mm(0x1702); lm(tx);
+    mm(0x1701); lm(pj);
+    mm(0x1700); lm(mv);
+    mm((E)old_mm);
+    at((E)old_active);
+    cat((E)old_client);
+    cm(cmask[0], cmask[1], cmask[2], cmask[3]);
+    c4(color[0], color[1], color[2], color[3]);
+    for (int k = 0; k < NCAPS; k++) (cap_on[k] ? en : di)(caps[k]);
+    vp(vpt[0], vpt[1], vpt[2], vpt[3]);
+    sc(scb[0], scb[1], scb[2], scb[3]);
+}
+
 void rt_gl_bind_drawable(uint32_t renderbuffer, int width, int height) {
     drawable_rb = renderbuffer;
     drawable_w = width;
@@ -280,9 +484,14 @@ void rt_gl_bind_drawable(uint32_t renderbuffer, int width, int height) {
     if (rt_verbose) rt_log("gl: drawable renderbuffer %u (%dx%d)", renderbuffer, width, height);
     for (int k = 0; k < MAX_ATTACH; k++)
         if (renderbuffer && color_att[k].fb && color_att[k].rb == renderbuffer) make_drawable_fb(color_att[k].fb);
+    present_setup();
+    if (present_fbo && is_drawable_fb(bound_fb)) host_bind_fb(0, bound_fb);
 }
 
-void rt_gl_present(void) { rt_platform_swap(); }
+void rt_gl_present(void) {
+    if (present_fbo) present_blit(); /* swaps */
+    else rt_platform_swap();
+}
 
 /* ---- pointers ---------------------------------------------------------------------------------------------- */
 static const void *array_ptr(uint32_t v) { return array_buffer ? (const void *)(uintptr_t)v : G(v); }

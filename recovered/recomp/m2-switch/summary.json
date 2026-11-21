@@ -1,0 +1,28 @@
+{
+ "executable": "NovaHD",
+ "entries": 21230,
+ "translated": 21230,
+ "untranslated": {},
+ "tested": 3,
+ "kind": "all",
+ "select": "switch",
+ "runs_per_function": 600,
+ "seed": 1,
+ "results": {
+  "calls": {
+   "pass": 2,
+   "no-coverage": 1
+  }
+ },
+ "incomplete_runs_by_reason": {
+  "import strlen": 423,
+  "unicorn: Invalid instruction": 90,
+  "unicorn: Invalid memory read": 69,
+  "unicorn: Invalid memory fetch": 12,
+  "unicorn: Unhandled CPU exception": 3,
+  "import strlen: Invalid memory read": 1,
+  "import _ZNSsD2Ev": 1,
+  "unicorn: Write to write-protected memory": 1
+ },
+ "seconds": 345
+}

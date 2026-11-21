@@ -334,8 +334,100 @@ MODELS.update({
 })
 
 
+def _format(m, fmt_addr, k):
+    """printf-style formatter for the iOS ABI (varargs in core registers, doubles in two words, no alignment).
+    Supports flags, width, precision, h/l/ll length modifiers and d i u x X o c s p f e g %."""
+    import re
+    fmt = m.cstr(fmt_addr).decode("latin-1")
+    out = []
+    pos = 0
+    for mt in re.finditer(r"%([-+ #0]*)(\*|\d+)?(?:\.(\*|\d+))?(hh|h|ll|l|z|t|j|L)?([diuxXocspfeEgG%])", fmt):
+        out.append(fmt[pos:mt.start()])
+        pos = mt.end()
+        flags, width, prec, ln, conv = mt.groups()
+        if conv == "%":
+            out.append("%")
+            continue
+        if width == "*":
+            width = m.arg(k); k += 1
+            if width & 0x80000000:
+                width -= 1 << 32
+        if prec == "*":
+            prec = m.arg(k); k += 1
+        spec = "%" + (flags or "") + (str(width) if width else "") + (("." + str(prec)) if prec is not None else "")
+        if conv in "fFeEgG":
+            lo, hi = m.arg(k), m.arg(k + 1)
+            k += 2
+            val = struct.unpack("<d", struct.pack("<II", lo, hi))[0]
+            out.append((spec + conv) % val)
+        elif conv == "s":
+            p = m.arg(k); k += 1
+            out.append((spec + "s") % (m.cstr(p).decode("latin-1") if p else "(null)"))
+        elif conv == "c":
+            out.append((spec + "c") % chr(m.arg(k) & 0xFF)); k += 1
+        elif conv == "p":
+            out.append("0x%x" % m.arg(k)); k += 1
+        else:
+            if ln in ("ll", "j"):
+                v = m.arg(k) | (m.arg(k + 1) << 32); k += 2; bits = 64
+            else:
+                v = m.arg(k); k += 1; bits = 32
+                if ln == "h":
+                    v &= 0xFFFF; bits = 16
+                elif ln == "hh":
+                    v &= 0xFF; bits = 8
+            if conv in "di" and v >> (bits - 1):
+                v -= 1 << bits
+            out.append((spec + ("d" if conv in "diu" else conv)) % v)
+    out.append(fmt[pos:])
+    return "".join(out).encode("latin-1")
+
+
+def _sprintf(m):
+    s = _format(m, m.arg(1), 2)
+    m.store(m.arg(0), s + b"\0")
+    m.ret(len(s))
+
+
+def _snprintf(m):
+    n = m.arg(1)
+    s = _format(m, m.arg(2), 3)
+    if n:
+        m.store(m.arg(0), s[:n - 1] + b"\0")
+    m.ret(len(s))
+
+
+def _printf(m):
+    m.ret(len(_format(m, m.arg(0), 1)))
+
+
+MODELS.update({"sprintf": _sprintf, "snprintf": _snprintf, "printf": _printf})
+
+
+def _guard_acquire(m):
+    p = m.arg(0)
+    m.ret(1 if m.read(p, 1)[0] == 0 else 0)
+
+
+def _guard_release(m):
+    m.store(m.arg(0), bytes([1]))
+
+
+def _puts(m):
+    m.ret(len(m.cstr(m.arg(0))) + 1)
+
+
+MODELS.update({
+    "_Unwind_SjLj_Register": _const(0), "_Unwind_SjLj_Unregister": _const(0),
+    "__cxa_guard_acquire": _guard_acquire, "__cxa_guard_release": _guard_release, "__cxa_guard_abort": _const(0),
+    "puts": _puts,
+})
+
+
 def run_import(m: Machine, name: str):
     model = MODELS.get(name)
+    if model is None and name.startswith("gl") and name[2:3].isupper():
+        model = _const(0)  # OpenGL ES calls: no effect on the CPU state that is compared
     if model is None:
         raise Unmodelled(name)
     model(m)

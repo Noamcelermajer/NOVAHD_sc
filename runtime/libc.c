@@ -348,6 +348,22 @@ IMP(mktime) {
     RET((uint32_t)mktime(&t));
 }
 
+/* strftime(buf, max, fmt, const struct tm *) */
+IMP(strftime) {
+    struct tm t = {0};
+    uint32_t g = A(3);
+    t.tm_sec = (int)rt_ld32(g); t.tm_min = (int)rt_ld32(g + 4); t.tm_hour = (int)rt_ld32(g + 8);
+    t.tm_mday = (int)rt_ld32(g + 12); t.tm_mon = (int)rt_ld32(g + 16); t.tm_year = (int)rt_ld32(g + 20);
+    t.tm_wday = (int)rt_ld32(g + 24); t.tm_yday = (int)rt_ld32(g + 28); t.tm_isdst = (int)rt_ld32(g + 32);
+    uint32_t max = A(1);
+    if (!max) { RET(0); return; }
+    char *tmp = malloc(max);
+    size_t n = strftime(tmp, max, S(2), &t);
+    memcpy(G(A(0)), tmp, n + 1 <= max ? n + 1 : max);
+    free(tmp);
+    RET(n);
+}
+
 /* ---- system ------------------------------------------------------------------------------------------------------------ */
 IMP(exit) { rt_log("game called exit(%d)", (int)A(0)); exit((int)A(0)); }
 IMP(__assert_rtn) { rt_fatal("assertion failed: %s, %s:%d (%s)", S(3), S(1), (int)A(2), S(0)); }
@@ -420,7 +436,7 @@ void rt_libc_register(void) {
     REG(realpath$DARWIN_EXTSN); REG(opendir); REG(readdir); REG(closedir);
     REG(malloc); REG(calloc); REG(realloc); REG(free);
     REG(time); REG(gettimeofday); REG(CFAbsoluteTimeGetCurrent); REG(usleep); REG(nanosleep); REG(sched_yield);
-    REG(localtime_r); REG(mktime);
+    REG(localtime_r); REG(mktime); REG(strftime);
     REG(exit); REG(__assert_rtn); REG(sigaction); REG(sysctlbyname); REG(uname); REG(gethostname);
     REG(mach_host_self); REG(host_page_size); REG(host_statistics); REG(CC_MD5);
     (void)stderr_block;

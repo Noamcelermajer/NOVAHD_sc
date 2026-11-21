@@ -527,6 +527,23 @@ def discover(image: Image) -> list:
         if a in literals or cover.get(a, thumb) != thumb:
             del funcs[a]
             rejected += 1
+    # A function found only through a data word or a literal, whose whole reach lies inside another function's
+    # reach, is a label in the middle of that function (a pointer-looking constant). As a function of its own it
+    # would split loops into mutually recursive fragments; it stays reachable as an extra entry instead.
+    covers = {}
+    for a, (_, _, reached, _) in funcs.items():
+        for pc in reached:
+            covers.setdefault(pc, []).append(a)
+    image.inner_labels = []
+    for a in sorted(funcs, key=lambda k: len(funcs[k][2])):
+        thumb, _, reached, trusted = funcs[a]
+        if trusted or a in symbol_starts:
+            continue
+        for b in covers.get(a, ()):
+            if b != a and b in funcs and len(funcs[b][2]) > len(reached) and funcs[b][0] == thumb                     and all(pc in funcs[b][2] for pc in reached):
+                image.inner_labels.append(a)
+                del funcs[a]
+                break
     funcs = {a: (t, n, r) for a, (t, n, r, _) in funcs.items()}
 
     # entries: branches into another function's range make the target an entry of its own
@@ -560,5 +577,5 @@ def discover(image: Image) -> list:
             data.append((run, end))
         out.append(Function(a, end - a, name, data, thumb))
     image.discovery = {"functions": len(out), "thumb": sum(f.thumb for f in out), "rejected_weak_seeds": rejected,
-                       "symbols": sum(1 for v in seeds.values() if v[2]), "data_pointer_seeds": len(weak)}
+                       "symbols": sum(1 for v in seeds.values() if v[2]), "inner_labels": len(image.inner_labels), "data_pointer_seeds": len(weak)}
     return out

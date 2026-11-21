@@ -1456,8 +1456,7 @@ M(eagl_current) { rt_ret(c, current_context); }
 /* renderbufferStorage:fromDrawable: the renderbuffer bound now becomes the window surface */
 M(eagl_storage) {
     uint32_t rb = gl_get_integer(c, 0x8CA7 /* GL_RENDERBUFFER_BINDING_OES */);
-    int w = 0, h = 0;
-    rt_platform_size(&w, &h);
+    int w = (int)SCREEN_W, h = (int)SCREEN_H; /* the layer is the portrait 768x1024; gles1.c shows it turned a quarter turn */
     static int logged;
     if (!logged++) rt_log("uikit: renderbufferStorage:%#x fromDrawable:%s -> renderbuffer %u is the window (%dx%d)", ARG(0),
                           rt_class_name(rt_object_class(ARG(1))), rb, w, h);

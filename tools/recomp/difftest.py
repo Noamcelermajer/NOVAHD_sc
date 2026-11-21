@@ -15,6 +15,7 @@ Thumb functions start in Unicorn with the Thumb bit set; the translated side doe
 from __future__ import annotations
 
 import argparse
+import re
 import concurrent.futures
 import csv
 import ctypes
@@ -459,6 +460,7 @@ class Harness:
         return {
             "r": list(c.r), "f": (c.n << 3) | (c.z << 2) | (c.c << 1) | c.v, "fp": c.fpscr >> 28, "d": list(c.d),
             "mem": {a: ctypes.string_at(base + a, b - a) for a, b in self.regions}, "fault": c.fault,
+            "depth": c.depth, "trace": list(c.trace),
         }
 
     def test(self, addr, runs, thumb=False):
@@ -484,6 +486,11 @@ class Harness:
                 key = why.split(" at ")[0].split(" (")[0][:60]
                 notes[key] = notes.get(key, 0) + 1
                 continue
+            if h["fault"] == 4:
+                # a computed jump to an address that is no entry: random state made a "virtual call" read a code
+                # word (a jump table inside a function). The translation supports computed jumps to entries only.
+                notes["dispatch to a non-entry, original continued"] = notes.get("dispatch to a non-entry, original continued", 0) + 1
+                continue
             if until != SENTINEL:
                 notes["returned elsewhere"] = notes.get("returned elsewhere", 0) + 1
             if h["fault"] == 7:
@@ -508,7 +515,11 @@ def main():
     ap.add_argument("--runs", type=int, default=16)
     ap.add_argument("--seed", type=int, default=1)
     ap.add_argument("--kind", choices=("all", "leaf", "calls"), default="all", help="which functions to sample")
+    ap.add_argument("--select", choices=("all", "thumb", "switch"), default="all",
+                    help="restrict the pool: Thumb entries only, or entries with an inline __switch32 site; "
+                         "--sample 0 tests every entry of the pool")
     ap.add_argument("--only", type=lambda s: int(s, 16), nargs="*", help="test these link addresses only")
+    ap.add_argument("--picked-only", action="store_true", help="with --kind leaf: build a DLL of the tested entries only")
     ap.add_argument("--mutate", help="OLD=>NEW: break every translation on purpose; the run should report failures")
     args = ap.parse_args()
 
@@ -528,15 +539,31 @@ def main():
              and any(is_bl or not (f.address <= t < f.address + f.size) for _, t, is_bl in branch_targets(image, f))}
     calls |= {a for a, src in sources.items() if "rc_dispatch" in src or "rc_import" in src}
 
-    dll = ctypes.CDLL(str(build(image, ents, sources, args.work,
-                                tuple(args.mutate.split("=>", 1)) if args.mutate else None)))
-    print(f"built in {time.time() - t0:.0f}s")
     pool = sorted(sources)
     if args.kind == "leaf":
         pool = [a for a in pool if a not in calls]
     elif args.kind == "calls":
         pool = [a for a in pool if a in calls]
+    if args.select == "thumb":
+        pool = [a for a in pool if getattr(ents[a], "thumb", False)]
+    elif args.select == "switch":
+        pool = [a for a in pool if "uint32_t res = addc(r0, ~" in sources[a] and "switch (r0) {" in sources[a]]
+    if args.sample <= 0:
+        args.sample = len(pool)
+    print(f"pool {len(pool)} ({args.select}/{args.kind})")
     picks = sorted(args.only) if args.only else sorted(random.Random(args.seed).sample(pool, min(args.sample, len(pool))))
+    mutate = tuple(args.mutate.split("=>", 1)) if args.mutate else None
+    b_ents, b_sources = ents, sources
+    if args.picked_only:  # leaf functions only: the DLL holds just the tested entries (a mutation run compiles little)
+        assert args.kind == "leaf", "--picked-only needs --kind leaf"
+        b_sources = {a: sources[a] for a in picks}
+        b_ents = dict(b_sources)  # entries the picks mention (a fall-through into the next block) become fault stubs
+        for a in picks:
+            for x in re.findall(r"f_([0-9a-f]{7})\(c, m\)", sources[a]):
+                b_ents.setdefault(int(x, 16), None)
+        b_ents = {a: ents[a] for a in b_ents}
+    dll = ctypes.CDLL(str(build(image, b_ents, b_sources, args.work, mutate)))
+    print(f"built in {time.time() - t0:.0f}s")
     harness = Harness(image, dll, args.seed)
     args.out.mkdir(parents=True, exist_ok=True)
     rows, counts = [], {}
@@ -560,7 +587,7 @@ def main():
                 nocov[k] = nocov.get(k, 0) + n
     summary = {"executable": args.so.name, "entries": len(ents), "translated": len(sources),
                "untranslated": dict(sorted(reasons.items(), key=lambda kv: -kv[1])), "tested": len(picks),
-               "kind": args.kind, "runs_per_function": args.runs, "seed": args.seed, "results": counts,
+               "kind": args.kind, "select": args.select, "runs_per_function": args.runs, "seed": args.seed, "results": counts,
                "incomplete_runs_by_reason": dict(sorted(nocov.items(), key=lambda kv: -kv[1])[:25]),
                "seconds": round(time.time() - t0)}
     (args.out / "summary.json").write_text(json.dumps(summary, indent=1) + "\n", encoding="utf-8")

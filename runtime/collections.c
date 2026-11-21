@@ -2016,10 +2016,17 @@ M(dt_with_file) {
 }
 M(dt_with_length) { id d = rt_objc_alloc(data_cls(c)); data_fill(d, "", 0); data_set_len(d, ARG(0)); RET(rt_autorelease(d)); }
 M(dt_with_capacity) { id d = rt_objc_alloc(data_cls(c)); data_reserve(d, ARG(0) ? ARG(0) : 1); RET(rt_autorelease(d)); }
-M(dt_url_unavailable) { /* dataWithContentsOfURL: — networking/URLs belong to other modules */
-    LOG_ONCE("collections: +[NSData dataWithContentsOfURL:] is not available (returns nil)");
+/* The path of a file URL, or 0 (http and other schemes are the network's business: nothing is reachable). */
+static id url_file_path(cpu_t *c, id url) {
+    if (!url || !rt_responds(url, "isFileURL") || !(rt_send(c, url, "isFileURL", 0) & 0xff)) return 0;
+    return rt_send(c, url, "path", 0);
+}
+M(dt_with_url) { /* dataWithContentsOfURL:(options:error:) */
+    id path = url_file_path(c, ARG(0)), d = 0;
+    if (path) d = data_file(c, rt_objc_alloc(data_cls(c)), path);
+    else LOG_ONCE("collections: NSData contentsOfURL: not a file URL (returns nil)");
     if (strstr(rt_sel_name(c->r[1]), "error:")) out_obj(ARG(2), 0);
-    RET(0);
+    RET(d ? rt_autorelease(d) : 0);
 }
 
 M(dti_init) { data_fill(SELF, "", 0); }
@@ -2037,12 +2044,12 @@ M(dti_data) { id self = SELF, o = ARG(0); RET(data_fill(self, o ? G(data_bytes(o
 M(dti_file) { id self = SELF; RET(data_file(c, self, ARG(0))); }
 M(dti_length) { id self = SELF; data_fill(self, "", 0); data_set_len(self, ARG(0)); RET(self); }
 M(dti_capacity) { id self = SELF; data_reserve(self, ARG(0) ? ARG(0) : 1); RET(self); }
-M(dti_url_unavailable) {
-    id self = SELF;
-    LOG_ONCE("collections: -[NSData initWithContentsOfURL:] is not available (returns nil)");
+M(dti_url) {
+    id self = SELF, path = url_file_path(c, ARG(0));
+    if (!path) LOG_ONCE("collections: NSData initWithContentsOfURL: not a file URL (returns nil)");
     if (strstr(rt_sel_name(c->r[1]), "error:")) out_obj(ARG(2), 0);
-    rt_release(c, self);
-    RET(0);
+    if (!path) { rt_release(c, self); RET(0); return; }
+    RET(data_file(c, self, path));
 }
 
 M(dt_bytes) { RET(data_bytes(SELF)); }
@@ -3034,14 +3041,14 @@ void rt_collections_define(void) {
         {"data", dt_data}, {"dataWithBytes:length:", dt_with_bytes}, {"dataWithBytesNoCopy:length:", dt_with_bytes_nocopy},
         {"dataWithBytesNoCopy:length:freeWhenDone:", dt_with_bytes_nocopy}, {"dataWithData:", dt_with_data},
         {"dataWithContentsOfFile:", dt_with_file}, {"dataWithContentsOfMappedFile:", dt_with_file},
-        {"dataWithContentsOfURL:", dt_url_unavailable}, {"dataWithContentsOfURL:options:error:", dt_url_unavailable},
+        {"dataWithContentsOfURL:", dt_with_url}, {"dataWithContentsOfURL:options:error:", dt_with_url},
         {"dataWithLength:", dt_with_length}, {"dataWithCapacity:", dt_with_capacity},
     };
     static const mdef dt_i[] = {
         {"init", dti_init}, {"initWithBytes:length:", dti_bytes}, {"initWithBytesNoCopy:length:", dti_bytes_nocopy},
         {"initWithBytesNoCopy:length:freeWhenDone:", dti_bytes_nocopy}, {"initWithData:", dti_data},
         {"initWithContentsOfFile:", dti_file}, {"initWithContentsOfMappedFile:", dti_file},
-        {"initWithContentsOfURL:", dti_url_unavailable}, {"initWithContentsOfURL:options:error:", dti_url_unavailable},
+        {"initWithContentsOfURL:", dti_url}, {"initWithContentsOfURL:options:error:", dti_url},
         {"initWithLength:", dti_length}, {"initWithCapacity:", dti_capacity}, {"bytes", dt_bytes},
         {"length", dt_length}, {"getBytes:", dt_get_bytes}, {"getBytes:length:", dt_get_bytes},
         {"getBytes:range:", dt_get_bytes}, {"subdataWithRange:", dt_subdata}, {"isEqualToData:", dt_is_equal},

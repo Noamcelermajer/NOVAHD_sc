@@ -1,0 +1,49 @@
+{
+ "executable": "NovaHD",
+ "entries": 21230,
+ "translated": 21230,
+ "untranslated": {},
+ "tested": 433,
+ "kind": "all",
+ "select": "thumb",
+ "runs_per_function": 16,
+ "seed": 1,
+ "results": {
+  "calls": {
+   "pass": 111,
+   "no-coverage": 187
+  },
+  "leaf": {
+   "pass": 133,
+   "no-coverage": 2
+  }
+ },
+ "incomplete_runs_by_reason": {
+  "unicorn: Invalid memory read": 417,
+  "unicorn: Write to write-protected memory": 351,
+  "unicorn: Invalid instruction": 267,
+  "import strlen": 178,
+  "unicorn stopped": 143,
+  "unicorn: Invalid memory write": 131,
+  "import _ZNSaIcEC1Ev": 120,
+  "import memset": 89,
+  "import memcpy": 87,
+  "import _ZNSsC1Ev": 86,
+  "import fopen": 86,
+  "import _ZSt18_Rb_tree_decrementPSt18_Rb_tree_node_base": 73,
+  "unicorn: Invalid memory fetch": 65,
+  "import _ZNSsD1Ev": 64,
+  "import socket": 64,
+  "import srand": 59,
+  "import _ZNKSs4findEPKcm": 44,
+  "import _ZNKSs7compareERKSs": 39,
+  "import gethostname": 32,
+  "import recvfrom": 32,
+  "import gethostbyname": 32,
+  "import NSSearchPathForDirectoriesInDomains": 32,
+  "import inet_addr": 31,
+  "import localtime_r": 29,
+  "import sprintf": 25
+ },
+ "seconds": 393
+}

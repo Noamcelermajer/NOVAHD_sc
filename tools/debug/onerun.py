@@ -14,7 +14,7 @@ ents = entries(image)
 dll = ctypes.CDLL(str(Path("build/recomp/recomp.dll").resolve()))
 h = D.Harness(image, dll, 1)
 path = []
-h.uc.hook_add(UC_HOOK_CODE, lambda uc, a, s, _: path.append(a) if len(path) < 400 else None)
+h.uc.hook_add(UC_HOOK_CODE, lambda uc, a, s, _: path.append(a) if len(path) < 20000 else None)
 f = ents[addr]
 rng = random.Random(addr * 1000 + run)
 mem = h.snapshot(run % 8)
@@ -29,6 +29,8 @@ for a in path:
     else:
         blocks[-1][1] = a
 print("path:", " ".join(f"{s:x}-{e:x}" for s, e in blocks[:60]))
+print("path tail:", " ".join(f"{s:x}-{e:x}" for s, e in blocks[-40:]))
 hh = h.run_host(addr, mem, regs, flags, fpscr, d)
 print("host fault", hh["fault"], [hex(x) for x in hh["r"]])
+print("host call trace (function entered at each depth, innermost last):", [hex(hh["trace"][k & 63]) for k in range(max(1, hh["depth"] - 8), hh["depth"] + 1)], "depth", hh["depth"])
 print("diff:", D.compare(u, hh) if u else None)

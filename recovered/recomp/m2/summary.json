@@ -1,0 +1,49 @@
+{
+ "executable": "NovaHD",
+ "entries": 21230,
+ "translated": 21230,
+ "untranslated": {},
+ "tested": 3000,
+ "kind": "all",
+ "select": "all",
+ "runs_per_function": 16,
+ "seed": 1,
+ "results": {
+  "calls": {
+   "no-coverage": 1959,
+   "pass": 558
+  },
+  "leaf": {
+   "pass": 457,
+   "no-coverage": 26
+  }
+ },
+ "incomplete_runs_by_reason": {
+  "unicorn: Invalid memory read": 9836,
+  "unicorn: Write to write-protected memory": 5244,
+  "unicorn: Invalid instruction": 5164,
+  "unicorn: Invalid memory write": 2746,
+  "unicorn stopped": 1726,
+  "import memset": 1287,
+  "unicorn: Invalid memory fetch": 994,
+  "import memcpy": 557,
+  "import objc_msgSend": 556,
+  "import _ZNSsC1ERKSs": 301,
+  "returned elsewhere": 280,
+  "import _ZNSsC1EPKcRKSaIcE": 232,
+  "import strcmp": 232,
+  "import _ZNSsD2Ev": 231,
+  "import fread": 128,
+  "import strlen": 111,
+  "unicorn: Unhandled CPU exception": 100,
+  "import printf": 94,
+  "import _ZNKSs7compareERKSs": 77,
+  "import _ZNSs6assignERKSs": 75,
+  "import remove": 69,
+  "import objc_setProperty": 65,
+  "import sprintf": 59,
+  "import fopen": 58,
+  "import _ZSt18_Rb_tree_decrementPSt18_Rb_tree_node_base": 52
+ },
+ "seconds": 2179
+}

@@ -136,6 +136,10 @@ class Lifter:
         out.append("  uint32_t " + ", ".join(f"r{k} = c->r[{k}]" for k in range(15)) + ";")
         out.append("  uint32_t n = c->n, z = c->z, cf = c->c, v = c->v, pcv;")
         prev = None
+        if f.address >= 4 and not f.is_data(f.address - 4):  # a fragment that starts with the write of PC after mov lr, pc
+            pw = list(self.md.disasm(self.image.memory[f.address - 4:f.address], f.address - 4))
+            if pw and self.is_mov_lr_pc(pw[0]):
+                prev = pw[0]
         for i in insns:
             self.i = i
             self.word = int.from_bytes(i.bytes, "little")
@@ -735,6 +739,13 @@ def branch_targets(image: Image, f: Function):
             if off & 0x800000:
                 off -= 0x1000000
             yield a, (a + 8 + 4 * off) & 0xFFFFFFFF, bool(w & 0x01000000)
+        elif w & 0x0FFFFF70 == 0x079FF100:  # ldr pc, [pc, rX, lsl #2]: a jump table follows; its targets are entries
+            t = a + 8
+            while f.is_data(t) and t < f.address + f.size:
+                v = int.from_bytes(image.memory[t:t + 4], "little") - IMAGE_BASE
+                if image.in_text(v) and not v & 3:
+                    yield a, v, False
+                t += 4
 
 
 def entries(image: Image) -> dict:
@@ -746,10 +757,17 @@ def entries(image: Image) -> dict:
         out[a] = Function(a, size, name)
     ordered = sorted(out)
     work = list(image.functions)
-    while work:
-        f = work.pop()
-        for a, t, is_bl in branch_targets(image, f):
-            inside = f.address <= t < f.address + f.size
+    # labels inside a function that something points at (see macho.discover): entries, not functions
+    pending = [(t, None) for t in getattr(image, "inner_labels", ())]
+    while work or pending:
+        if pending:
+            t, _ = pending.pop()
+            f, targets = None, [(t, t, True)]
+        else:
+            f = work.pop()
+            targets = branch_targets(image, f)
+        for a, t, is_bl in targets:
+            inside = f is not None and f.address <= t < f.address + f.size
             if t in out or t in image.plt or (inside and not is_bl):
                 continue
             k = bisect.bisect_right(ordered, t) - 1
@@ -758,7 +776,7 @@ def entries(image: Image) -> dict:
             parent = out[ordered[k]]
             if not parent.address < t < parent.address + parent.size or parent.is_data(t):
                 continue
-            if getattr(parent, "thumb", False) != getattr(f, "thumb", False) and not is_bl:
+            if f is not None and getattr(parent, "thumb", False) != getattr(f, "thumb", False) and not is_bl:
                 continue  # a plain branch never changes mode: this target is not code of that parent
             g = Function(t, parent.address + parent.size - t, f"{parent.name}+0x{t - parent.address:x}",
                          [(max(s, t), e) for s, e in parent.data_ranges if e > t], getattr(parent, "thumb", False))
