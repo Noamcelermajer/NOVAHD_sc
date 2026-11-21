@@ -216,6 +216,9 @@ void rt_uikit_resume(cpu_t *c);
 /* the platform layer (host_main.c on Windows/Linux, android_main.c on Android) */
 void rt_platform_swap(void);                        /* show the frame drawn to the window surface */
 void rt_platform_size(int *width, int *height);     /* the window surface in pixels */
+/* UIApplicationMain never returns on iOS: after the launch it calls this, which pumps window events into
+ * rt_uikit_touch/rt_uikit_accelerometer and calls rt_uikit_frame once per display frame until the app quits */
+void rt_platform_run(cpu_t *c);
 
 /* diagnostics */
 void rt_log(const char *fmt, ...);
