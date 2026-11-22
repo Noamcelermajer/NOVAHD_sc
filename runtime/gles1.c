@@ -430,7 +430,8 @@ static void present_blit(void) {
     mm(0x1700); li();
     mm(0x1701); li();
     mm(0x1702); li();
-    vp(0, 0, ww, wh);
+    int vw = ww * 3 > wh * 4 ? wh * 4 / 3 : ww, vh = ww * 3 > wh * 4 ? wh : ww * 3 / 4; /* 4:3, centred, black bars */
+    vp((ww - vw) / 2, (wh - vh) / 2, vw, vh);
     cc(0, 0, 0, 1);
     cl(0x4000);
     en(0x0DE1);

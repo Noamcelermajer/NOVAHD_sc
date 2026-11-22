@@ -113,6 +113,7 @@ static cpu_t *game_cpu; /* the game's main thread; set once the boot reaches the
 static int booted;      /* rt_platform_run has started: events go to UIKit */
 static int resumed = 1; /* the activity is between RESUME and PAUSE (it starts resumed: we are launched) */
 static int uikit_paused;
+static int buf_w = SCREEN_W, buf_h = SCREEN_H; /* the window buffers: the window's aspect around the 4:3 picture */
 static int win_w = SCREEN_W, win_h = SCREEN_H; /* the window in physical pixels (touch coordinates) */
 static int finger_ptr[MAX_FINGERS] = {-1, -1, -1, -1, -1}; /* Android pointer id held by each finger slot */
 static unsigned long long frames, swaps;
@@ -321,7 +322,12 @@ static void window_geometry(ANativeWindow *w) {
     ANativeWindow_setBuffersGeometry(w, 0, 0, visual_format); /* back to the window's own size, to measure it */
     int ww = ANativeWindow_getWidth(w), wh = ANativeWindow_getHeight(w);
     if (ww > 0 && wh > 0) { win_w = ww; win_h = wh; }
-    ANativeWindow_setBuffersGeometry(w, SCREEN_W, SCREEN_H, visual_format);
+    /* buffers with the window's aspect and the game's 768 lines (or 1024 columns on a window narrower than 4:3):
+     * rt_gl_present centres the 4:3 picture in them, so nothing is stretched */
+    buf_w = SCREEN_W; buf_h = SCREEN_H;
+    if (win_w * 3 > win_h * 4) buf_w = (SCREEN_H * win_w / win_h + 1) & ~1;
+    else buf_h = (SCREEN_W * win_h / win_w + 1) & ~1;
+    ANativeWindow_setBuffersGeometry(w, buf_w, buf_h, visual_format);
 }
 
 static int surface_create(void) {
@@ -398,7 +404,8 @@ static void touch(int phase, const AInputEvent *e, size_t i) {
     int32_t pid = AMotionEvent_getPointerId(e, i);
     int f = finger_of(pid, phase == RT_TOUCH_BEGAN);
     if (f < 0) return;
-    float x = AMotionEvent_getX(e, i) * SCREEN_W / (float)win_w, y = AMotionEvent_getY(e, i) * SCREEN_H / (float)win_h;
+    float x = AMotionEvent_getX(e, i) * buf_w / (float)win_w - (buf_w - SCREEN_W) / 2,
+          y = AMotionEvent_getY(e, i) * buf_h / (float)win_h - (buf_h - SCREEN_H) / 2;
     if (x < 0) x = 0;
     if (x > SCREEN_W - 1) x = SCREEN_W - 1;
     if (y < 0) y = 0;
@@ -507,8 +514,8 @@ static void drain_events(void) {
 
 /* ---- the platform interface (rt.h) -------------------------------------------------------------------------------- */
 void rt_platform_size(int *width, int *height) {
-    if (width) *width = SCREEN_W;
-    if (height) *height = SCREEN_H;
+    if (width) *width = buf_w;
+    if (height) *height = buf_h;
 }
 
 /* the render thread: bring its EGL binding up to date with want_surf/want_gen (a surface created, or about to be
