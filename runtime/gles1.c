@@ -343,7 +343,7 @@ static void sh_proj_for_gl(float *m) {
  * degrees counter-clockwise (portrait (px, py) -> landscape (py, W - px), which is the inverse of the touch
  * conversion in uikit.c), then swaps. The game's GL state is saved around the blit and put back. */
 static uint32_t present_tex, present_ds;
-static int wide_dirty;
+static int wide_dirty, proj_dirty = 1;
 static int wide_apply(int kind, E mode, I first, I count, E itype, const void *idx);
 static int present_w, present_h;
 static int present_failed;
@@ -553,8 +553,42 @@ void rt_gl_bind_drawable(uint32_t renderbuffer, int width, int height) {
     if (present_fbo && is_drawable_fb(bound_fb)) host_bind_fb(0, bound_fb);
 }
 
+/* the window changed shape after the layer was made (Android reports a portrait window first, then turns it): give the
+ * layer its new long side between two frames. The game redraws every frame, so the lost picture does not matter. */
+static void present_resize(void) {
+    int want = rt_gl_wide_long > drawable_h ? rt_gl_wide_long : drawable_h;
+    T_glGetIntegerv gi = F(glGetIntegerv);
+    T_glBindTexture bt = F(glBindTexture);
+    T_glTexImage2D ti = F(glTexImage2D);
+    T_glBindRenderbufferOES br = F(glBindRenderbufferOES);
+    T_glRenderbufferStorageOES rs = F(glRenderbufferStorageOES);
+    T_glCheckFramebufferStatusOES cs = F(glCheckFramebufferStatusOES);
+    T_glBindFramebufferOES bf = F(glBindFramebufferOES);
+    if (!present_fbo || !drawable_h || want == present_h || !gi || !bt || !ti || !br || !rs || !cs || !bf) return;
+    I old_tex = 0, old_rb = 0;
+    gi(0x8069, &old_tex);
+    gi(GL_RENDERBUFFER_BINDING_OES, &old_rb);
+    bt(0x0DE1, present_tex);
+    ti(0x0DE1, 0, 0x1908, present_w, want, 0, 0x1908, 0x1401, NULL);
+    br(GL_RENDERBUFFER_OES, present_ds);
+    bf(0x8D40, present_fbo);
+    rs(GL_RENDERBUFFER_OES, 0x88F0, present_w, want);
+    if (cs(0x8D40) != GL_FRAMEBUFFER_COMPLETE_OES) rs(GL_RENDERBUFFER_OES, 0x81A5, present_w, want);
+    bf(0x8D40, host_fb(bound_fb));
+    bt(0x0DE1, (uint32_t)old_tex);
+    br(GL_RENDERBUFFER_OES, (uint32_t)old_rb);
+    rt_log("gl: the layer is now %dx%d", present_w, want);
+    present_h = want;
+    wide_dirty = 1;
+    proj_dirty = 1;
+    wide_k = (float)drawable_h / present_h;
+    T_glMatrixMode mm = F(glMatrixMode);
+    T_glLoadMatrixf lm = F(glLoadMatrixf);
+    if (proj_scaled && mm && lm) { float m[16]; sh_proj_for_gl(m); mm(0x1701); lm(m); mm((E)mat_mode); }
+}
+
 void rt_gl_present(void) {
-    if (present_fbo) present_blit(); /* swaps */
+    if (present_fbo) { present_blit(); present_resize(); } /* the blit swaps */
     else rt_platform_swap();
 }
 
@@ -628,7 +662,7 @@ IMP(glGetPointerv) {
  * it is applied again. Framebuffers of the game's own are left alone. */
 int rt_gl_wide_long;
 static I game_vp[4] = {0, 0, 768, 1024}, game_sc[4] = {0, 0, 768, 1024};
-static int proj_dirty = 1, proj_persp;
+static int proj_persp;
 static int proj_stack[4], proj_sp;
 #define PROJ_TOUCHED() do { if (mat_mode == 0x1701) proj_dirty = 1; } while (0)
 
