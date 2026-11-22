@@ -285,7 +285,7 @@ static void make_drawable_fb(uint32_t fb) {
  * conversion in uikit.c), then swaps. The game's GL state is saved around the blit and put back. */
 static uint32_t present_tex, present_ds;
 static int wide_dirty;
-static void wide_apply(int kind, I first, I count, E itype, const void *idx);
+static int wide_apply(int kind, E mode, I first, I count, E itype, const void *idx);
 static int present_w, present_h;
 static int present_failed;
 
@@ -539,8 +539,8 @@ IMP(glVertexPointer) {
 IMP(glTexCoordPointer) { T_glTexCoordPointer f = F(glTexCoordPointer); if (f) f((I)A(0), A(1), (I)A(2), array_ptr(A(3))); }
 IMP(glColorPointer) { T_glColorPointer f = F(glColorPointer); if (f) f((I)A(0), A(1), (I)A(2), array_ptr(A(3))); }
 IMP(glNormalPointer) { T_glNormalPointer f = F(glNormalPointer); if (f) f(A(0), (I)A(1), array_ptr(A(2))); }
-IMP(glDrawElements) { T_glDrawElements f = F(glDrawElements); wide_apply(2, 0, (I)A(1), A(2), index_ptr(A(3))); if (f) f(A(0), (I)A(1), A(2), index_ptr(A(3))); }
-IMP(glDrawArrays) { T_glDrawArrays f = F(glDrawArrays); wide_apply(1, (I)A(1), (I)A(2), 0, NULL); if (f) f(A(0), (I)A(1), (I)A(2)); }
+IMP(glDrawElements) { T_glDrawElements f = F(glDrawElements); if (!wide_apply(2, A(0), 0, (I)A(1), A(2), index_ptr(A(3))) && f) f(A(0), (I)A(1), A(2), index_ptr(A(3))); }
+IMP(glDrawArrays) { T_glDrawArrays f = F(glDrawArrays); if (!wide_apply(1, A(0), (I)A(1), (I)A(2), 0, NULL) && f) f(A(0), (I)A(1), (I)A(2)); }
 IMP(glEnableClientState) { T_glEnableClientState f = F(glEnableClientState); if (f) f(A(0)); }
 IMP(glDisableClientState) { T_glDisableClientState f = F(glDisableClientState); if (f) f(A(0)); }
 IMP(glClientActiveTexture) { T_glClientActiveTexture f = F(glClientActiveTexture); if (f) f(A(0)); }
@@ -590,9 +590,12 @@ float rt_gl_wide_game_x(float d) {
 }
 
 /* the extent of a draw along the layer's long axis in normalised device coordinates; 0 when it cannot be read */
+enum { EXT_MAX = 8190 };
+static float ext_y[EXT_MAX];    /* per element of the last draw_extent: its position along the long axis */
+static uint32_t ext_i[EXT_MAX]; /* and its vertex index */
 static int draw_extent(int kind, I first, I count, E itype, const void *idx, float *lo, float *hi) {
     T_glGetFloatv gfv = F(glGetFloatv);
-    if (!gfv || !vtx.ptr || count <= 0 || count > 8192 || vtx.size < 2 || first < 0) return 0;
+    if (!gfv || !vtx.ptr || count <= 0 || count > EXT_MAX || vtx.size < 2 || first < 0) return 0;
     if (kind == 2 && (element_buffer || !idx || (itype != 0x1401 && itype != 0x1403))) return 0;
     int esz = vtx.type == 0x1406 || vtx.type == 0x140C ? 4 : vtx.type == 0x1402 ? 2 : vtx.type == 0x1400 ? 1 : 0;
     if (!esz) return 0;
@@ -620,19 +623,84 @@ static int draw_extent(int kind, I first, I count, E itype, const void *idx, flo
         float y = (ry[0] * v[0] + ry[1] * v[1] + ry[2] * v[2] + ry[3] * v[3]) / w;
         if (y < a) a = y;
         if (y > b) b = y;
+        ext_y[k] = y; ext_i[k] = i;
     }
     *lo = a; *hi = b;
     return 1;
 }
 
-static void wide_apply(int kind, I first, I count, E itype, const void *idx) { /* kind: 0 clear, 1 arrays, 2 elements */
-    if (!rt_gl_wide_long || !present_fbo || !drawable_h) return;
+/* a 2D element spanning lo..hi (normalised device coordinates of the game's viewport): its placement on the layer */
+static void wide_place(float lo, float hi, int *num, int *off) {
+    float a = (game_vp[1] + (lo + 1) / 2 * game_vp[3]) / drawable_h, b = (game_vp[1] + (hi + 1) / 2 * game_vp[3]) / drawable_h;
+    int m = (present_h - drawable_h) / 2;
+    if (b - a >= 0.45f && (a <= 0.02f || b >= 0.98f)) { *num = present_h; *off = 0; } /* backgrounds, bars: stretched */
+    else { *num = drawable_h; *off = m + (int)(m * wide_s((a + b) / 2)); } /* smaller: same size, moved towards its edge */
+}
+
+static void wide_set(int num, int off) {
+    static int last_num, last_off;
+    T_glViewport vp = F(glViewport);
+    T_glScissor sc = F(glScissor);
+    if (!wide_dirty && num == last_num && off == last_off) return;
+    wide_dirty = 0;
+    last_num = num; last_off = off;
+    vp(game_vp[0], game_vp[1] * num / drawable_h + off, game_vp[2], game_vp[3] * num / drawable_h);
+    sc(game_sc[0], game_sc[1] * num / drawable_h + off, game_sc[2], game_sc[3] * num / drawable_h);
+}
+
+/* A batch of triangles holding several separate 2D elements (the HUD's buttons in one draw): the triangles are grouped
+ * into elements by their extent across the screen (touching or nearly touching ones belong together), and each group
+ * is drawn with its own placement. Groups do not overlap across the screen, so drawing them one after another keeps
+ * the picture. Uses ext_y/ext_i from draw_extent. Returns 0 (nothing drawn) for a batch that is one element. */
+static int wide_split(I count) {
+    enum { MAXG = 24 };
+    static uint16_t order[EXT_MAX / 3], out[EXT_MAX];
+    static uint8_t group[EXT_MAX / 3];
+    static float ta[EXT_MAX / 3], tb[EXT_MAX / 3];
+    T_glDrawElements de = F(glDrawElements);
+    T_glBindBuffer bb = F(glBindBuffer);
+    int nt = count / 3;
+    if (nt < 2 || !de || !bb) return 0;
+    for (int t = 0; t < nt; t++) {
+        float a = ext_y[3 * t], b = a;
+        for (int k = 1; k < 3; k++) { float y = ext_y[3 * t + k]; if (y < a) a = y; if (y > b) b = y; }
+        if (ext_i[3 * t] > 0xffff || ext_i[3 * t + 1] > 0xffff || ext_i[3 * t + 2] > 0xffff) return 0;
+        ta[t] = a; tb[t] = b; order[t] = (uint16_t)t;
+    }
+    for (int i = 1; i < nt; i++) { /* by left edge */
+        uint16_t t = order[i]; int j = i;
+        while (j > 0 && ta[order[j - 1]] > ta[t]) { order[j] = order[j - 1]; j--; }
+        order[j] = t;
+    }
+    float glo[MAXG], ghi[MAXG];
+    int ng = 0;
+    for (int i = 0; i < nt; i++) {
+        int t = order[i];
+        if (ng && ta[t] <= ghi[ng - 1] + 0.06f) { if (tb[t] > ghi[ng - 1]) ghi[ng - 1] = tb[t]; }
+        else { if (ng == MAXG) return 0; glo[ng] = ta[t]; ghi[ng] = tb[t]; ng++; }
+        group[t] = (uint8_t)(ng - 1);
+    }
+    if (ng < 2) return 0;
+    if (element_buffer) bb(GL_ELEMENT_ARRAY_BUFFER, 0);
+    for (int g = 0; g < ng; g++) {
+        int n = 0, num, off;
+        for (int t = 0; t < nt; t++)
+            if (group[t] == g) for (int k = 0; k < 3; k++) out[n++] = (uint16_t)ext_i[3 * t + k];
+        wide_place(glo[g], ghi[g], &num, &off);
+        wide_set(num, off);
+        de(0x0004, n, 0x1403, out);
+    }
+    if (element_buffer) bb(GL_ELEMENT_ARRAY_BUFFER, element_buffer);
+    return 1;
+}
+
+/* before a clear or draw; kind: 0 clear, 1 arrays, 2 elements. Returns 1 when it has done the draw itself. */
+static int wide_apply(int kind, E mode, I first, I count, E itype, const void *idx) {
+    if (!rt_gl_wide_long || !present_fbo || !drawable_h) return 0;
     T_glGetFloatv gfv = F(glGetFloatv);
     T_glMatrixMode mm = F(glMatrixMode);
     T_glLoadMatrixf lm = F(glLoadMatrixf);
-    T_glViewport vp = F(glViewport);
-    T_glScissor sc = F(glScissor);
-    if (!gfv || !mm || !lm || !vp || !sc) return;
+    if (!gfv || !mm || !lm || !F(glViewport) || !F(glScissor)) return 0;
     int on = is_drawable_fb(bound_fb);
     float m[16];
     if (proj_dirty) {
@@ -659,17 +727,12 @@ static void wide_apply(int kind, I first, I count, E itype, const void *idx) { /
         float lo, hi;
         off = (present_h - drawable_h) / 2;
         if (game_vp[3] > 0 && draw_extent(kind, first, count, itype, idx, &lo, &hi)) {
-            float a = (game_vp[1] + (lo + 1) / 2 * game_vp[3]) / drawable_h, b = (game_vp[1] + (hi + 1) / 2 * game_vp[3]) / drawable_h;
-            if (b - a >= 0.45f && (a <= 0.02f || b >= 0.98f)) { num = present_h; off = 0; } /* backgrounds, bars: stretched */
-            else off += (int)(off * wide_s((a + b) / 2)); /* anything smaller keeps its size and moves towards its edge */
+            if (mode == 0x0004 && wide_split(count)) return 1;
+            wide_place(lo, hi, &num, &off);
         }
     }
-    static int last_num, last_off;
-    if (!wide_dirty && num == last_num && off == last_off) return;
-    wide_dirty = 0;
-    last_num = num; last_off = off;
-    vp(game_vp[0], game_vp[1] * num / drawable_h + off, game_vp[2], game_vp[3] * num / drawable_h);
-    sc(game_sc[0], game_sc[1] * num / drawable_h + off, game_sc[2], game_sc[3] * num / drawable_h);
+    wide_set(num, off);
+    return 0;
 }
 
 /* ---- framebuffers and renderbuffers (the drawable) ----------------------------------------------------------------- */
@@ -1127,7 +1190,7 @@ IMP(glEnable) { T_glEnable f = F(glEnable); if (f) f(A(0)); }
 IMP(glDisable) { T_glDisable f = F(glDisable); if (f) f(A(0)); }
 IMP(glAlphaFunc) { T_glAlphaFunc f = F(glAlphaFunc); if (f) f(A(0), FA(1)); }
 IMP(glBlendFunc) { T_glBlendFunc f = F(glBlendFunc); if (f) f(A(0), A(1)); }
-IMP(glClear) { T_glClear f = F(glClear); wide_apply(0, 0, 0, 0, NULL); if (f) f(A(0)); }
+IMP(glClear) { T_glClear f = F(glClear); wide_apply(0, 0, 0, 0, 0, NULL); if (f) f(A(0)); }
 IMP(glClearColor) { T_glClearColor f = F(glClearColor); if (f) f(FA(0), FA(1), FA(2), FA(3)); }
 IMP(glClearDepthf) { T_glClearDepthf f = F(glClearDepthf); if (f) f(FA(0)); }
 IMP(glColorMask) { T_glColorMask f = F(glColorMask); if (f) f(B(0), B(1), B(2), B(3)); }
