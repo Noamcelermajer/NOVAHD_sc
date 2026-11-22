@@ -125,6 +125,7 @@ def main():
     ap.add_argument("--exe", type=Path, required=True, help="the original NovaHD executable (Mach-O)")
     ap.add_argument("--out", type=Path, default=Path("build/apk"))
     ap.add_argument("--checked", action="store_true", help="RECOMP_CHECKED translated code and runtime")
+    ap.add_argument("--bundle", type=Path, help="pack this NovaHD.app folder into the APK (extracted on first run)")
     ap.add_argument("--install", action="store_true", help="adb install -r the APK afterwards")
     ap.add_argument("--push", type=Path, help="adb push this NovaHD.app folder to the app's files folder")
     args = ap.parse_args()
@@ -196,6 +197,16 @@ def main():
          "-A", assets, "-0", ".bin"])
     with zipfile.ZipFile(unsigned, "a", zipfile.ZIP_DEFLATED) as z:
         z.write(lib, f"lib/arm64-v8a/lib{LIBNAME}.so")
+    if args.bundle:  # stored, not deflated: the data packs are already compressed
+        skip = {"NovaHD", "embedded.mobileprovision", "PkgInfo"}
+        files = [f for f in sorted(args.bundle.rglob("*")) if f.is_file() and f.name not in skip
+                 and "_CodeSignature" not in f.parts and "SC_Info" not in f.parts]
+        with zipfile.ZipFile(unsigned, "a", zipfile.ZIP_STORED) as z:
+            z.writestr("assets/bundle.lst", "".join(f"{f.stat().st_size} {f.relative_to(args.bundle).as_posix()}\n"
+                                                    for f in files))
+            for f in files:
+                z.write(f, "assets/NovaHD.app/" + f.relative_to(args.bundle).as_posix())
+        print(f"bundle: {len(files)} files, {sum(f.stat().st_size for f in files) >> 20} MB packed as assets")
     aligned = out / "aligned.apk"
     run([bt / f"zipalign{exe}", "-f", "-P", "16", "4", unsigned, aligned])
     env = java_env()

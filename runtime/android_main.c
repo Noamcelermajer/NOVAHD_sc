@@ -607,6 +607,47 @@ static void make_dir(const char *base, const char *sub) {
     if (mkdir(p, 0770) && errno != EEXIST) rt_log("android: cannot create %s (%s)", p, strerror(errno));
 }
 
+/* The game bundle packed in the APK (build_apk.py --bundle): assets/bundle.lst has one "<size> <relative path>" line
+ * per file under assets/NovaHD.app. Files that are missing or of another size are copied out once, because the game
+ * reads its data with fopen. */
+static void extract_bundle(const char *bundle) {
+    AAssetManager *am = app_state->activity->assetManager;
+    AAsset *lst = AAssetManager_open(am, "bundle.lst", AASSET_MODE_BUFFER);
+    if (!lst) return;
+    size_t n = (size_t)AAsset_getLength64(lst);
+    char *text = malloc(n + 1);
+    if (!text || AAsset_read(lst, text, n) != (int)n) { AAsset_close(lst); free(text); rt_log("android: cannot read bundle.lst"); return; }
+    text[n] = 0;
+    AAsset_close(lst);
+    make_dir(bundle, "");
+    int copied = 0, failed = 0;
+    static char block[1 << 16];
+    for (char *line = strtok(text, "\n"); line; line = strtok(NULL, "\n")) {
+        char *sp = strchr(line, ' ');
+        if (!sp) continue;
+        long long size = atoll(line);
+        const char *rel = sp + 1;
+        size_t rl = strlen(rel);
+        if (rl && rel[rl - 1] == '\r') ((char *)rel)[--rl] = 0;
+        char dst[900], src[700];
+        snprintf(dst, sizeof dst, "%s/%s", bundle, rel);
+        struct stat st;
+        if (!stat(dst, &st) && (long long)st.st_size == size) continue;
+        for (char *q = dst + strlen(bundle) + 1; (q = strchr(q, '/')); q++) { *q = 0; mkdir(dst, 0770); *q = '/'; }
+        snprintf(src, sizeof src, "NovaHD.app/%s", rel);
+        AAsset *a = AAssetManager_open(am, src, AASSET_MODE_STREAMING);
+        FILE *f = a ? fopen(dst, "wb") : NULL;
+        int ok = f != NULL, got;
+        while (ok && (got = AAsset_read(a, block, sizeof block)) > 0) ok = fwrite(block, 1, (size_t)got, f) == (size_t)got;
+        if (f) fclose(f);
+        if (a) AAsset_close(a);
+        if (ok) copied++;
+        else { failed++; rt_log("android: cannot extract %s to %s", src, dst); }
+    }
+    free(text);
+    if (copied || failed) rt_log("android: game bundle extracted from the APK: %d files copied, %d failed", copied, failed);
+}
+
 static void setup_paths(void) {
     const char *files = app_state->activity->externalDataPath;
     if (!files || !files[0]) files = app_state->activity->internalDataPath;
@@ -623,6 +664,7 @@ static void setup_paths(void) {
     snprintf(rt_home_path, sizeof rt_home_path, "%s", GAME_HOME);
     rt_path_alias(GAME_BUNDLE, bundle);
     rt_path_alias(GAME_HOME, home);
+    extract_bundle(bundle);
     char probe[600];
     struct stat st;
     snprintf(probe, sizeof probe, "%s/Info.plist", bundle);
