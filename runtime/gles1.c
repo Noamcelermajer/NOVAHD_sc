@@ -284,8 +284,8 @@ static void make_drawable_fb(uint32_t fb) {
  * degrees counter-clockwise (portrait (px, py) -> landscape (py, W - px), which is the inverse of the touch
  * conversion in uikit.c), then swaps. The game's GL state is saved around the blit and put back. */
 static uint32_t present_tex, present_ds;
-static int wide_dirty;
-static void wide_apply(void);
+static int wide_dirty, frame_had_3d;
+static int wide_apply(void);
 static int present_w, present_h;
 static int present_failed;
 
@@ -441,14 +441,33 @@ static void present_blit(void) {
     bt(0x0DE1, present_tex);
     te(0x2300, 0x2200, 0x1E01 /* REPLACE */);
     bb(GL_ARRAY_BUFFER, 0);
-    static const float quad[] = { /* x, y, s, t: the portrait texture turned a quarter turn counter-clockwise */
+    float quad[] = { /* x, y, s, t: the portrait texture turned a quarter turn counter-clockwise */
         1, -1, 0, 0,   1, 1, 1, 0,   -1, -1, 0, 1,   -1, 1, 1, 1 };
+    int fill_2d = rt_gl_wide_long && present_h > drawable_h && drawable_h && !frame_had_3d;
+    frame_had_3d = 0;
     ecs(0x8074);
     ecs(0x8078);
     dcs(0x8076);
     dcs(0x8075);
     vptr(2, 0x1406 /* FLOAT */, 16, quad);
     tptr(2, 0x1406, 16, quad + 2);
+    if (fill_2d) {
+        /* a frame with no 3D scene (menus, loading screens) only fills the middle 4:3 of the wide layer: show that
+         * picture enlarged and darkened over the whole screen first, then the picture itself in the middle */
+        float f = (float)drawable_h / present_h, t0 = (1 - f) / 2, t1 = (1 + f) / 2;
+        float back[] = { 1, -1, t0, t0,   1, 1, t1, t0,   -1, -1, t0, t1,   -1, 1, t1, t1 };
+        float front[] = { f, -1, 0, t0,   f, 1, 1, t0,   -f, -1, 0, t1,   -f, 1, 1, t1 };
+        te(0x2300, 0x2200, 0x2100 /* MODULATE */);
+        c4(0.28f, 0.28f, 0.28f, 1);
+        vptr(2, 0x1406, 16, back);
+        tptr(2, 0x1406, 16, back + 2);
+        da(0x0005, 0, 4);
+        te(0x2300, 0x2200, 0x1E01);
+        c4(1, 1, 1, 1);
+        memcpy(quad, front, sizeof quad);
+        vptr(2, 0x1406, 16, quad);
+        tptr(2, 0x1406, 16, quad + 2);
+    }
     da(0x0005 /* TRIANGLE_STRIP */, 0, 4);
 
     /* the frame is shown by the caller's swap; put the game's state back */
@@ -534,8 +553,8 @@ IMP(glVertexPointer) { T_glVertexPointer f = F(glVertexPointer); if (f) f((I)A(0
 IMP(glTexCoordPointer) { T_glTexCoordPointer f = F(glTexCoordPointer); if (f) f((I)A(0), A(1), (I)A(2), array_ptr(A(3))); }
 IMP(glColorPointer) { T_glColorPointer f = F(glColorPointer); if (f) f((I)A(0), A(1), (I)A(2), array_ptr(A(3))); }
 IMP(glNormalPointer) { T_glNormalPointer f = F(glNormalPointer); if (f) f(A(0), (I)A(1), array_ptr(A(2))); }
-IMP(glDrawElements) { T_glDrawElements f = F(glDrawElements); wide_apply(); if (f) f(A(0), (I)A(1), A(2), index_ptr(A(3))); }
-IMP(glDrawArrays) { T_glDrawArrays f = F(glDrawArrays); wide_apply(); if (f) f(A(0), (I)A(1), (I)A(2)); }
+IMP(glDrawElements) { T_glDrawElements f = F(glDrawElements); frame_had_3d |= wide_apply(); if (f) f(A(0), (I)A(1), A(2), index_ptr(A(3))); }
+IMP(glDrawArrays) { T_glDrawArrays f = F(glDrawArrays); frame_had_3d |= wide_apply(); if (f) f(A(0), (I)A(1), (I)A(2)); }
 IMP(glEnableClientState) { T_glEnableClientState f = F(glEnableClientState); if (f) f(A(0)); }
 IMP(glDisableClientState) { T_glDisableClientState f = F(glDisableClientState); if (f) f(A(0)); }
 IMP(glClientActiveTexture) { T_glClientActiveTexture f = F(glClientActiveTexture); if (f) f(A(0)); }
@@ -567,14 +586,14 @@ static int proj_dirty = 1, proj_scaled, proj_persp, mat_mode = 0x1700;
 static int proj_stack[4], proj_sp;
 #define PROJ_TOUCHED() do { if (mat_mode == 0x1701) proj_dirty = 1; } while (0)
 
-static void wide_apply(void) {
-    if (!rt_gl_wide_long || !present_fbo || !drawable_h) return;
+static int wide_apply(void) { /* 1 when the next draw is part of the 3D scene on the drawable */
+    if (!rt_gl_wide_long || !present_fbo || !drawable_h) return 0;
     T_glGetFloatv gfv = F(glGetFloatv);
     T_glMatrixMode mm = F(glMatrixMode);
     T_glLoadMatrixf lm = F(glLoadMatrixf);
     T_glViewport vp = F(glViewport);
     T_glScissor sc = F(glScissor);
-    if (!gfv || !mm || !lm || !vp || !sc) return;
+    if (!gfv || !mm || !lm || !vp || !sc) return 0;
     int on = is_drawable_fb(bound_fb);
     float m[16];
     if (proj_dirty) {
@@ -594,7 +613,7 @@ static void wide_apply(void) {
         proj_scaled = want;
         wide_dirty = 1;
     }
-    if (!wide_dirty) return;
+    if (!wide_dirty) return want;
     wide_dirty = 0;
     if (!on) {
         vp(game_vp[0], game_vp[1], game_vp[2], game_vp[3]);
@@ -607,6 +626,7 @@ static void wide_apply(void) {
         vp(game_vp[0], game_vp[1] + off, game_vp[2], game_vp[3]);
         sc(game_sc[0], game_sc[1] + off, game_sc[2], game_sc[3]);
     }
+    return want;
 }
 
 /* ---- framebuffers and renderbuffers (the drawable) ----------------------------------------------------------------- */
