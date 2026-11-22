@@ -277,6 +277,65 @@ static void make_drawable_fb(uint32_t fb) {
     if (bound_fb == fb) host_bind_fb(0, fb);
 }
 
+/* ---- the matrices of the game -------------------------------------------------------------------------------------
+ * Kept here as the game sets them (modelview and projection stacks), because the widescreen code needs them for every
+ * draw and some drivers (the Android emulator) answer glGetFloatv for a matrix with the identity. Column-major. */
+enum { MV_DEPTH = 32, PJ_DEPTH = 4 };
+static float sh_mv[MV_DEPTH][16] = {{1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1}};
+static float sh_pj[PJ_DEPTH][16] = {{1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1}};
+static int sh_mv_sp, sh_pj_sp;
+static int mat_mode = 0x1700, proj_scaled;
+static float wide_k; /* drawable_h / present_h once the wide layer exists */
+static float *sh_cur(void) { return mat_mode == 0x1700 ? sh_mv[sh_mv_sp] : mat_mode == 0x1701 ? sh_pj[sh_pj_sp] : NULL; }
+static void sh_identity(float *m) { for (int k = 0; k < 16; k++) m[k] = (k % 5) ? 0.0f : 1.0f; }
+static void sh_mult(const float *b) { /* current = current * b */
+    float *a = sh_cur(), r[16];
+    if (!a) return;
+    for (int c = 0; c < 4; c++)
+        for (int w = 0; w < 4; w++)
+            r[4 * c + w] = a[w] * b[4 * c] + a[4 + w] * b[4 * c + 1] + a[8 + w] * b[4 * c + 2] + a[12 + w] * b[4 * c + 3];
+    memcpy(a, r, sizeof r);
+}
+static void sh_load(const float *b) { float *a = sh_cur(); if (a) memcpy(a, b, 16 * sizeof(float)); }
+static void sh_push(void) {
+    if (mat_mode == 0x1700 && sh_mv_sp < MV_DEPTH - 1) { memcpy(sh_mv[sh_mv_sp + 1], sh_mv[sh_mv_sp], sizeof sh_mv[0]); sh_mv_sp++; }
+    if (mat_mode == 0x1701 && sh_pj_sp < PJ_DEPTH - 1) { memcpy(sh_pj[sh_pj_sp + 1], sh_pj[sh_pj_sp], sizeof sh_pj[0]); sh_pj_sp++; }
+}
+static void sh_pop(void) {
+    if (mat_mode == 0x1700 && sh_mv_sp > 0) sh_mv_sp--;
+    if (mat_mode == 0x1701 && sh_pj_sp > 0) sh_pj_sp--;
+}
+static void sh_frustum(float l, float r, float b, float t, float n, float f, int ortho) {
+    float m[16] = {0};
+    if (r == l || t == b || f == n) return;
+    if (ortho) {
+        m[0] = 2 / (r - l); m[5] = 2 / (t - b); m[10] = -2 / (f - n);
+        m[12] = -(r + l) / (r - l); m[13] = -(t + b) / (t - b); m[14] = -(f + n) / (f - n); m[15] = 1;
+    } else {
+        m[0] = 2 * n / (r - l); m[5] = 2 * n / (t - b); m[8] = (r + l) / (r - l); m[9] = (t + b) / (t - b);
+        m[10] = -(f + n) / (f - n); m[11] = -1; m[14] = -2 * f * n / (f - n);
+    }
+    sh_mult(m);
+}
+static void sh_rotate(float deg, float x, float y, float z) {
+    float len = sqrtf(x * x + y * y + z * z), m[16];
+    if (len < 1e-12f) return;
+    x /= len; y /= len; z /= len;
+    float a = deg * 0.017453292519943295f, c = cosf(a), s = sinf(a), t = 1 - c;
+    sh_identity(m);
+    m[0] = x * x * t + c;     m[4] = x * y * t - z * s; m[8] = x * z * t + y * s;
+    m[1] = y * x * t + z * s; m[5] = y * y * t + c;     m[9] = y * z * t - x * s;
+    m[2] = z * x * t - y * s; m[6] = z * y * t + x * s; m[10] = z * z * t + c;
+    sh_mult(m);
+}
+static void sh_scale(float x, float y, float z) { float m[16]; sh_identity(m); m[0] = x; m[5] = y; m[10] = z; sh_mult(m); }
+static void sh_translate(float x, float y, float z) { float m[16]; sh_identity(m); m[12] = x; m[13] = y; m[14] = z; sh_mult(m); }
+/* the projection the driver must hold: the game one, squeezed along the long axis while the 3D scene is drawn wide */
+static void sh_proj_for_gl(float *m) {
+    memcpy(m, sh_pj[sh_pj_sp], 16 * sizeof(float));
+    if (proj_scaled && wide_k > 0) { m[1] *= wide_k; m[5] *= wide_k; m[9] *= wide_k; m[13] *= wide_k; }
+}
+
 /* ---- the portrait drawable and its presentation ----------------------------------------------------------------------
  * The iPad's EAGL layer is 768x1024 (portrait) and the game rotates its own projection for landscape, so the screen
  * shows the layer turned a quarter turn. The game therefore draws into a 768x1024 host framebuffer object (a texture
@@ -470,8 +529,9 @@ static void present_blit(void) {
         (tcarr_on[u] ? ecs : dcs)(0x8078);
     }
     mm(0x1702); lm(tx);
+    sh_proj_for_gl(pj);
     mm(0x1701); lm(pj);
-    mm(0x1700); lm(mv);
+    mm(0x1700); lm(sh_mv[sh_mv_sp]);
     mm((E)old_mm);
     at((E)old_active);
     cat((E)old_client);
@@ -568,7 +628,7 @@ IMP(glGetPointerv) {
  * it is applied again. Framebuffers of the game's own are left alone. */
 int rt_gl_wide_long;
 static I game_vp[4] = {0, 0, 768, 1024}, game_sc[4] = {0, 0, 768, 1024};
-static int proj_dirty = 1, proj_scaled, proj_persp, mat_mode = 0x1700;
+static int proj_dirty = 1, proj_persp;
 static int proj_stack[4], proj_sp;
 #define PROJ_TOUCHED() do { if (mat_mode == 0x1701) proj_dirty = 1; } while (0)
 
@@ -592,18 +652,19 @@ float rt_gl_wide_game_x(float d) {
 /* the extent of a draw along the layer's long axis in normalised device coordinates; 0 when it cannot be read */
 enum { EXT_MAX = 8190 };
 static float ext_y[EXT_MAX];    /* per element of the last draw_extent: its position along the long axis */
+static float ext_x[EXT_MAX];    /* and along the short axis */
+static float ext_xspan;         /* the whole draw along the short axis */
 static uint32_t ext_i[EXT_MAX]; /* and its vertex index */
 static int draw_extent(int kind, I first, I count, E itype, const void *idx, float *lo, float *hi) {
-    T_glGetFloatv gfv = F(glGetFloatv);
-    if (!gfv || !vtx.ptr || count <= 0 || count > EXT_MAX || vtx.size < 2 || first < 0) return 0;
+    if (!vtx.ptr || count <= 0 || count > EXT_MAX || vtx.size < 2 || first < 0) return 0;
     if (kind == 2 && (element_buffer || !idx || (itype != 0x1401 && itype != 0x1403))) return 0;
     int esz = vtx.type == 0x1406 || vtx.type == 0x140C ? 4 : vtx.type == 0x1402 ? 2 : vtx.type == 0x1400 ? 1 : 0;
     if (!esz) return 0;
     int stride = vtx.stride ? vtx.stride : esz * vtx.size;
-    float mv[16], pj[16], ry[4], rw[4]; /* rows 1 and 3 of projection * modelview */
-    gfv(0x0BA6, mv);
-    gfv(0x0BA7, pj);
+    const float *mv = sh_mv[sh_mv_sp], *pj = sh_pj[sh_pj_sp];
+    float rx[4], ry[4], rw[4], xa = 1e30f, xb = -1e30f; /* rows 0, 1 and 3 of projection * modelview */
     for (int c = 0; c < 4; c++) {
+        rx[c] = pj[0] * mv[4 * c] + pj[4] * mv[4 * c + 1] + pj[8] * mv[4 * c + 2] + pj[12] * mv[4 * c + 3];
         ry[c] = pj[1] * mv[4 * c] + pj[5] * mv[4 * c + 1] + pj[9] * mv[4 * c + 2] + pj[13] * mv[4 * c + 3];
         rw[c] = pj[3] * mv[4 * c] + pj[7] * mv[4 * c + 1] + pj[11] * mv[4 * c + 2] + pj[15] * mv[4 * c + 3];
     }
@@ -623,17 +684,25 @@ static int draw_extent(int kind, I first, I count, E itype, const void *idx, flo
         float y = (ry[0] * v[0] + ry[1] * v[1] + ry[2] * v[2] + ry[3] * v[3]) / w;
         if (y < a) a = y;
         if (y > b) b = y;
-        ext_y[k] = y; ext_i[k] = i;
+        float x = (rx[0] * v[0] + rx[1] * v[1] + rx[2] * v[2] + rx[3] * v[3]) / w;
+        if (x < xa) xa = x;
+        if (x > xb) xb = x;
+        ext_y[k] = y; ext_x[k] = x; ext_i[k] = i;
     }
+    ext_xspan = xb - xa;
     *lo = a; *hi = b;
     return 1;
 }
 
 /* a 2D element spanning lo..hi (normalised device coordinates of the game's viewport): its placement on the layer */
-static void wide_place(float lo, float hi, int *num, int *off) {
+static void wide_place(float lo, float hi, float xspan, int *num, int *off) {
     float a = (game_vp[1] + (lo + 1) / 2 * game_vp[3]) / drawable_h, b = (game_vp[1] + (hi + 1) / 2 * game_vp[3]) / drawable_h;
     int m = (present_h - drawable_h) / 2;
-    if (b - a >= 0.45f && (a <= 0.02f || b >= 0.98f)) { *num = present_h; *off = 0; } /* backgrounds, bars: stretched */
+    /* stretched: what spans the screen (backgrounds, bars, fades) and tall pieces of a tiled background; a line of
+     * text that happens to reach one edge is not */
+    int both = a <= 0.02f && b >= 0.98f, one = a <= 0.02f || b >= 0.98f;
+    float tall = xspan / 2 * game_vp[2] / (drawable_w ? drawable_w : 768);
+    if (both || (one && b - a >= 0.45f && tall >= 0.25f)) { *num = present_h; *off = 0; }
     else { *num = drawable_h; *off = m + (int)(m * wide_s((a + b) / 2)); } /* smaller: same size, moved towards its edge */
 }
 
@@ -672,7 +741,7 @@ static int wide_split(I count) {
         while (j > 0 && ta[order[j - 1]] > ta[t]) { order[j] = order[j - 1]; j--; }
         order[j] = t;
     }
-    float glo[MAXG], ghi[MAXG];
+    float glo[MAXG], ghi[MAXG], gxa[MAXG], gxb[MAXG];
     int ng = 0;
     for (int i = 0; i < nt; i++) {
         int t = order[i];
@@ -680,13 +749,20 @@ static int wide_split(I count) {
         else { if (ng == MAXG) return 0; glo[ng] = ta[t]; ghi[ng] = tb[t]; ng++; }
         group[t] = (uint8_t)(ng - 1);
     }
+    for (int g = 0; g < ng; g++) { gxa[g] = 1e30f; gxb[g] = -1e30f; }
+    for (int t = 0; t < nt; t++)
+        for (int k = 0; k < 3; k++) {
+            float x = ext_x[3 * t + k];
+            if (x < gxa[group[t]]) gxa[group[t]] = x;
+            if (x > gxb[group[t]]) gxb[group[t]] = x;
+        }
     if (ng < 2) return 0;
     if (element_buffer) bb(GL_ELEMENT_ARRAY_BUFFER, 0);
     for (int g = 0; g < ng; g++) {
         int n = 0, num, off;
         for (int t = 0; t < nt; t++)
             if (group[t] == g) for (int k = 0; k < 3; k++) out[n++] = (uint16_t)ext_i[3 * t + k];
-        wide_place(glo[g], ghi[g], &num, &off);
+        wide_place(glo[g], ghi[g], gxb[g] - gxa[g], &num, &off);
         wide_set(num, off);
         de(0x0004, n, 0x1403, out);
     }
@@ -697,27 +773,25 @@ static int wide_split(I count) {
 /* before a clear or draw; kind: 0 clear, 1 arrays, 2 elements. Returns 1 when it has done the draw itself. */
 static int wide_apply(int kind, E mode, I first, I count, E itype, const void *idx) {
     if (!rt_gl_wide_long || !present_fbo || !drawable_h) return 0;
-    T_glGetFloatv gfv = F(glGetFloatv);
     T_glMatrixMode mm = F(glMatrixMode);
     T_glLoadMatrixf lm = F(glLoadMatrixf);
-    if (!gfv || !mm || !lm || !F(glViewport) || !F(glScissor)) return 0;
+    if (!mm || !lm || !F(glViewport) || !F(glScissor)) return 0;
     int on = is_drawable_fb(bound_fb);
     float m[16];
+    wide_k = (float)drawable_h / present_h;
     if (proj_dirty) {
-        gfv(0x0BA7 /* PROJECTION_MATRIX */, m);
-        proj_persp = fabsf(m[3]) + fabsf(m[7]) + fabsf(m[11]) > 1e-6f;
+        const float *p = sh_pj[sh_pj_sp];
+        proj_persp = fabsf(p[3]) + fabsf(p[7]) + fabsf(p[11]) > 1e-6f;
         proj_dirty = 0;
         wide_dirty = 1;
     }
     int want = on && proj_persp;
     if (want != proj_scaled) {
-        float k = want ? (float)drawable_h / present_h : (float)present_h / drawable_h;
-        gfv(0x0BA7, m);
-        m[1] *= k; m[5] *= k; m[9] *= k; m[13] *= k;
+        proj_scaled = want;
+        sh_proj_for_gl(m);
         mm(0x1701);
         lm(m);
         mm((E)mat_mode);
-        proj_scaled = want;
         wide_dirty = 1;
     }
     /* placement along the long axis: y' = y * num / drawable_h + off */
@@ -728,7 +802,7 @@ static int wide_apply(int kind, E mode, I first, I count, E itype, const void *i
         off = (present_h - drawable_h) / 2;
         if (game_vp[3] > 0 && draw_extent(kind, first, count, itype, idx, &lo, &hi)) {
             if (mode == 0x0004 && wide_split(count)) return 1;
-            wide_place(lo, hi, &num, &off);
+            wide_place(lo, hi, ext_xspan, &num, &off);
         }
     }
     wide_set(num, off);
@@ -1232,18 +1306,19 @@ IMP(glMaterialfv) { T_glMaterialfv f = F(glMaterialfv); if (f && A(2)) f(A(0), A
 
 /* ---- matrices ----------------------------------------------------------------------------------------------- */
 IMP(glMatrixMode) { T_glMatrixMode f = F(glMatrixMode); mat_mode = (int)A(0); if (f) f(A(0)); }
-IMP(glLoadIdentity) { T_glLoadIdentity f = F(glLoadIdentity); if (mat_mode == 0x1701) proj_scaled = 0, proj_dirty = 1; if (f) f(); }
-IMP(glPushMatrix) { T_glPushMatrix f = F(glPushMatrix); if (mat_mode == 0x1701 && proj_sp < 4) proj_stack[proj_sp++] = proj_scaled; if (f) f(); }
-IMP(glPopMatrix) { T_glPopMatrix f = F(glPopMatrix); if (mat_mode == 0x1701) { if (proj_sp > 0) proj_scaled = proj_stack[--proj_sp]; proj_dirty = 1; } if (f) f(); }
-IMP(glLoadMatrixf) { T_glLoadMatrixf f = F(glLoadMatrixf); if (mat_mode == 0x1701) proj_scaled = 0, proj_dirty = 1; if (f && A(0)) f((const float *)G(A(0))); }
-IMP(glMultMatrixf) { T_glMultMatrixf f = F(glMultMatrixf); PROJ_TOUCHED(); if (f && A(0)) f((const float *)G(A(0))); }
-IMP(glFrustumf) { T_glFrustumf f = F(glFrustumf); PROJ_TOUCHED(); if (f) f(FA(0), FA(1), FA(2), FA(3), FA(4), FA(5)); }
-IMP(glOrthof) { T_glOrthof f = F(glOrthof); PROJ_TOUCHED(); if (f) f(FA(0), FA(1), FA(2), FA(3), FA(4), FA(5)); }
-IMP(glRotatef) { T_glRotatef f = F(glRotatef); PROJ_TOUCHED(); if (f) f(FA(0), FA(1), FA(2), FA(3)); }
-IMP(glScalef) { T_glScalef f = F(glScalef); PROJ_TOUCHED(); if (f) f(FA(0), FA(1), FA(2)); }
-IMP(glTranslatef) { T_glTranslatef f = F(glTranslatef); PROJ_TOUCHED(); if (f) f(FA(0), FA(1), FA(2)); }
+IMP(glLoadIdentity) { T_glLoadIdentity f = F(glLoadIdentity); if (mat_mode == 0x1701) proj_scaled = 0, proj_dirty = 1; { float *m = sh_cur(); if (m) sh_identity(m); } if (f) f(); }
+IMP(glPushMatrix) { T_glPushMatrix f = F(glPushMatrix); if (mat_mode == 0x1701 && proj_sp < 4) proj_stack[proj_sp++] = proj_scaled; sh_push(); if (f) f(); }
+IMP(glPopMatrix) { T_glPopMatrix f = F(glPopMatrix); if (mat_mode == 0x1701) { if (proj_sp > 0) proj_scaled = proj_stack[--proj_sp]; proj_dirty = 1; } sh_pop(); if (f) f(); }
+IMP(glLoadMatrixf) { T_glLoadMatrixf f = F(glLoadMatrixf); if (mat_mode == 0x1701) proj_scaled = 0, proj_dirty = 1; if (A(0)) sh_load((const float *)G(A(0))); if (f && A(0)) f((const float *)G(A(0))); }
+IMP(glMultMatrixf) { T_glMultMatrixf f = F(glMultMatrixf); PROJ_TOUCHED(); if (A(0)) sh_mult((const float *)G(A(0))); if (f && A(0)) f((const float *)G(A(0))); }
+IMP(glFrustumf) { T_glFrustumf f = F(glFrustumf); PROJ_TOUCHED(); sh_frustum(FA(0), FA(1), FA(2), FA(3), FA(4), FA(5), 0); if (f) f(FA(0), FA(1), FA(2), FA(3), FA(4), FA(5)); }
+IMP(glOrthof) { T_glOrthof f = F(glOrthof); PROJ_TOUCHED(); sh_frustum(FA(0), FA(1), FA(2), FA(3), FA(4), FA(5), 1); if (f) f(FA(0), FA(1), FA(2), FA(3), FA(4), FA(5)); }
+IMP(glRotatef) { T_glRotatef f = F(glRotatef); PROJ_TOUCHED(); sh_rotate(FA(0), FA(1), FA(2), FA(3)); if (f) f(FA(0), FA(1), FA(2), FA(3)); }
+IMP(glScalef) { T_glScalef f = F(glScalef); PROJ_TOUCHED(); sh_scale(FA(0), FA(1), FA(2)); if (f) f(FA(0), FA(1), FA(2)); }
+IMP(glTranslatef) { T_glTranslatef f = F(glTranslatef); PROJ_TOUCHED(); sh_translate(FA(0), FA(1), FA(2)); if (f) f(FA(0), FA(1), FA(2)); }
 IMP(glOrthox) {
     PROJ_TOUCHED();
+    sh_frustum(fx((I)A(0)), fx((I)A(1)), fx((I)A(2)), fx((I)A(3)), fx((I)A(4)), fx((I)A(5)), 1);
     T_glOrthox f = F(glOrthox);
     if (f) { f((I)A(0), (I)A(1), (I)A(2), (I)A(3), (I)A(4), (I)A(5)); return; }
     T_glOrthof g = F(glOrthof);
@@ -1251,17 +1326,21 @@ IMP(glOrthox) {
 }
 IMP(glRotatex) {
     PROJ_TOUCHED();
+    sh_rotate(fx((I)A(0)), fx((I)A(1)), fx((I)A(2)), fx((I)A(3)));
     T_glRotatex f = F(glRotatex);
     if (f) { f((I)A(0), (I)A(1), (I)A(2), (I)A(3)); return; }
     T_glRotatef g = F(glRotatef); if (g) g(fx((I)A(0)), fx((I)A(1)), fx((I)A(2)), fx((I)A(3)));
 }
 IMP(glScalex) {
+    PROJ_TOUCHED();
+    sh_scale(fx((I)A(0)), fx((I)A(1)), fx((I)A(2)));
     T_glScalex f = F(glScalex);
     if (f) { f((I)A(0), (I)A(1), (I)A(2)); return; }
     T_glScalef g = F(glScalef); if (g) g(fx((I)A(0)), fx((I)A(1)), fx((I)A(2)));
 }
 IMP(glTranslatex) {
     PROJ_TOUCHED();
+    sh_translate(fx((I)A(0)), fx((I)A(1)), fx((I)A(2)));
     T_glTranslatex f = F(glTranslatex);
     if (f) { f((I)A(0), (I)A(1), (I)A(2)); return; }
     T_glTranslatef g = F(glTranslatef); if (g) g(fx((I)A(0)), fx((I)A(1)), fx((I)A(2)));

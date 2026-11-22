@@ -126,6 +126,7 @@ def main():
     ap.add_argument("--out", type=Path, default=Path("build/apk"))
     ap.add_argument("--checked", action="store_true", help="RECOMP_CHECKED translated code and runtime")
     ap.add_argument("--bundle", type=Path, help="pack this NovaHD.app folder into the APK (extracted on first run)")
+    ap.add_argument("--runtime-only", action="store_true", help="reuse the translated objects of the last build")
     ap.add_argument("--install", action="store_true", help="adb install -r the APK afterwards")
     ap.add_argument("--push", type=Path, help="adb push this NovaHD.app folder to the app's files folder")
     args = ap.parse_args()
@@ -144,19 +145,27 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     run([sys.executable, ROOT / "tools/recomp/pack_image.py", "--exe", args.exe, "--out", out])
 
-    # the translated code, as for the Windows runner (variant "runtime": rc_import/rc_hostcall come from runtime/)
-    image = Image(args.exe)
-    ents = entries(image)
-    lifter = Lifter(image, ents)
-    sources = {}
-    for a, f in ents.items():
-        try:
-            sources[a] = lifter.lift(f)
-        except Unsupported:
-            pass
     opt = ["-O1", "-fPIC", "-g0", "-DRECOMP_CHECKED"] if args.checked else ["-O2", "-fPIC", "-g0"]
     work = Path("build/recomp-android" + ("-checked" if args.checked else ""))
-    objs = compile_objects(image, ents, sources, work, target=(triple, opt, "unused", [clang]), variant="runtime")
+    if args.runtime_only:
+        newest_obj = {}  # one object per source: names carry a content hash, older ones stay behind
+        for o in work.glob("*.o"):
+            k = o.name.split(".")[0]
+            if k not in newest_obj or o.stat().st_mtime > newest_obj[k].stat().st_mtime:
+                newest_obj[k] = o
+        objs = sorted(newest_obj.values())
+    else:
+        # the translated code, as for the Windows runner (variant "runtime": rc_import/rc_hostcall come from runtime/)
+        image = Image(args.exe)
+        ents = entries(image)
+        lifter = Lifter(image, ents)
+        sources = {}
+        for a, f in ents.items():
+            try:
+                sources[a] = lifter.lift(f)
+            except Unsupported:
+                pass
+        objs = compile_objects(image, ents, sources, work, target=(triple, opt, "unused", [clang]), variant="runtime")
     print(f"translated code: {len(objs)} objects, {time.time() - t0:.0f}s")
 
     # the runtime, the glue, image_meta.c
