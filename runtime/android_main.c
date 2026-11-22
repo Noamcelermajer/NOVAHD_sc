@@ -327,6 +327,7 @@ static void window_geometry(ANativeWindow *w) {
     buf_w = SCREEN_W; buf_h = SCREEN_H;
     if (win_w * 3 > win_h * 4) buf_w = (SCREEN_H * win_w / win_h + 1) & ~1;
     else buf_h = (SCREEN_W * win_h / win_w + 1) & ~1;
+    rt_gl_wide_long = buf_w > SCREEN_W ? buf_w : 0; /* widescreen: gles1.c fills the extra width with the 3D scene */
     ANativeWindow_setBuffersGeometry(w, buf_w, buf_h, visual_format);
 }
 

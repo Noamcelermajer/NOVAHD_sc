@@ -58,7 +58,9 @@ void rt_objc_define_root(void); /* objc.c: NSObject and the root metaclass (not 
 
 #define GAME_HOME "/var/mobile/Applications/NOVAHD"
 #define GAME_BUNDLE GAME_HOME "/NovaHD.app"
-#define SCREEN_W 1024 /* the iPad screen in landscape, in points (= pixels on the iPad 1) */
+#define GAME_W 1024 /* the game's own screen width in points; SCREEN_W is the surface shown (--width) */
+static int screen_w = 1024;
+#define SCREEN_W screen_w /* the iPad screen in landscape, in points (= pixels on the iPad 1) */
 #define SCREEN_H 768
 
 #if defined(_WIN32) && !defined(_WIN64)
@@ -134,7 +136,7 @@ static int nshots;
 
 /* ---- window and mouse input -------------------------------------------------------------------------------------- */
 static HWND top_win, view_win;
-static int view_w = SCREEN_W, view_h = SCREEN_H; /* the child (GL) window's client size */
+static int view_w = 1024, view_h = SCREEN_H; /* the child (GL) window's client size */
 
 typedef struct { int phase, finger; float x, y; } touch_ev;
 static touch_ev touch_q[256];
@@ -159,10 +161,10 @@ static void queue_touch(int phase, int finger, float x, float y) {
 /* a mouse position in the GL child window -> screen points (undoes the stretch; clamped to the screen) */
 static void mouse_points(LPARAM l, float *x, float *y) {
     float px = (float)(short)LOWORD(l), py = (float)(short)HIWORD(l);
-    *x = px * SCREEN_W / (float)(view_w > 0 ? view_w : 1);
+    *x = px * SCREEN_W / (float)(view_w > 0 ? view_w : 1) - (SCREEN_W - GAME_W) / 2; /* menus and HUD are centred */
     *y = py * SCREEN_H / (float)(view_h > 0 ? view_h : 1);
     if (*x < 0) *x = 0;
-    if (*x > SCREEN_W - 1) *x = SCREEN_W - 1;
+    if (*x > GAME_W - 1) *x = GAME_W - 1;
     if (*y < 0) *y = 0;
     if (*y > SCREEN_H - 1) *y = SCREEN_H - 1;
 }
@@ -206,17 +208,17 @@ static LRESULT CALLBACK wndproc(HWND h, UINT msg, WPARAM w, LPARAM l) {
         return 0;
     case WM_RBUTTONDOWN:
         if (right_down) return 0;
-        right_down = 1; SetCapture(h); mouse_points(l, &x, &y); queue_touch(RT_TOUCH_BEGAN, 1, SCREEN_W - x, SCREEN_H - y);
+        right_down = 1; SetCapture(h); mouse_points(l, &x, &y); queue_touch(RT_TOUCH_BEGAN, 1, GAME_W - x, SCREEN_H - y);
         return 0;
     case WM_RBUTTONUP:
         if (!right_down) return 0;
-        right_down = 0; mouse_points(l, &x, &y); queue_touch(RT_TOUCH_ENDED, 1, SCREEN_W - x, SCREEN_H - y);
+        right_down = 0; mouse_points(l, &x, &y); queue_touch(RT_TOUCH_ENDED, 1, GAME_W - x, SCREEN_H - y);
         if (!left_down) ReleaseCapture();
         return 0;
     case WM_MOUSEMOVE:
         mouse_points(l, &x, &y);
         if (left_down) queue_touch(RT_TOUCH_MOVED, 0, x, y);
-        if (right_down) queue_touch(RT_TOUCH_MOVED, 1, SCREEN_W - x, SCREEN_H - y);
+        if (right_down) queue_touch(RT_TOUCH_MOVED, 1, GAME_W - x, SCREEN_H - y);
         return 0;
     case WM_CAPTURECHANGED: /* capture taken away (e.g. alt-tab while dragging): the touches are cancelled */
         if ((HWND)l != h) {
@@ -549,6 +551,11 @@ int main(int argc, char **argv) {
             k++;
             if (sscanf(v, "%d:%d:%d", &f, &x, &y) != 3) { fprintf(stderr, "bad --tap %s (FRAME:X:Y)\n", v); return 2; }
             if (nscript < MAX_SCRIPT) script[nscript++] = (script_touch){f, x, y, x, y, 2, -1};
+        } else if (!strcmp(a, "--width") && v) { /* widescreen: the surface width (the game stays 1024 points wide) */
+            k++;
+            screen_w = atoi(v) < GAME_W ? GAME_W : atoi(v) & ~1;
+            view_w = screen_w;
+            rt_gl_wide_long = screen_w > GAME_W ? screen_w : 0;
         } else if (!strcmp(a, "--drag") && v) {
             int f, x0, y0, x1, y1, n;
             k++;

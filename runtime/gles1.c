@@ -284,6 +284,8 @@ static void make_drawable_fb(uint32_t fb) {
  * degrees counter-clockwise (portrait (px, py) -> landscape (py, W - px), which is the inverse of the touch
  * conversion in uikit.c), then swaps. The game's GL state is saved around the blit and put back. */
 static uint32_t present_tex, present_ds;
+static int wide_dirty;
+static void wide_apply(void);
 static int present_w, present_h;
 static int present_failed;
 
@@ -308,7 +310,7 @@ static void present_setup(void) {
     gi(GL_RENDERBUFFER_BINDING_OES, &old_rb);
     gi(GL_FRAMEBUFFER_BINDING_OES, &old_fb);
     present_w = drawable_w;
-    present_h = drawable_h;
+    present_h = rt_gl_wide_long > drawable_h ? rt_gl_wide_long : drawable_h; /* widescreen: a longer layer */
     gt(1, &present_tex);
     bt(0x0DE1, present_tex);
     ti(0x0DE1, 0, 0x1908 /* RGBA */, present_w, present_h, 0, 0x1908, 0x1401, NULL);
@@ -430,7 +432,8 @@ static void present_blit(void) {
     mm(0x1700); li();
     mm(0x1701); li();
     mm(0x1702); li();
-    int vw = ww * 3 > wh * 4 ? wh * 4 / 3 : ww, vh = ww * 3 > wh * 4 ? wh : ww * 3 / 4; /* 4:3, centred, black bars */
+    int wide = ww * present_w > wh * present_h; /* the layer's aspect, centred, black bars */
+    int vw = wide ? wh * present_h / present_w : ww, vh = wide ? wh : ww * present_w / present_h;
     vp((ww - vw) / 2, (wh - vh) / 2, vw, vh);
     cc(0, 0, 0, 1);
     cl(0x4000);
@@ -450,6 +453,7 @@ static void present_blit(void) {
 
     /* the frame is shown by the caller's swap; put the game's state back */
     rt_platform_swap();
+    wide_dirty = 1;
     bf(0x8D40, host_fb(bound_fb));
     bt(0x0DE1, 0);
     bb(GL_ARRAY_BUFFER, (uint32_t)av.buffer); vptr(av.size, av.type, av.stride, av.ptr); (av.enabled ? ecs : dcs)(0x8074);
@@ -530,8 +534,8 @@ IMP(glVertexPointer) { T_glVertexPointer f = F(glVertexPointer); if (f) f((I)A(0
 IMP(glTexCoordPointer) { T_glTexCoordPointer f = F(glTexCoordPointer); if (f) f((I)A(0), A(1), (I)A(2), array_ptr(A(3))); }
 IMP(glColorPointer) { T_glColorPointer f = F(glColorPointer); if (f) f((I)A(0), A(1), (I)A(2), array_ptr(A(3))); }
 IMP(glNormalPointer) { T_glNormalPointer f = F(glNormalPointer); if (f) f(A(0), (I)A(1), array_ptr(A(2))); }
-IMP(glDrawElements) { T_glDrawElements f = F(glDrawElements); if (f) f(A(0), (I)A(1), A(2), index_ptr(A(3))); }
-IMP(glDrawArrays) { T_glDrawArrays f = F(glDrawArrays); if (f) f(A(0), (I)A(1), (I)A(2)); }
+IMP(glDrawElements) { T_glDrawElements f = F(glDrawElements); wide_apply(); if (f) f(A(0), (I)A(1), A(2), index_ptr(A(3))); }
+IMP(glDrawArrays) { T_glDrawArrays f = F(glDrawArrays); wide_apply(); if (f) f(A(0), (I)A(1), (I)A(2)); }
 IMP(glEnableClientState) { T_glEnableClientState f = F(glEnableClientState); if (f) f(A(0)); }
 IMP(glDisableClientState) { T_glDisableClientState f = F(glDisableClientState); if (f) f(A(0)); }
 IMP(glClientActiveTexture) { T_glClientActiveTexture f = F(glClientActiveTexture); if (f) f(A(0)); }
@@ -547,11 +551,70 @@ IMP(glGetPointerv) {
     rt_st32(out, (v >= base && v - base <= 0xffffffffu) ? (uint32_t)(v - base) : (uint32_t)v);
 }
 
+/* ---- widescreen -------------------------------------------------------------------------------------------------------
+ * The game only knows the iPad's 4:3 screen. With rt_gl_wide_long set (the long side of a wider layer, by the host,
+ * before launch) the presentation framebuffer is 768 x rt_gl_wide_long and what the game draws into its drawable is
+ * placed just before each draw or clear:
+ *   - under a perspective projection (the 3D scene) the viewport and scissor are stretched over the whole layer and the
+ *     projection is pre-multiplied by a scale of 1024/long along the layer's long axis, so the scene keeps its
+ *     proportions and shows more to the left and right;
+ *   - under any other projection (menus, HUD) the viewport and scissor are moved to the middle 768x1024.
+ * A pre-multiplied scale survives the game's later glMultMatrix/glRotate calls; glLoadMatrix/glLoadIdentity drop it and
+ * it is applied again. Framebuffers of the game's own are left alone. */
+int rt_gl_wide_long;
+static I game_vp[4] = {0, 0, 768, 1024}, game_sc[4] = {0, 0, 768, 1024};
+static int proj_dirty = 1, proj_scaled, proj_persp, mat_mode = 0x1700;
+static int proj_stack[4], proj_sp;
+#define PROJ_TOUCHED() do { if (mat_mode == 0x1701) proj_dirty = 1; } while (0)
+
+static void wide_apply(void) {
+    if (!rt_gl_wide_long || !present_fbo || !drawable_h) return;
+    T_glGetFloatv gfv = F(glGetFloatv);
+    T_glMatrixMode mm = F(glMatrixMode);
+    T_glLoadMatrixf lm = F(glLoadMatrixf);
+    T_glViewport vp = F(glViewport);
+    T_glScissor sc = F(glScissor);
+    if (!gfv || !mm || !lm || !vp || !sc) return;
+    int on = is_drawable_fb(bound_fb);
+    float m[16];
+    if (proj_dirty) {
+        gfv(0x0BA7 /* PROJECTION_MATRIX */, m);
+        proj_persp = fabsf(m[3]) + fabsf(m[7]) + fabsf(m[11]) > 1e-6f;
+        proj_dirty = 0;
+        wide_dirty = 1;
+    }
+    int want = on && proj_persp;
+    if (want != proj_scaled) {
+        float k = want ? (float)drawable_h / present_h : (float)present_h / drawable_h;
+        gfv(0x0BA7, m);
+        m[1] *= k; m[5] *= k; m[9] *= k; m[13] *= k;
+        mm(0x1701);
+        lm(m);
+        mm((E)mat_mode);
+        proj_scaled = want;
+        wide_dirty = 1;
+    }
+    if (!wide_dirty) return;
+    wide_dirty = 0;
+    if (!on) {
+        vp(game_vp[0], game_vp[1], game_vp[2], game_vp[3]);
+        sc(game_sc[0], game_sc[1], game_sc[2], game_sc[3]);
+    } else if (want) {
+        vp(game_vp[0], game_vp[1] * present_h / drawable_h, game_vp[2], game_vp[3] * present_h / drawable_h);
+        sc(game_sc[0], game_sc[1] * present_h / drawable_h, game_sc[2], game_sc[3] * present_h / drawable_h);
+    } else {
+        int off = (present_h - drawable_h) / 2;
+        vp(game_vp[0], game_vp[1] + off, game_vp[2], game_vp[3]);
+        sc(game_sc[0], game_sc[1] + off, game_sc[2], game_sc[3]);
+    }
+}
+
 /* ---- framebuffers and renderbuffers (the drawable) ----------------------------------------------------------------- */
 IMP(glGenFramebuffersOES) { gen_names(F(glGenFramebuffersOES), (I)A(0), A(1)); }
 IMP(glGenRenderbuffersOES) { gen_names(F(glGenRenderbuffersOES), (I)A(0), A(1)); }
 IMP(glBindFramebufferOES) {
     bound_fb = A(1);
+    wide_dirty = 1;
     host_bind_fb(A(0), bound_fb);
 }
 IMP(glBindRenderbufferOES) {
@@ -1001,7 +1064,7 @@ IMP(glEnable) { T_glEnable f = F(glEnable); if (f) f(A(0)); }
 IMP(glDisable) { T_glDisable f = F(glDisable); if (f) f(A(0)); }
 IMP(glAlphaFunc) { T_glAlphaFunc f = F(glAlphaFunc); if (f) f(A(0), FA(1)); }
 IMP(glBlendFunc) { T_glBlendFunc f = F(glBlendFunc); if (f) f(A(0), A(1)); }
-IMP(glClear) { T_glClear f = F(glClear); if (f) f(A(0)); }
+IMP(glClear) { T_glClear f = F(glClear); wide_apply(); if (f) f(A(0)); }
 IMP(glClearColor) { T_glClearColor f = F(glClearColor); if (f) f(FA(0), FA(1), FA(2), FA(3)); }
 IMP(glClearDepthf) { T_glClearDepthf f = F(glClearDepthf); if (f) f(FA(0)); }
 IMP(glColorMask) { T_glColorMask f = F(glColorMask); if (f) f(B(0), B(1), B(2), B(3)); }
@@ -1016,8 +1079,8 @@ IMP(glLineWidth) { T_glLineWidth f = F(glLineWidth); if (f) f(FA(0)); }
 IMP(glPointSize) { T_glPointSize f = F(glPointSize); if (f) f(FA(0)); }
 IMP(glPointParameterf) { T_glPointParameterf f = F(glPointParameterf); if (f) f(A(0), FA(1)); }
 IMP(glPolygonOffset) { T_glPolygonOffset f = F(glPolygonOffset); if (f) f(FA(0), FA(1)); }
-IMP(glScissor) { T_glScissor f = F(glScissor); if (f) f((I)A(0), (I)A(1), (I)A(2), (I)A(3)); }
-IMP(glViewport) { T_glViewport f = F(glViewport); if (f) f((I)A(0), (I)A(1), (I)A(2), (I)A(3)); }
+IMP(glScissor) { T_glScissor f = F(glScissor); for (int k = 0; k < 4; k++) game_sc[k] = (I)A(k); wide_dirty = 1; if (f) f((I)A(0), (I)A(1), (I)A(2), (I)A(3)); }
+IMP(glViewport) { T_glViewport f = F(glViewport); for (int k = 0; k < 4; k++) game_vp[k] = (I)A(k); wide_dirty = 1; if (f) f((I)A(0), (I)A(1), (I)A(2), (I)A(3)); }
 IMP(glShadeModel) { T_glShadeModel f = F(glShadeModel); if (f) f(A(0)); }
 IMP(glStencilFunc) { T_glStencilFunc f = F(glStencilFunc); if (f) f(A(0), (I)A(1), A(2)); }
 IMP(glStencilMask) { T_glStencilMask f = F(glStencilMask); if (f) f(A(0)); }
@@ -1042,24 +1105,26 @@ IMP(glMaterialf) { T_glMaterialf f = F(glMaterialf); if (f) f(A(0), A(1), FA(2))
 IMP(glMaterialfv) { T_glMaterialfv f = F(glMaterialfv); if (f && A(2)) f(A(0), A(1), (const float *)G(A(2))); }
 
 /* ---- matrices ----------------------------------------------------------------------------------------------- */
-IMP(glMatrixMode) { T_glMatrixMode f = F(glMatrixMode); if (f) f(A(0)); }
-IMP(glLoadIdentity) { T_glLoadIdentity f = F(glLoadIdentity); if (f) f(); }
-IMP(glPushMatrix) { T_glPushMatrix f = F(glPushMatrix); if (f) f(); }
-IMP(glPopMatrix) { T_glPopMatrix f = F(glPopMatrix); if (f) f(); }
-IMP(glLoadMatrixf) { T_glLoadMatrixf f = F(glLoadMatrixf); if (f && A(0)) f((const float *)G(A(0))); }
-IMP(glMultMatrixf) { T_glMultMatrixf f = F(glMultMatrixf); if (f && A(0)) f((const float *)G(A(0))); }
-IMP(glFrustumf) { T_glFrustumf f = F(glFrustumf); if (f) f(FA(0), FA(1), FA(2), FA(3), FA(4), FA(5)); }
-IMP(glOrthof) { T_glOrthof f = F(glOrthof); if (f) f(FA(0), FA(1), FA(2), FA(3), FA(4), FA(5)); }
-IMP(glRotatef) { T_glRotatef f = F(glRotatef); if (f) f(FA(0), FA(1), FA(2), FA(3)); }
-IMP(glScalef) { T_glScalef f = F(glScalef); if (f) f(FA(0), FA(1), FA(2)); }
-IMP(glTranslatef) { T_glTranslatef f = F(glTranslatef); if (f) f(FA(0), FA(1), FA(2)); }
+IMP(glMatrixMode) { T_glMatrixMode f = F(glMatrixMode); mat_mode = (int)A(0); if (f) f(A(0)); }
+IMP(glLoadIdentity) { T_glLoadIdentity f = F(glLoadIdentity); if (mat_mode == 0x1701) proj_scaled = 0, proj_dirty = 1; if (f) f(); }
+IMP(glPushMatrix) { T_glPushMatrix f = F(glPushMatrix); if (mat_mode == 0x1701 && proj_sp < 4) proj_stack[proj_sp++] = proj_scaled; if (f) f(); }
+IMP(glPopMatrix) { T_glPopMatrix f = F(glPopMatrix); if (mat_mode == 0x1701) { if (proj_sp > 0) proj_scaled = proj_stack[--proj_sp]; proj_dirty = 1; } if (f) f(); }
+IMP(glLoadMatrixf) { T_glLoadMatrixf f = F(glLoadMatrixf); if (mat_mode == 0x1701) proj_scaled = 0, proj_dirty = 1; if (f && A(0)) f((const float *)G(A(0))); }
+IMP(glMultMatrixf) { T_glMultMatrixf f = F(glMultMatrixf); PROJ_TOUCHED(); if (f && A(0)) f((const float *)G(A(0))); }
+IMP(glFrustumf) { T_glFrustumf f = F(glFrustumf); PROJ_TOUCHED(); if (f) f(FA(0), FA(1), FA(2), FA(3), FA(4), FA(5)); }
+IMP(glOrthof) { T_glOrthof f = F(glOrthof); PROJ_TOUCHED(); if (f) f(FA(0), FA(1), FA(2), FA(3), FA(4), FA(5)); }
+IMP(glRotatef) { T_glRotatef f = F(glRotatef); PROJ_TOUCHED(); if (f) f(FA(0), FA(1), FA(2), FA(3)); }
+IMP(glScalef) { T_glScalef f = F(glScalef); PROJ_TOUCHED(); if (f) f(FA(0), FA(1), FA(2)); }
+IMP(glTranslatef) { T_glTranslatef f = F(glTranslatef); PROJ_TOUCHED(); if (f) f(FA(0), FA(1), FA(2)); }
 IMP(glOrthox) {
+    PROJ_TOUCHED();
     T_glOrthox f = F(glOrthox);
     if (f) { f((I)A(0), (I)A(1), (I)A(2), (I)A(3), (I)A(4), (I)A(5)); return; }
     T_glOrthof g = F(glOrthof);
     if (g) g(fx((I)A(0)), fx((I)A(1)), fx((I)A(2)), fx((I)A(3)), fx((I)A(4)), fx((I)A(5)));
 }
 IMP(glRotatex) {
+    PROJ_TOUCHED();
     T_glRotatex f = F(glRotatex);
     if (f) { f((I)A(0), (I)A(1), (I)A(2), (I)A(3)); return; }
     T_glRotatef g = F(glRotatef); if (g) g(fx((I)A(0)), fx((I)A(1)), fx((I)A(2)), fx((I)A(3)));
@@ -1070,6 +1135,7 @@ IMP(glScalex) {
     T_glScalef g = F(glScalef); if (g) g(fx((I)A(0)), fx((I)A(1)), fx((I)A(2)));
 }
 IMP(glTranslatex) {
+    PROJ_TOUCHED();
     T_glTranslatex f = F(glTranslatex);
     if (f) { f((I)A(0), (I)A(1), (I)A(2)); return; }
     T_glTranslatef g = F(glTranslatef); if (g) g(fx((I)A(0)), fx((I)A(1)), fx((I)A(2)));
