@@ -180,7 +180,8 @@ double rt_now(void);                                /* seconds, monotonic */
 /* OpenGL ES 1.1 (gles1.c) and the drawable (renderbuffer bound by -[EAGLContext renderbufferStorage:fromDrawable:]) */
 void rt_gl_register(void);
 extern void *(*rt_gl_getproc)(const char *name);   /* set by the platform layer before rt_imports_init */
-extern int rt_gl_wide_long; /* widescreen: the long side of the layer shown (0 or 1024 = the iPad's 4:3); set before launch */
+extern int rt_gl_wide_long;
+float rt_gl_wide_game_x(float across); /* a position across the wide screen -> the game's own x (2D elements move) */ /* widescreen: the long side of the layer shown (0 or 1024 = the iPad's 4:3); set before launch */
 void rt_gl_bind_drawable(uint32_t renderbuffer, int width, int height); /* that renderbuffer is the window */
 void rt_gl_present(void);                           /* called by -presentRenderbuffer: */
 

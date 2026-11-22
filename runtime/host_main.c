@@ -161,7 +161,12 @@ static void queue_touch(int phase, int finger, float x, float y) {
 /* a mouse position in the GL child window -> screen points (undoes the stretch; clamped to the screen) */
 static void mouse_points(LPARAM l, float *x, float *y) {
     float px = (float)(short)LOWORD(l), py = (float)(short)HIWORD(l);
-    *x = px * SCREEN_W / (float)(view_w > 0 ? view_w : 1) - (SCREEN_W - GAME_W) / 2; /* menus and HUD are centred */
+    static float off; /* the 2D element under the pointer was moved by this much: kept while a button is down */
+    static int was_down;
+    *x = px * SCREEN_W / (float)(view_w > 0 ? view_w : 1);
+    if (!was_down) off = SCREEN_W > GAME_W ? *x - rt_gl_wide_game_x(*x) : 0;
+    was_down = left_down || right_down;
+    *x -= off;
     *y = py * SCREEN_H / (float)(view_h > 0 ? view_h : 1);
     if (*x < 0) *x = 0;
     if (*x > GAME_W - 1) *x = GAME_W - 1;

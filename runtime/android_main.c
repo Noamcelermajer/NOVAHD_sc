@@ -405,8 +405,11 @@ static void touch(int phase, const AInputEvent *e, size_t i) {
     int32_t pid = AMotionEvent_getPointerId(e, i);
     int f = finger_of(pid, phase == RT_TOUCH_BEGAN);
     if (f < 0) return;
-    float x = AMotionEvent_getX(e, i) * buf_w / (float)win_w - (buf_w - SCREEN_W) / 2,
+    static float finger_off[MAX_FINGERS]; /* the 2D element under the finger was moved by this much: kept for the touch */
+    float x = AMotionEvent_getX(e, i) * buf_w / (float)win_w,
           y = AMotionEvent_getY(e, i) * buf_h / (float)win_h - (buf_h - SCREEN_H) / 2;
+    if (phase == RT_TOUCH_BEGAN) finger_off[f] = buf_w > SCREEN_W ? x - rt_gl_wide_game_x(x) : 0;
+    x -= finger_off[f];
     if (x < 0) x = 0;
     if (x > SCREEN_W - 1) x = SCREEN_W - 1;
     if (y < 0) y = 0;

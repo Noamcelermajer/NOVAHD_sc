@@ -284,8 +284,8 @@ static void make_drawable_fb(uint32_t fb) {
  * degrees counter-clockwise (portrait (px, py) -> landscape (py, W - px), which is the inverse of the touch
  * conversion in uikit.c), then swaps. The game's GL state is saved around the blit and put back. */
 static uint32_t present_tex, present_ds;
-static int wide_dirty, frame_had_3d;
-static int wide_apply(void);
+static int wide_dirty;
+static void wide_apply(int kind, I first, I count, E itype, const void *idx);
 static int present_w, present_h;
 static int present_failed;
 
@@ -443,31 +443,12 @@ static void present_blit(void) {
     bb(GL_ARRAY_BUFFER, 0);
     float quad[] = { /* x, y, s, t: the portrait texture turned a quarter turn counter-clockwise */
         1, -1, 0, 0,   1, 1, 1, 0,   -1, -1, 0, 1,   -1, 1, 1, 1 };
-    int fill_2d = rt_gl_wide_long && present_h > drawable_h && drawable_h && !frame_had_3d;
-    frame_had_3d = 0;
     ecs(0x8074);
     ecs(0x8078);
     dcs(0x8076);
     dcs(0x8075);
     vptr(2, 0x1406 /* FLOAT */, 16, quad);
     tptr(2, 0x1406, 16, quad + 2);
-    if (fill_2d) {
-        /* a frame with no 3D scene (menus, loading screens) only fills the middle 4:3 of the wide layer: show that
-         * picture enlarged and darkened over the whole screen first, then the picture itself in the middle */
-        float f = (float)drawable_h / present_h, t0 = (1 - f) / 2, t1 = (1 + f) / 2;
-        float back[] = { 1, -1, t0, t0,   1, 1, t1, t0,   -1, -1, t0, t1,   -1, 1, t1, t1 };
-        float front[] = { f, -1, 0, t0,   f, 1, 1, t0,   -f, -1, 0, t1,   -f, 1, 1, t1 };
-        te(0x2300, 0x2200, 0x2100 /* MODULATE */);
-        c4(0.28f, 0.28f, 0.28f, 1);
-        vptr(2, 0x1406, 16, back);
-        tptr(2, 0x1406, 16, back + 2);
-        da(0x0005, 0, 4);
-        te(0x2300, 0x2200, 0x1E01);
-        c4(1, 1, 1, 1);
-        memcpy(quad, front, sizeof quad);
-        vptr(2, 0x1406, 16, quad);
-        tptr(2, 0x1406, 16, quad + 2);
-    }
     da(0x0005 /* TRIANGLE_STRIP */, 0, 4);
 
     /* the frame is shown by the caller's swap; put the game's state back */
@@ -549,12 +530,17 @@ IMP(glBufferData) { T_glBufferData f = F(glBufferData); if (f) f(A(0), (intptr_t
 IMP(glBufferSubData) { T_glBufferSubData f = F(glBufferSubData); if (f) f(A(0), (intptr_t)(I)A(1), (intptr_t)(I)A(2), G(A(3))); }
 
 /* ---- client arrays and drawing ---------------------------------------------------------------------------------- */
-IMP(glVertexPointer) { T_glVertexPointer f = F(glVertexPointer); if (f) f((I)A(0), A(1), (I)A(2), array_ptr(A(3))); }
+static struct { I size, stride; E type; const uint8_t *ptr; } vtx; /* the vertex array; ptr NULL: in a buffer object */
+IMP(glVertexPointer) {
+    T_glVertexPointer f = F(glVertexPointer); if (f) f((I)A(0), A(1), (I)A(2), array_ptr(A(3)));
+    vtx.size = (I)A(0); vtx.type = A(1); vtx.stride = (I)A(2);
+    vtx.ptr = array_buffer ? NULL : (const uint8_t *)G(A(3));
+}
 IMP(glTexCoordPointer) { T_glTexCoordPointer f = F(glTexCoordPointer); if (f) f((I)A(0), A(1), (I)A(2), array_ptr(A(3))); }
 IMP(glColorPointer) { T_glColorPointer f = F(glColorPointer); if (f) f((I)A(0), A(1), (I)A(2), array_ptr(A(3))); }
 IMP(glNormalPointer) { T_glNormalPointer f = F(glNormalPointer); if (f) f(A(0), (I)A(1), array_ptr(A(2))); }
-IMP(glDrawElements) { T_glDrawElements f = F(glDrawElements); frame_had_3d |= wide_apply(); if (f) f(A(0), (I)A(1), A(2), index_ptr(A(3))); }
-IMP(glDrawArrays) { T_glDrawArrays f = F(glDrawArrays); frame_had_3d |= wide_apply(); if (f) f(A(0), (I)A(1), (I)A(2)); }
+IMP(glDrawElements) { T_glDrawElements f = F(glDrawElements); wide_apply(2, 0, (I)A(1), A(2), index_ptr(A(3))); if (f) f(A(0), (I)A(1), A(2), index_ptr(A(3))); }
+IMP(glDrawArrays) { T_glDrawArrays f = F(glDrawArrays); wide_apply(1, (I)A(1), (I)A(2), 0, NULL); if (f) f(A(0), (I)A(1), (I)A(2)); }
 IMP(glEnableClientState) { T_glEnableClientState f = F(glEnableClientState); if (f) f(A(0)); }
 IMP(glDisableClientState) { T_glDisableClientState f = F(glDisableClientState); if (f) f(A(0)); }
 IMP(glClientActiveTexture) { T_glClientActiveTexture f = F(glClientActiveTexture); if (f) f(A(0)); }
@@ -586,14 +572,67 @@ static int proj_dirty = 1, proj_scaled, proj_persp, mat_mode = 0x1700;
 static int proj_stack[4], proj_sp;
 #define PROJ_TOUCHED() do { if (mat_mode == 0x1701) proj_dirty = 1; } while (0)
 
-static int wide_apply(void) { /* 1 when the next draw is part of the 3D scene on the drawable */
-    if (!rt_gl_wide_long || !present_fbo || !drawable_h) return 0;
+/* where a 2D element goes by its centre across the screen (0..1): -1 the left edge, 0 the middle, 1 the right edge */
+static float wide_s(float c) {
+    float d = fabsf(c - 0.5f), s = d <= 0.08f ? 0 : d >= 0.20f ? 1 : (d - 0.08f) / 0.12f;
+    return c < 0.5f ? -s : s;
+}
+
+/* a position across the wide screen (0..long side) -> the game's own 0..1024, for touches on moved 2D elements */
+float rt_gl_wide_game_x(float d) {
+    float g = drawable_h ? (float)drawable_h : 1024.0f, m = (rt_gl_wide_long - g) / 2, lo = 0, hi = g;
+    if (rt_gl_wide_long <= g) return d;
+    for (int k = 0; k < 24; k++) {
+        float x = (lo + hi) / 2;
+        if (x + m + m * wide_s(x / g) < d) lo = x; else hi = x;
+    }
+    return (lo + hi) / 2;
+}
+
+/* the extent of a draw along the layer's long axis in normalised device coordinates; 0 when it cannot be read */
+static int draw_extent(int kind, I first, I count, E itype, const void *idx, float *lo, float *hi) {
+    T_glGetFloatv gfv = F(glGetFloatv);
+    if (!gfv || !vtx.ptr || count <= 0 || count > 8192 || vtx.size < 2 || first < 0) return 0;
+    if (kind == 2 && (element_buffer || !idx || (itype != 0x1401 && itype != 0x1403))) return 0;
+    int esz = vtx.type == 0x1406 || vtx.type == 0x140C ? 4 : vtx.type == 0x1402 ? 2 : vtx.type == 0x1400 ? 1 : 0;
+    if (!esz) return 0;
+    int stride = vtx.stride ? vtx.stride : esz * vtx.size;
+    float mv[16], pj[16], ry[4], rw[4]; /* rows 1 and 3 of projection * modelview */
+    gfv(0x0BA6, mv);
+    gfv(0x0BA7, pj);
+    for (int c = 0; c < 4; c++) {
+        ry[c] = pj[1] * mv[4 * c] + pj[5] * mv[4 * c + 1] + pj[9] * mv[4 * c + 2] + pj[13] * mv[4 * c + 3];
+        rw[c] = pj[3] * mv[4 * c] + pj[7] * mv[4 * c + 1] + pj[11] * mv[4 * c + 2] + pj[15] * mv[4 * c + 3];
+    }
+    float a = 1e30f, b = -1e30f;
+    for (I k = 0; k < count; k++) {
+        uint32_t i = kind == 2 ? (itype == 0x1401 ? ((const uint8_t *)idx)[k] : ((const uint16_t *)idx)[k]) : (uint32_t)(first + k);
+        const uint8_t *p = vtx.ptr + (size_t)i * (size_t)stride;
+        float v[4] = {0, 0, 0, 1};
+        for (int c = 0; c < vtx.size && c < 4; c++) {
+            if (vtx.type == 0x1406) { memcpy(&v[c], p + 4 * c, 4); }
+            else if (vtx.type == 0x140C) { int32_t t; memcpy(&t, p + 4 * c, 4); v[c] = t / 65536.0f; }
+            else if (vtx.type == 0x1402) { int16_t t; memcpy(&t, p + 2 * c, 2); v[c] = t; }
+            else v[c] = (int8_t)p[c];
+        }
+        float w = rw[0] * v[0] + rw[1] * v[1] + rw[2] * v[2] + rw[3] * v[3];
+        if (fabsf(w) < 1e-6f) return 0;
+        float y = (ry[0] * v[0] + ry[1] * v[1] + ry[2] * v[2] + ry[3] * v[3]) / w;
+        if (y < a) a = y;
+        if (y > b) b = y;
+    }
+    *lo = a; *hi = b;
+    return 1;
+}
+
+static void wide_apply(int kind, I first, I count, E itype, const void *idx) { /* kind: 0 clear, 1 arrays, 2 elements */
+    if (!rt_gl_wide_long || !present_fbo || !drawable_h) return;
     T_glGetFloatv gfv = F(glGetFloatv);
     T_glMatrixMode mm = F(glMatrixMode);
     T_glLoadMatrixf lm = F(glLoadMatrixf);
     T_glViewport vp = F(glViewport);
     T_glScissor sc = F(glScissor);
-    if (!gfv || !mm || !lm || !vp || !sc) return 0;
+    if (!gfv || !mm || !lm || !vp || !sc) return;
     int on = is_drawable_fb(bound_fb);
     float m[16];
     if (proj_dirty) {
@@ -613,20 +652,24 @@ static int wide_apply(void) { /* 1 when the next draw is part of the 3D scene on
         proj_scaled = want;
         wide_dirty = 1;
     }
-    if (!wide_dirty) return want;
-    wide_dirty = 0;
-    if (!on) {
-        vp(game_vp[0], game_vp[1], game_vp[2], game_vp[3]);
-        sc(game_sc[0], game_sc[1], game_sc[2], game_sc[3]);
-    } else if (want) {
-        vp(game_vp[0], game_vp[1] * present_h / drawable_h, game_vp[2], game_vp[3] * present_h / drawable_h);
-        sc(game_sc[0], game_sc[1] * present_h / drawable_h, game_sc[2], game_sc[3] * present_h / drawable_h);
-    } else {
-        int off = (present_h - drawable_h) / 2;
-        vp(game_vp[0], game_vp[1] + off, game_vp[2], game_vp[3]);
-        sc(game_sc[0], game_sc[1] + off, game_sc[2], game_sc[3]);
+    /* placement along the long axis: y' = y * num / drawable_h + off */
+    int num = drawable_h, off = 0;
+    if (on && (want || kind == 0)) num = present_h; /* the 3D scene and clears: the whole layer */
+    else if (on) {
+        float lo, hi;
+        off = (present_h - drawable_h) / 2;
+        if (game_vp[3] > 0 && draw_extent(kind, first, count, itype, idx, &lo, &hi)) {
+            float a = (game_vp[1] + (lo + 1) / 2 * game_vp[3]) / drawable_h, b = (game_vp[1] + (hi + 1) / 2 * game_vp[3]) / drawable_h;
+            if (b - a >= 0.45f && (a <= 0.02f || b >= 0.98f)) { num = present_h; off = 0; } /* backgrounds, bars: stretched */
+            else off += (int)(off * wide_s((a + b) / 2)); /* anything smaller keeps its size and moves towards its edge */
+        }
     }
-    return want;
+    static int last_num, last_off;
+    if (!wide_dirty && num == last_num && off == last_off) return;
+    wide_dirty = 0;
+    last_num = num; last_off = off;
+    vp(game_vp[0], game_vp[1] * num / drawable_h + off, game_vp[2], game_vp[3] * num / drawable_h);
+    sc(game_sc[0], game_sc[1] * num / drawable_h + off, game_sc[2], game_sc[3] * num / drawable_h);
 }
 
 /* ---- framebuffers and renderbuffers (the drawable) ----------------------------------------------------------------- */
@@ -1084,7 +1127,7 @@ IMP(glEnable) { T_glEnable f = F(glEnable); if (f) f(A(0)); }
 IMP(glDisable) { T_glDisable f = F(glDisable); if (f) f(A(0)); }
 IMP(glAlphaFunc) { T_glAlphaFunc f = F(glAlphaFunc); if (f) f(A(0), FA(1)); }
 IMP(glBlendFunc) { T_glBlendFunc f = F(glBlendFunc); if (f) f(A(0), A(1)); }
-IMP(glClear) { T_glClear f = F(glClear); wide_apply(); if (f) f(A(0)); }
+IMP(glClear) { T_glClear f = F(glClear); wide_apply(0, 0, 0, 0, NULL); if (f) f(A(0)); }
 IMP(glClearColor) { T_glClearColor f = F(glClearColor); if (f) f(FA(0), FA(1), FA(2), FA(3)); }
 IMP(glClearDepthf) { T_glClearDepthf f = F(glClearDepthf); if (f) f(FA(0)); }
 IMP(glColorMask) { T_glColorMask f = F(glColorMask); if (f) f(B(0), B(1), B(2), B(3)); }
