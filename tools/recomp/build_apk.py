@@ -63,7 +63,7 @@ def runtime_sources() -> list[str]:
 
 MANIFEST = f"""<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="{PACKAGE}"
-    android:versionCode="2" android:versionName="0.2">
+    android:versionCode="3" android:versionName="0.3">
   <uses-sdk android:minSdkVersion="{API}" android:targetSdkVersion="34" />
   <uses-feature android:glEsVersion="0x00010001" android:required="true" />
   <uses-feature android:name="android.hardware.sensor.accelerometer" android:required="false" />

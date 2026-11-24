@@ -349,15 +349,15 @@ static int wide_apply(int kind, E mode, I first, I count, E itype, const void *i
 struct place { float sy, oy, sx, ox; };
 /* the controls of the HUD are drawn larger on a wide screen (a phone is far smaller than the iPad they were sized
  * for); where each enlarged element ended up in the last frame, for the touches on it */
-#define HUD_SCALE 1.3f
-enum { HIT_MAX = 64 };
+#define HUD_SCALE 1.6f
+enum { HIT_MAX = 512 };
 /* in screen terms: y0..y1 across, x0..x1 down, t as rt_gl_wide_touch gives it */
-static struct hit { float y0, y1, x0, x1, t[4]; } hit_cur[HIT_MAX], hit_last[HIT_MAX];
+static struct hit { float y0, y1, x0, x1, t[4]; int moved; } hit_cur[HIT_MAX], hit_last[HIT_MAX];
 static int hit_cur_n, hit_last_n;
 static int frame_3d; /* a 3D scene was drawn in this frame: the 2D elements after it are the HUD */
 /* the HUD is up (and not the pause menu or a cutscene over the scene) while its pause button is drawn in the top left
  * corner: seen in this frame, and in the one before */
-static int hud_seen, hud_on;
+static int hud_seen, hud_on, hud_gone;
 static int present_w, present_h;
 static int present_failed;
 
@@ -421,6 +421,21 @@ static void present_setup(void) {
 typedef struct { I size, type, stride, buffer; void *ptr; uint8_t enabled; } arr_state;
 
 /* draw the portrait texture into the window, turned a quarter turn, with the game's GL state saved and restored */
+/* What the game enabled, kept here: glIsEnabled is answered without asking the driver (the Android emulator's GL
+ * layer can crash on it, and the blit below needs these every frame). GL_TEXTURE_2D is per texture unit. */
+static int act_unit;
+static uint8_t tex2d_on[32];
+static struct { E cap; uint8_t on; } cap_sh[64];
+static int cap_n;
+static uint8_t *cap_slot(E cap) {
+    static uint8_t spare;
+    for (int k = 0; k < cap_n; k++) if (cap_sh[k].cap == cap) return &cap_sh[k].on;
+    if (cap_n == 64) return &spare;
+    cap_sh[cap_n].cap = cap;
+    cap_sh[cap_n].on = cap == 0x0BD0 /* DITHER */ || cap == 0x809D /* MULTISAMPLE */; /* on at the start */
+    return &cap_sh[cap_n++].on;
+}
+
 static void present_blit(void) {
     T_glGetIntegerv gi = F(glGetIntegerv);
     T_glGetFloatv gfv = F(glGetFloatv);
@@ -461,7 +476,7 @@ static void present_blit(void) {
                              0x0BF2 /* COLOR_LOGIC_OP */};
     enum { NCAPS = sizeof caps / sizeof caps[0] };
     uint8_t cap_on[NCAPS];
-    for (int k = 0; k < NCAPS; k++) cap_on[k] = ie(caps[k]);
+    for (int k = 0; k < NCAPS; k++) cap_on[k] = *cap_slot(caps[k]);
     I vpt[4] = {0}, scb[4] = {0}, old_tex[2] = {0, 0}, old_active = 0, old_client = 0, old_mm = 0, old_env[2] = {0, 0};
     float mv[16], pj[16], tx[16], color[4];
     uint8_t cmask[4], tex_on[2], tcarr_on[2];
@@ -479,7 +494,7 @@ static void present_blit(void) {
         cat(0x84C0 + u);
         gi(0x8069, &old_tex[u]);
         gte(0x2300 /* TEXTURE_ENV */, 0x2200 /* TEXTURE_ENV_MODE */, &old_env[u]);
-        tex_on[u] = ie(0x0DE1);
+        tex_on[u] = tex2d_on[u];
         tcarr_on[u] = ie(0x8078 /* TEXTURE_COORD_ARRAY */);
     }
     at(0x84C0);
@@ -606,7 +621,10 @@ void rt_gl_present(void) {
     memcpy(hit_last, hit_cur, sizeof hit_cur[0] * (size_t)hit_cur_n);
     hit_last_n = hit_cur_n;
     hit_cur_n = 0;
-    hud_on = hud_seen;
+    /* a few frames of grace: an effect drawn over the pause button for a moment must not shrink the controls
+     * under the player's thumbs */
+    hud_gone = hud_seen ? 0 : hud_gone + 1;
+    hud_on = hud_gone < 4;
     hud_seen = 0;
     frame_3d = 0;
 }
@@ -656,7 +674,16 @@ IMP(glDrawElements) { T_glDrawElements f = F(glDrawElements); if (!wide_apply(2,
 IMP(glDrawArrays) { T_glDrawArrays f = F(glDrawArrays); if (!wide_apply(1, A(0), (I)A(1), (I)A(2), 0, NULL) && f) f(A(0), (I)A(1), (I)A(2)); }
 IMP(glEnableClientState) { T_glEnableClientState f = F(glEnableClientState); if (f) f(A(0)); }
 IMP(glDisableClientState) { T_glDisableClientState f = F(glDisableClientState); if (f) f(A(0)); }
-IMP(glClientActiveTexture) { T_glClientActiveTexture f = F(glClientActiveTexture); if (f) f(A(0)); }
+/* A texture unit the host does not have is not passed on: a driver answers GL_INVALID_ENUM and stays on the unit it
+ * was on, but the Android emulator's GL layer crashes at the next glIsEnabled of a client array. */
+static int unit_bad;
+static int unit_ok(E unit) {
+    static I max_units;
+    T_glGetIntegerv gi = F(glGetIntegerv);
+    if (!max_units) { if (gi) gi(0x84E2, &max_units); if (max_units < 1) max_units = 2; }
+    return unit >= 0x84C0 && unit < 0x84C0 + (E)max_units;
+}
+IMP(glClientActiveTexture) { T_glClientActiveTexture f = F(glClientActiveTexture); unit_bad = !unit_ok(A(0)); if (f && !unit_bad) f(A(0)); }
 IMP(glGetPointerv) {
     uint32_t out = A(1);
     T_glGetPointerv f = F(glGetPointerv);
@@ -709,9 +736,11 @@ void rt_gl_wide_touch(float px, float py, float *t) {
     t[0] = 1; t[1] = 0; t[2] = 1; t[3] = 0;
     if (rt_gl_wide_long <= g) return;
     const struct hit *h = NULL;
-    for (int k = 0; k < hit_last_n && k < HIT_MAX; k++) { /* an enlarged element: the smallest one under the finger */
+    /* an enlarged element: the smallest one under the finger. One at the regular place of its zone wins over one
+     * that was moved up from the bottom edge (a marker passing over the fire button must not take its touches). */
+    for (int k = 0; k < hit_last_n && k < HIT_MAX; k++) {
         const struct hit *c = &hit_last[k];
-        float area = (c->y1 - c->y0) * (c->x1 - c->x0);
+        float area = (c->y1 - c->y0) * (c->x1 - c->x0) + (c->moved ? 1e9f : 0);
         if (px >= c->y0 && px <= c->y1 && py >= c->x0 && py <= c->x1 && area < best) { best = area; h = c; }
     }
     if (h) { memcpy(t, h->t, sizeof h->t); return; }
@@ -777,21 +806,26 @@ static void wide_place(float lo, float hi, float xa, float xb, struct place *p) 
     p->sx = 1; p->ox = 0;
     if (both || (one && b - a >= 0.45f && tall >= 0.25f)) { p->sy = present_h / g; p->oy = 0; return; }
     p->sy = 1; p->oy = (float)(m + (int)(m * side)); /* smaller: same size, moved towards its edge */
-    /* the HUD's controls at the left and right: enlarged from their edge of the screen and from its top, which also
-     * brings the stick and the fire button down towards the thumbs; what would pass the bottom is moved up to fit */
+    /* the HUD's controls at the left and right: enlarged from their edge of the screen (as far as its width allows).
+     * Down the screen the upper ones grow from the top; the lower ones (stick, fire) grow about the line at 0.8 of
+     * the height, which lands on the bottom edge, so they come down towards the thumbs. What would still pass the
+     * bottom is moved up to fit. */
+    if (s * g > present_h) s = present_h / g;
     /* the layer shows turned half round: its long axis runs from the right of the screen to the left */
     if (frame_3d && a > 0.80f && vb < 0.12f && b - a > 0.03f) hud_seen = 1;
-    if (frame_3d && hud_on && fabsf(side) >= 1 && b - a < 0.35f && tall < 0.35f && present_h >= g * s) {
+    if (frame_3d && hud_on && fabsf(side) >= 1 && b - a < 0.35f && tall < 0.35f && s > 1.05f) {
         p->sy = p->sx = s;
         p->oy = side < 0 ? 0 : present_h - s * g;
-        p->ox = w * (1 - s);
-        if (s * vb > 1) p->ox += w * (s * vb - 1);
+        float base;
+        if ((va + vb) / 2 < 0.45f) { p->ox = base = w * (1 - s); if (s * vb > 1) p->ox += w * (s * vb - 1); }
+        else { p->ox = base = -0.2f * w * s; if (vb > 0.8f) p->ox += w * s * (vb - 0.8f); }
         if (hit_cur_n < HIT_MAX) {
             struct hit *h = &hit_cur[hit_cur_n++];
             h->y0 = present_h - (b * g * s + p->oy) - 12; h->y1 = present_h - (a * g * s + p->oy) + 12;
             h->x0 = w - ((1 - va) * w * s + p->ox) - 12; h->x1 = w - ((1 - vb) * w * s + p->ox) + 12;
             h->t[0] = 1 / s; h->t[1] = g - (present_h - p->oy) / s;
             h->t[2] = 1 / s; h->t[3] = w - (w - p->ox) / s;
+            h->moved = p->ox != base;
         }
     }
 }
@@ -1048,7 +1082,13 @@ IMP(glGetBooleanv) {
     if (f) f(A(0), (uint8_t *)G(out)); else rt_mem[out] = 0;
 }
 IMP(glGetError) { T_glGetError f = F(glGetError); RET(f ? f() : GL_NO_ERROR); }
-IMP(glIsEnabled) { T_glIsEnabled f = F(glIsEnabled); RET(f ? f(A(0)) : 0); }
+IMP(glIsEnabled) {
+    T_glIsEnabled f = F(glIsEnabled);
+    E cap = A(0);
+    if (cap == 0x0DE1) RET(tex2d_on[act_unit]);
+    else if (cap >= 0x8074 && cap <= 0x8078) RET(f && !(unit_bad && cap == 0x8078) ? f(cap) : 0); /* client arrays */
+    else RET(*cap_slot(cap));
+}
 
 static struct { uint32_t name, addr; } strings[16];
 IMP(glGetString) {
@@ -1295,7 +1335,7 @@ static uint8_t *bgra_swizzle(const uint8_t *src, I w, I h) {
 }
 
 /* ---- textures ------------------------------------------------------------------------------------------------- */
-IMP(glActiveTexture) { T_glActiveTexture f = F(glActiveTexture); if (f) f(A(0)); }
+IMP(glActiveTexture) { T_glActiveTexture f = F(glActiveTexture); if (f && unit_ok(A(0))) { act_unit = (int)(A(0) - 0x84C0) & 31; f(A(0)); } }
 IMP(glBindTexture) { T_glBindTexture f = F(glBindTexture); if (f) f(A(0), A(1)); }
 IMP(glGenTextures) { gen_names(F(glGenTextures), (I)A(0), A(1)); }
 IMP(glDeleteTextures) { T_glDeleteTextures f = F(glDeleteTextures); if (f && (I)A(0) > 0) f((I)A(0), (const E *)G(A(1))); }
@@ -1370,8 +1410,8 @@ IMP(glReadPixels) {
 }
 
 /* ---- state ---------------------------------------------------------------------------------------------------- */
-IMP(glEnable) { T_glEnable f = F(glEnable); if (f) f(A(0)); }
-IMP(glDisable) { T_glDisable f = F(glDisable); if (f) f(A(0)); }
+IMP(glEnable) { T_glEnable f = F(glEnable); if (A(0) == 0x0DE1) tex2d_on[act_unit] = 1; else *cap_slot(A(0)) = 1; if (f) f(A(0)); }
+IMP(glDisable) { T_glDisable f = F(glDisable); if (A(0) == 0x0DE1) tex2d_on[act_unit] = 0; else *cap_slot(A(0)) = 0; if (f) f(A(0)); }
 IMP(glAlphaFunc) { T_glAlphaFunc f = F(glAlphaFunc); if (f) f(A(0), FA(1)); }
 IMP(glBlendFunc) { T_glBlendFunc f = F(glBlendFunc); if (f) f(A(0), A(1)); }
 IMP(glClear) { T_glClear f = F(glClear); wide_apply(0, 0, 0, 0, 0, NULL); if (f) f(A(0)); }
