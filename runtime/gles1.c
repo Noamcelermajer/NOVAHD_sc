@@ -929,6 +929,10 @@ static int wide_apply(int kind, E mode, I first, I count, E itype, const void *i
         wide_dirty = 1;
     }
     int want = on && proj_persp;
+    /* what is drawn clipped to a small scissor rectangle (the minimap's terrain: one large mesh and its markers) is
+     * one element, placed by that rectangle like the frame drawn around it */
+    int clip = on && *cap_slot(0x0C11) && game_sc[2] > 0 && game_sc[3] > 0 && game_vp[2] > 0 && game_vp[3] > 0 &&
+               game_sc[2] * 10 < drawable_w * 6 && game_sc[3] * 10 < drawable_h * 6;
     if (want != proj_scaled) {
         proj_scaled = want;
         sh_proj_for_gl(m);
@@ -940,7 +944,10 @@ static int wide_apply(int kind, E mode, I first, I count, E itype, const void *i
     /* placement along the long axis: y' = y * num / drawable_h + off */
     struct place p = {1, 0, 1, 0};
     if (on && want && kind) frame_3d = 1;
-    if (on && (want || kind == 0)) p.sy = (float)present_h / drawable_h; /* the 3D scene and clears: the whole layer */
+    if (clip && (!want || kind == 0))
+        wide_place((game_sc[1] - game_vp[1]) * 2.0f / game_vp[3] - 1, (game_sc[1] + game_sc[3] - game_vp[1]) * 2.0f / game_vp[3] - 1,
+                   (game_sc[0] - game_vp[0]) * 2.0f / game_vp[2] - 1, (game_sc[0] + game_sc[2] - game_vp[0]) * 2.0f / game_vp[2] - 1, &p);
+    else if (on && (want || kind == 0)) p.sy = (float)present_h / drawable_h; /* the 3D scene and clears: the whole layer */
     else if (on) {
         float lo, hi;
         p.oy = (float)((present_h - drawable_h) / 2);
