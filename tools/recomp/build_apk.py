@@ -126,6 +126,8 @@ def main():
     ap.add_argument("--out", type=Path, default=Path("build/apk"))
     ap.add_argument("--checked", action="store_true", help="RECOMP_CHECKED translated code and runtime")
     ap.add_argument("--bundle", type=Path, help="pack this NovaHD.app folder into the APK (extracted on first run)")
+    ap.add_argument("--icon", type=Path, help="launcher icon, a PNG or JPEG (default: the iTunesArtwork beside the "
+                                              "Payload folder of --bundle)")
     ap.add_argument("--runtime-only", action="store_true", help="reuse the translated objects of the last build")
     ap.add_argument("--install", action="store_true", help="adb install -r the APK afterwards")
     ap.add_argument("--push", type=Path, help="adb push this NovaHD.app folder to the app's files folder")
@@ -194,16 +196,39 @@ def main():
     print(f"{lib}: {lib.stat().st_size} bytes")
 
     # package: manifest + assets/image.bin + lib/arm64-v8a/libnovahd.so, aligned and signed
-    (out / "AndroidManifest.xml").write_text(MANIFEST, encoding="utf-8")
+    exe = ".exe" if os.name == "nt" else ""
+    bat = ".bat" if os.name == "nt" else ""
+    icon = args.icon
+    if not icon and args.bundle and (args.bundle.resolve().parent.parent / "iTunesArtwork").is_file():
+        icon = args.bundle.resolve().parent.parent / "iTunesArtwork"
+    manifest, res_zip = MANIFEST, []
+    if icon:
+        # the art as it is for old launchers; for adaptive ones it fills the visible 72 of 108 dp on black
+        ext = ".png" if icon.read_bytes()[:4] == b"\x89PNG" else ".jpg"
+        res = out / "res"
+        shutil.rmtree(res, ignore_errors=True)
+        (res / "mipmap-xxxhdpi").mkdir(parents=True)
+        (res / "mipmap-anydpi-v26").mkdir()
+        shutil.copyfile(icon, res / "mipmap-xxxhdpi" / f"ic_launcher{ext}")
+        shutil.copyfile(icon, res / "mipmap-xxxhdpi" / f"ic_art{ext}")
+        (res / "mipmap-anydpi-v26" / "ic_launcher.xml").write_text(
+            '<?xml version="1.0" encoding="utf-8"?>\n'
+            '<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">\n'
+            '  <background android:drawable="@android:color/black" />\n'
+            '  <foreground><inset android:drawable="@mipmap/ic_art" android:inset="16.7%" /></foreground>\n'
+            '</adaptive-icon>\n', encoding="utf-8")
+        res_zip = [out / "res.zip"]
+        run([bt / f"aapt2{exe}", "compile", "--dir", res, "-o", res_zip[0]])
+        manifest = manifest.replace("<application ", '<application android:icon="@mipmap/ic_launcher" ', 1)
+        print(f"icon: {icon.name}")
+    (out / "AndroidManifest.xml").write_text(manifest, encoding="utf-8")
     assets = out / "assets"
     assets.mkdir(exist_ok=True)
     shutil.copyfile(out / "image.bin", assets / "image.bin")
-    exe = ".exe" if os.name == "nt" else ""
-    bat = ".bat" if os.name == "nt" else ""
     unsigned = out / "unsigned.apk"
     # -0 bin: image.bin stays uncompressed, so AAsset_getBuffer maps it instead of inflating it
     run([bt / f"aapt2{exe}", "link", "-o", unsigned, "-I", android_jar, "--manifest", out / "AndroidManifest.xml",
-         "-A", assets, "-0", ".bin"])
+         "-A", assets, "-0", ".bin", *res_zip])
     with zipfile.ZipFile(unsigned, "a", zipfile.ZIP_DEFLATED) as z:
         z.write(lib, f"lib/arm64-v8a/lib{LIBNAME}.so")
     if args.bundle:  # stored, not deflated: the data packs are already compressed
