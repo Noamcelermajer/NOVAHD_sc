@@ -181,6 +181,7 @@ double rt_now(void);                                /* seconds, monotonic */
 void rt_gl_register(void);
 extern void *(*rt_gl_getproc)(const char *name);   /* set by the platform layer before rt_imports_init */
 extern int rt_gl_wide_long;
+void rt_gl_wide_touch(float across, float down, float *t); /* a touch on the wide screen -> the game's point: x = across * t[0] + t[1], y = down * t[2] + t[3] */
 float rt_gl_wide_game_x(float across); /* a position across the wide screen -> the game's own x (2D elements move) */ /* widescreen: the long side of the layer shown (0 or 1024 = the iPad's 4:3); set before launch */
 void rt_gl_bind_drawable(uint32_t renderbuffer, int width, int height); /* that renderbuffer is the window */
 void rt_gl_present(void);                           /* called by -presentRenderbuffer: */

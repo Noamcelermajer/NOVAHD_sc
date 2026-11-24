@@ -345,6 +345,19 @@ static void sh_proj_for_gl(float *m) {
 static uint32_t present_tex, present_ds;
 static int wide_dirty, proj_dirty = 1;
 static int wide_apply(int kind, E mode, I first, I count, E itype, const void *idx);
+/* a placement on the layer: Y' = Y * sy + oy along its long axis, X' = X * sx + ox along the short one */
+struct place { float sy, oy, sx, ox; };
+/* the controls of the HUD are drawn larger on a wide screen (a phone is far smaller than the iPad they were sized
+ * for); where each enlarged element ended up in the last frame, for the touches on it */
+#define HUD_SCALE 1.3f
+enum { HIT_MAX = 64 };
+/* in screen terms: y0..y1 across, x0..x1 down, t as rt_gl_wide_touch gives it */
+static struct hit { float y0, y1, x0, x1, t[4]; } hit_cur[HIT_MAX], hit_last[HIT_MAX];
+static int hit_cur_n, hit_last_n;
+static int frame_3d; /* a 3D scene was drawn in this frame: the 2D elements after it are the HUD */
+/* the HUD is up (and not the pause menu or a cutscene over the scene) while its pause button is drawn in the top left
+ * corner: seen in this frame, and in the one before */
+static int hud_seen, hud_on;
 static int present_w, present_h;
 static int present_failed;
 
@@ -590,6 +603,12 @@ static void present_resize(void) {
 void rt_gl_present(void) {
     if (present_fbo) { present_blit(); present_resize(); } /* the blit swaps */
     else rt_platform_swap();
+    memcpy(hit_last, hit_cur, sizeof hit_cur[0] * (size_t)hit_cur_n);
+    hit_last_n = hit_cur_n;
+    hit_cur_n = 0;
+    hud_on = hud_seen;
+    hud_seen = 0;
+    frame_3d = 0;
 }
 
 /* ---- pointers ---------------------------------------------------------------------------------------------- */
@@ -683,11 +702,27 @@ float rt_gl_wide_game_x(float d) {
     return (lo + hi) / 2;
 }
 
+/* a touch at (px across 0..long side, py down 0..768) of the wide screen -> the game's own point:
+ * x = px * t[0] + t[1], y = py * t[2] + t[3]. Asked when a touch begins and kept for that touch. */
+void rt_gl_wide_touch(float px, float py, float *t) {
+    float g = drawable_h ? (float)drawable_h : 1024.0f, best = 1e30f;
+    t[0] = 1; t[1] = 0; t[2] = 1; t[3] = 0;
+    if (rt_gl_wide_long <= g) return;
+    const struct hit *h = NULL;
+    for (int k = 0; k < hit_last_n && k < HIT_MAX; k++) { /* an enlarged element: the smallest one under the finger */
+        const struct hit *c = &hit_last[k];
+        float area = (c->y1 - c->y0) * (c->x1 - c->x0);
+        if (px >= c->y0 && px <= c->y1 && py >= c->x0 && py <= c->x1 && area < best) { best = area; h = c; }
+    }
+    if (h) { memcpy(t, h->t, sizeof h->t); return; }
+    t[1] = rt_gl_wide_game_x(px) - px;
+}
+
 /* the extent of a draw along the layer's long axis in normalised device coordinates; 0 when it cannot be read */
 enum { EXT_MAX = 8190 };
 static float ext_y[EXT_MAX];    /* per element of the last draw_extent: its position along the long axis */
 static float ext_x[EXT_MAX];    /* and along the short axis */
-static float ext_xspan;         /* the whole draw along the short axis */
+static float ext_xa, ext_xb;    /* the whole draw along the short axis */
 static uint32_t ext_i[EXT_MAX]; /* and its vertex index */
 static int draw_extent(int kind, I first, I count, E itype, const void *idx, float *lo, float *hi) {
     if (!vtx.ptr || count <= 0 || count > EXT_MAX || vtx.size < 2 || first < 0) return 0;
@@ -723,40 +758,62 @@ static int draw_extent(int kind, I first, I count, E itype, const void *idx, flo
         if (x > xb) xb = x;
         ext_y[k] = y; ext_x[k] = x; ext_i[k] = i;
     }
-    ext_xspan = xb - xa;
+    ext_xa = xa; ext_xb = xb;
     *lo = a; *hi = b;
     return 1;
 }
 
 /* a 2D element spanning lo..hi (normalised device coordinates of the game's viewport): its placement on the layer */
-static void wide_place(float lo, float hi, float xspan, int *num, int *off) {
-    float a = (game_vp[1] + (lo + 1) / 2 * game_vp[3]) / drawable_h, b = (game_vp[1] + (hi + 1) / 2 * game_vp[3]) / drawable_h;
+static void wide_place(float lo, float hi, float xa, float xb, struct place *p) {
+    float g = (float)drawable_h, w = drawable_w ? (float)drawable_w : 768.0f;
+    float a = (game_vp[1] + (lo + 1) / 2 * game_vp[3]) / g, b = (game_vp[1] + (hi + 1) / 2 * game_vp[3]) / g;
+    /* down the screen (0 the top, 1 the bottom): the layer's short axis runs the other way */
+    float va = 1 - (game_vp[0] + (xb + 1) / 2 * game_vp[2]) / w, vb = 1 - (game_vp[0] + (xa + 1) / 2 * game_vp[2]) / w;
     int m = (present_h - drawable_h) / 2;
     /* stretched: what spans the screen (backgrounds, bars, fades) and tall pieces of a tiled background; a line of
      * text that happens to reach one edge is not */
     int both = a <= 0.02f && b >= 0.98f, one = a <= 0.02f || b >= 0.98f;
-    float tall = xspan / 2 * game_vp[2] / (drawable_w ? drawable_w : 768);
-    if (both || (one && b - a >= 0.45f && tall >= 0.25f)) { *num = present_h; *off = 0; }
-    else { *num = drawable_h; *off = m + (int)(m * wide_s((a + b) / 2)); } /* smaller: same size, moved towards its edge */
+    float tall = vb - va, side = wide_s((a + b) / 2), s = HUD_SCALE;
+    p->sx = 1; p->ox = 0;
+    if (both || (one && b - a >= 0.45f && tall >= 0.25f)) { p->sy = present_h / g; p->oy = 0; return; }
+    p->sy = 1; p->oy = (float)(m + (int)(m * side)); /* smaller: same size, moved towards its edge */
+    /* the HUD's controls at the left and right: enlarged from their edge of the screen and from its top, which also
+     * brings the stick and the fire button down towards the thumbs; what would pass the bottom is moved up to fit */
+    /* the layer shows turned half round: its long axis runs from the right of the screen to the left */
+    if (frame_3d && a > 0.80f && vb < 0.12f && b - a > 0.03f) hud_seen = 1;
+    if (frame_3d && hud_on && fabsf(side) >= 1 && b - a < 0.35f && tall < 0.35f && present_h >= g * s) {
+        p->sy = p->sx = s;
+        p->oy = side < 0 ? 0 : present_h - s * g;
+        p->ox = w * (1 - s);
+        if (s * vb > 1) p->ox += w * (s * vb - 1);
+        if (hit_cur_n < HIT_MAX) {
+            struct hit *h = &hit_cur[hit_cur_n++];
+            h->y0 = present_h - (b * g * s + p->oy) - 12; h->y1 = present_h - (a * g * s + p->oy) + 12;
+            h->x0 = w - ((1 - va) * w * s + p->ox) - 12; h->x1 = w - ((1 - vb) * w * s + p->ox) + 12;
+            h->t[0] = 1 / s; h->t[1] = g - (present_h - p->oy) / s;
+            h->t[2] = 1 / s; h->t[3] = w - (w - p->ox) / s;
+        }
+    }
 }
 
-static void wide_set(int num, int off) {
-    static int last_num, last_off;
+static void wide_set(const struct place *p) {
+    static struct place last;
     T_glViewport vp = F(glViewport);
     T_glScissor sc = F(glScissor);
-    if (!wide_dirty && num == last_num && off == last_off) return;
+    if (!wide_dirty && !memcmp(p, &last, sizeof last)) return;
     wide_dirty = 0;
-    last_num = num; last_off = off;
-    vp(game_vp[0], game_vp[1] * num / drawable_h + off, game_vp[2], game_vp[3] * num / drawable_h);
-    sc(game_sc[0], game_sc[1] * num / drawable_h + off, game_sc[2], game_sc[3] * num / drawable_h);
+    last = *p;
+    vp((I)lroundf(game_vp[0] * p->sx + p->ox), (I)lroundf(game_vp[1] * p->sy + p->oy),
+       (I)lroundf(game_vp[2] * p->sx), (I)lroundf(game_vp[3] * p->sy));
+    sc((I)lroundf(game_sc[0] * p->sx + p->ox), (I)lroundf(game_sc[1] * p->sy + p->oy),
+       (I)lroundf(game_sc[2] * p->sx), (I)lroundf(game_sc[3] * p->sy));
 }
 
 /* A batch of triangles holding several separate 2D elements (the HUD's buttons in one draw): the triangles are grouped
  * into elements by their extent across the screen (touching or nearly touching ones belong together), and each group
- * is drawn with its own placement. Groups do not overlap across the screen, so drawing them one after another keeps
- * the picture. Uses ext_y/ext_i from draw_extent. Returns 0 (nothing drawn) for a batch that is one element. */
+ * is drawn with its own placement. Groups do not overlap, so drawing them one after another keeps the picture. Uses ext_y/ext_i from draw_extent. Returns 0 (nothing drawn) for a batch that is one element. */
 static int wide_split(I count) {
-    enum { MAXG = 24 };
+    enum { MAXG = 48 };
     static uint16_t order[EXT_MAX / 3], out[EXT_MAX];
     static uint8_t group[EXT_MAX / 3];
     static float ta[EXT_MAX / 3], tb[EXT_MAX / 3];
@@ -776,28 +833,46 @@ static int wide_split(I count) {
         order[j] = t;
     }
     float glo[MAXG], ghi[MAXG], gxa[MAXG], gxb[MAXG];
-    int ng = 0;
-    for (int i = 0; i < nt; i++) {
+    static uint8_t group1[EXT_MAX / 3];
+    static uint16_t ord2[EXT_MAX / 3];
+    static float xa[EXT_MAX / 3], xb[EXT_MAX / 3];
+    int ng1 = 0, ng = 0;
+    float hi1 = 0;
+    for (int i = 0; i < nt; i++) { /* across the screen */
         int t = order[i];
-        if (ng && ta[t] <= ghi[ng - 1] + 0.06f) { if (tb[t] > ghi[ng - 1]) ghi[ng - 1] = tb[t]; }
-        else { if (ng == MAXG) return 0; glo[ng] = ta[t]; ghi[ng] = tb[t]; ng++; }
-        group[t] = (uint8_t)(ng - 1);
+        if (ng1 && ta[t] <= hi1 + 0.06f) { if (tb[t] > hi1) hi1 = tb[t]; }
+        else { if (ng1 == MAXG) return 0; hi1 = tb[t]; ng1++; }
+        group1[t] = (uint8_t)(ng1 - 1);
+        float a = ext_x[3 * t], b = a;
+        for (int k = 1; k < 3; k++) { float x = ext_x[3 * t + k]; if (x < a) a = x; if (x > b) b = x; }
+        xa[t] = a; xb[t] = b;
     }
-    for (int g = 0; g < ng; g++) { gxa[g] = 1e30f; gxb[g] = -1e30f; }
-    for (int t = 0; t < nt; t++)
-        for (int k = 0; k < 3; k++) {
-            float x = ext_x[3 * t + k];
-            if (x < gxa[group[t]]) gxa[group[t]] = x;
-            if (x > gxb[group[t]]) gxb[group[t]] = x;
+    for (int g = 0; g < ng1; g++) { /* and each of those down the screen: the stick is not part of the map above it */
+        int n = 0;
+        for (int t = 0; t < nt; t++) {
+            if (group1[t] != g) continue;
+            int j = n++;
+            while (j > 0 && xa[ord2[j - 1]] > xa[t]) { ord2[j] = ord2[j - 1]; j--; }
+            ord2[j] = (uint16_t)t;
         }
+        for (int i = 0; i < n; i++) {
+            int t = ord2[i];
+            if (i && xa[t] <= gxb[ng - 1] + 0.08f) { if (xb[t] > gxb[ng - 1]) gxb[ng - 1] = xb[t]; }
+            else { if (ng == MAXG) return 0; gxa[ng] = xa[t]; gxb[ng] = xb[t]; glo[ng] = 1e30f; ghi[ng] = -1e30f; ng++; }
+            if (ta[t] < glo[ng - 1]) glo[ng - 1] = ta[t];
+            if (tb[t] > ghi[ng - 1]) ghi[ng - 1] = tb[t];
+            group[t] = (uint8_t)(ng - 1);
+        }
+    }
     if (ng < 2) return 0;
     if (element_buffer) bb(GL_ELEMENT_ARRAY_BUFFER, 0);
     for (int g = 0; g < ng; g++) {
-        int n = 0, num, off;
+        int n = 0;
+        struct place p;
         for (int t = 0; t < nt; t++)
             if (group[t] == g) for (int k = 0; k < 3; k++) out[n++] = (uint16_t)ext_i[3 * t + k];
-        wide_place(glo[g], ghi[g], gxb[g] - gxa[g], &num, &off);
-        wide_set(num, off);
+        wide_place(glo[g], ghi[g], gxa[g], gxb[g], &p);
+        wide_set(&p);
         de(0x0004, n, 0x1403, out);
     }
     if (element_buffer) bb(GL_ELEMENT_ARRAY_BUFFER, element_buffer);
@@ -829,17 +904,18 @@ static int wide_apply(int kind, E mode, I first, I count, E itype, const void *i
         wide_dirty = 1;
     }
     /* placement along the long axis: y' = y * num / drawable_h + off */
-    int num = drawable_h, off = 0;
-    if (on && (want || kind == 0)) num = present_h; /* the 3D scene and clears: the whole layer */
+    struct place p = {1, 0, 1, 0};
+    if (on && want && kind) frame_3d = 1;
+    if (on && (want || kind == 0)) p.sy = (float)present_h / drawable_h; /* the 3D scene and clears: the whole layer */
     else if (on) {
         float lo, hi;
-        off = (present_h - drawable_h) / 2;
+        p.oy = (float)((present_h - drawable_h) / 2);
         if (game_vp[3] > 0 && draw_extent(kind, first, count, itype, idx, &lo, &hi)) {
             if (mode == 0x0004 && wide_split(count)) return 1;
-            wide_place(lo, hi, ext_xspan, &num, &off);
+            wide_place(lo, hi, ext_xa, ext_xb, &p);
         }
     }
-    wide_set(num, off);
+    wide_set(&p);
     return 0;
 }
 

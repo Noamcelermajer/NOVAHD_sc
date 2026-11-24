@@ -63,13 +63,13 @@ def runtime_sources() -> list[str]:
 
 MANIFEST = f"""<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="{PACKAGE}"
-    android:versionCode="1" android:versionName="0.1">
+    android:versionCode="2" android:versionName="0.2">
   <uses-sdk android:minSdkVersion="{API}" android:targetSdkVersion="34" />
   <uses-feature android:glEsVersion="0x00010001" android:required="true" />
   <uses-feature android:name="android.hardware.sensor.accelerometer" android:required="false" />
   <uses-feature android:name="android.hardware.touchscreen.multitouch.distinct" android:required="false" />
   <application android:label="N.O.V.A. HD" android:hasCode="false" android:extractNativeLibs="true"
-      android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
+      android:theme="@style/Game">
     <activity android:name="android.app.NativeActivity" android:exported="true" android:launchMode="singleTask"
         android:screenOrientation="sensorLandscape"
         android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|screenLayout|navigation|uiMode|density">
@@ -201,12 +201,20 @@ def main():
     icon = args.icon
     if not icon and args.bundle and (args.bundle.resolve().parent.parent / "iTunesArtwork").is_file():
         icon = args.bundle.resolve().parent.parent / "iTunesArtwork"
-    manifest, res_zip = MANIFEST, []
+    manifest = MANIFEST
+    res = out / "res"
+    shutil.rmtree(res, ignore_errors=True)
+    # the theme: full screen, and from Android 9 the window also covers the strip beside a camera cutout
+    for folder, item in (("values", ""), ("values-v28",
+                         '<item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>')):
+        (res / folder).mkdir(parents=True)
+        (res / folder / "styles.xml").write_text(
+            '<?xml version="1.0" encoding="utf-8"?>\n<resources>\n'
+            f'  <style name="Game" parent="@android:style/Theme.NoTitleBar.Fullscreen">{item}</style>\n'
+            '</resources>\n', encoding="utf-8")
     if icon:
         # the art as it is for old launchers; for adaptive ones it fills the visible 72 of 108 dp on black
         ext = ".png" if icon.read_bytes()[:4] == b"\x89PNG" else ".jpg"
-        res = out / "res"
-        shutil.rmtree(res, ignore_errors=True)
         (res / "mipmap-xxxhdpi").mkdir(parents=True)
         (res / "mipmap-anydpi-v26").mkdir()
         shutil.copyfile(icon, res / "mipmap-xxxhdpi" / f"ic_launcher{ext}")
@@ -217,10 +225,10 @@ def main():
             '  <background android:drawable="@android:color/black" />\n'
             '  <foreground><inset android:drawable="@mipmap/ic_art" android:inset="16.7%" /></foreground>\n'
             '</adaptive-icon>\n', encoding="utf-8")
-        res_zip = [out / "res.zip"]
-        run([bt / f"aapt2{exe}", "compile", "--dir", res, "-o", res_zip[0]])
         manifest = manifest.replace("<application ", '<application android:icon="@mipmap/ic_launcher" ', 1)
         print(f"icon: {icon.name}")
+    res_zip = [out / "res.zip"]
+    run([bt / f"aapt2{exe}", "compile", "--dir", res, "-o", res_zip[0]])
     (out / "AndroidManifest.xml").write_text(manifest, encoding="utf-8")
     assets = out / "assets"
     assets.mkdir(exist_ok=True)
